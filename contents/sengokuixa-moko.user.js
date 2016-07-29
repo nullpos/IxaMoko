@@ -10014,7 +10014,7 @@ function Moko_main($) {
           $a.eq(i).attr('href', change_href);
         }
         create_immediately_trade($html);
-        $('#commonWrapperLeft table.common_table1 > tbody').append($tr);
+        $('#commonWrapperLeft table.mt10 > tbody').append($tr);
         tb_init('a.thickbox');
         $('ul.pager:last').attr({
           'page': page,
