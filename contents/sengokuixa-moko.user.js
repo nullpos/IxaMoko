@@ -981,6 +981,7 @@ function Moko_main($) {
     warskil_summary_init: {tag: 'all', caption: 'サマリー機能を使用する[合戦報告書(城主)][格付(同盟)]'},
     war_list_2pane: {tag: 'all', caption: '合戦報告書を2ペイン表示にする'},
     ar_point_cmp: {tag: 'all', caption: '同盟ポイント比較機能を使用する'},
+    ar_gm_point_summary: {tag: 'all', caption: '金山発掘集計機能を使用する'},
     //全般2
     menu_reversal: {tag: 'all2', caption: '資源バーの位置を変更する'},
     menu_reversal_mod: {tag: 'all2', caption: '位置変更の選択'},
@@ -17823,6 +17824,67 @@ npc_zone: falsepoly: "330,101,314,96,330,90,346,96"
     });
   }
 
+  //同盟金山履歴集計機能
+  function ar_gm_point_summary() {
+    if (location.pathname != '/alliance/alliance_gold_mine_history.php') {
+      return;
+    }
+    if (!options.ar_gm_point_summary) {
+      return;
+    }
+
+    $('div.common_box3in')
+      .prepend('<div id="gm_summary" class="common_box3bottom"><span id="section_inner">金山貢献集計 </span></div>');
+    $('#section_inner')
+      .append('<input type="button" id="gms" name="gms" value="集計" />');
+    $('#gms').click(function() {
+      var $tr = $('table.common_table1.center tr');
+      var point_obj = {};
+      $tr.slice(1).each(function() {
+        var gm_point = parseInt($(this).find('td').eq(2).text().trim()),
+          gm_member = $(this).find('td').eq(0).text().trim(),
+          gm_get = parseInt($(this).find('td').eq(3).text().trim());
+        if (gm_member in point_obj) {
+          point_obj[gm_member]['gm_point'] += gm_point;
+          point_obj[gm_member]['gm_get'] += gm_get;
+          point_obj[gm_member]['gm_num']++;
+        } else {
+          point_obj[gm_member] = {
+            'gm_point': gm_point,
+            'gm_get': gm_get,
+            'gm_num': 1
+          };
+        }
+      });
+      var point_array = $.map(point_obj, function(value, index) {
+        value['gm_member'] = index;
+        return [value];
+      }).sort(function(a,b) {
+        return b['gm_point'] - a['gm_point'];
+      });
+      $('#gm_summary')
+        .append('<div style="width:732px; height:0px; overflow-y:scroll;" id="gm_div">' +
+          '<table class="common_table1 center" id="gm_table" summary="件名"><tbody><tr>' +
+          '<th width="117">城主名</th>' +
+          '<th width="100">総投資資源</th>' +
+          '<th width="100">総発掘距離</th>' +
+          '<th width="50">発掘回数</th>' +
+          '</tr></tbody></table></div>');
+
+      $.each(point_array, function(index, value) {
+        $('#gm_table').append(
+          $('<tr></tr>')
+            .append($('<td></td>').text(value['gm_member']))
+            .append($('<td></td>').text(value['gm_point']))
+            .append($('<td></td>').text(value['gm_get']))
+            .append($('<td></td>').text(value['gm_num'])));
+      });
+
+      $('#gms').prop("disabled", true);
+      $('#gm_div').css('height', 23 + 27 * point_array.length + 30)
+    });
+  }
+
   //チャット履歴の座標っぽいのをリンクに
   function chat_mapcood2() {
     if (!options.chat_mapcood) {
@@ -21535,6 +21597,7 @@ npc_zone: falsepoly: "330,101,314,96,330,90,346,96"
   
   store_allies_base();            //alliance/info
   ar_point_cmp();                 //alliance/info
+  ar_gm_point_summary();          //alliance/info
   chat_mapcood2();                //alliance/chat_view
   ar_summary_init();              //alliance/list
 
@@ -21733,7 +21796,7 @@ npc_zone: falsepoly: "330,101,314,96,330,90,346,96"
                   } else if (tmp1[0].match(/謀殺/)) {
                     tmp2 = ['攻', skt.match(/\d+/g)[3]];
                   } else {
-                    tmp2 = skt.match(/([攻防])：([\d\.]+)/) ? tmp2.shift() : [false];
+                    tmp2 = skt.match(/([攻防])：([\d\.]+)/) ? tmp1.shift() : [false];
                   }
                   oppostatus[9][i] = tmp1.concat(tmp2);
                   opponentbox.find('div.skill:eq(' + i + ') span').each(function(j) {
