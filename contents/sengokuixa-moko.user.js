@@ -21704,7 +21704,7 @@ npc_zone: falsepoly: "330,101,314,96,330,90,346,96"
 
   east_west_war_check();          //country/country_ranking
 
-  present_check();                //user/
+  present_check();                //user/present
 
   favoriteSort();                 //all  お気に入りソート
   remove_bushodrama();            //all
