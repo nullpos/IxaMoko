@@ -1007,6 +1007,8 @@ function Moko_main($) {
     //チャット
     chat_mapcood: {tag: 'chat', caption: 'チャット・掲示板・書状の座標っぽいものをリンクに'},
     bbs_no_display_delete: {tag: 'chat', caption: '削除されたコメントを非表示'},
+    slack_notify: {tag: 'chat', caption: 'Slackに敵襲を投稿する'},
+    slack_notify_mod: {tag: 'chat', caption: 'Slack Webhook URL'},
     //部隊
     rank_lock: {tag: 'deck', caption: 'カード一括削除の非活性化'},
     rank_lock_mod: {tag: 'deck', caption: '非活性レベルの選択'},
@@ -1082,7 +1084,7 @@ function Moko_main($) {
       for (key in options_param) {
         if (typeof(options[key]) == 'undefined') {
           //指定
-          if (key == 'place_skip_mod') {
+          if (key == 'place_skip_mod' || key == 'slack_notify_mod') {
             options[key] = '';
           } else if (key == 'all_deck_setting_mod' || key == 'pager_ajax_mod') {
             options[key] = '1';
@@ -1446,6 +1448,10 @@ function Moko_main($) {
                 '<input id="output_potential_data" type="button" value="データを出力" />' +
                 '</li>';
               setting_list += create_list(key, html);
+              break;
+            case 'slack_notify':
+              html = '<div>Webhook URL：<input type="text" key="slack_notify_mod" value="' + (!options.slack_notify_mod ? '' : options.slack_notify_mod) + '" class="ixamoko_setting" maxlength="128" /></div>';
+              setting_list += create_list(key, html, '', '', true);
               break;
             default:
               setting_list += key.indexOf('_mod') != -1 ? '' : create_list(key);
@@ -4007,6 +4013,34 @@ function Moko_main($) {
     return raid_loop(10);
   }
 
+  //Slack敵襲投稿
+  function slack_notify(list) {
+    console.log(list);
+    var name = 'ixa_bot';
+    var username = $('#lordName').text();
+    var world = location.host.match(/^y0(\d\d)/);
+    if(world == null) { return; }
+    world = location.host.match(/^y0(\d\d)/)[1];
+    channel = '#' + world + 'saba';
+
+    for(var i = 0; i < list.length; i++) {
+      var text = '<!channel> ' +
+        username + 'さんに敵襲です！\n' +
+        '着弾時間: ' + list[i]['date'] + '\n' +
+        '残り時間: ' + list[i]['time'] + '\n' +
+        '詳細    : ' + list[i]['text'];
+      $.ajax({
+        url: options.slack_notify_mod,
+        type: 'post',
+        data: 'payload=' + JSON.stringify({
+          "channel": channel,
+          "username": name,
+          "text": text
+        })
+      });
+    }
+  }
+
   //統合敵襲警報 敵襲クロール
   function enemyCheckR(rst) {
     var rrr = getStorage([{
@@ -4036,6 +4070,9 @@ function Moko_main($) {
             api_enemy_pop();
             if (options.raid_sound) {
               raid_sound_play();
+            }
+            if (options.slack_notify && rrr.length > 0) {
+              slack_notify(rrr);
             }
           }
         },
