@@ -602,20 +602,114 @@ function MokoMain($) {
   ],
   // 東西戦砦座標 10章~
   EW_FORT_MAP = [
-    [[-121,   1],  [-121, 41], [-101, 21], [-81, 1], [-101, -19], [-121, -39], [-61, 41], [-41, 21], [-41, 1]],
-    [[-121, 101],  [-141,121], [-121,141], [-101,121], [-81,101], [-101,81], [-61,141], [-41,121], [-21,101]],
-    [[-101, -79],  [-121,-99], [-101,-119], [-81,-99], [-81,-79], [-101,-59], [-41,-59], [-41,-79], [-21,-99]],
-    [[  99,   1],  [99,41], [79,21], [79,1], [79,-19], [99,-39], [39,41], [19,21], [39,1]],
-    [[ 119, 121],  [139,101], [119,101], [99,101], [99,121], [79,141], [19,141], [39,121], [19,101]],
-    [[ 119, -99],  [139,-119], [119,-139], [99,-119], [79,-99], [99,-79], [39,-59], [59,-79], [39,-99]]
-  ];
+    [[-121,   1],  [-121,  41], [-101,  21], [ -81,   1], [-101, -19], [-121, -39], [-61, 41], [-41, 21], [-41,  1], [-21,  -19], [-61,  -39]],
+    [[-121, 101],  [-141, 121], [-121, 141], [-101, 121], [ -81, 101], [-101,  81], [-61,141], [-41,121], [-21,101], [-41,   81], [-41,   61]],
+    [[-101, -79],  [-121, -99], [-101,-119], [ -81, -99], [ -81, -79], [-101, -59], [-41,-59], [-41,-79], [-21,-99], [-41, -119], [-21, -139]],
+    [[  99,   1],  [  99,  41], [  79,  21], [  79,   1], [  79, -19], [  99, -39], [ 39, 41], [ 19, 21], [ 39,  1], [ 19,  -19], [ 39,  -39]],
+    [[ 119, 121],  [ 139, 101], [ 119, 101], [  99, 101], [  99, 121], [  79, 141], [ 19,141], [ 39,121], [ 19,101], [ 39,   81], [ 59,   81]],
+    [[ 119, -99],  [ 139,-119], [ 119,-139], [  99,-119], [  79, -99], [  99, -79], [ 39,-59], [ 59,-79], [ 39,-99], [ 39, -119], [ 59, -119]]
+  ],
+  //国番号：国名
+  COUNTRY_10S = { 1:"柴田家", 2:"島津家", 3: "前田家", 4: "上杉家", 5: "徳川家", 6: "毛利家", 7: "伊達家", 8: "北条家", 9: "長宗我部家", 10: "佐竹家", 11: "豊臣家", 12: "龍造寺家", 20:"東西戦場1", 21:"東西戦場2" },
+  COUNTRY_11S = { 1:"織田家", 2:"斎藤家", 3: "武田家", 4: "上杉家", 5: "三好家", 6: "毛利家", 7: "最上家", 8: "北条家", 9: "尼子家", 10: "今川家", 11: "大友家", 12: "龍造寺家", 20:"東西戦場1", 21:"東西戦場2" },
+  COUNTRY_12S = { 1:"真田家", 2:"加藤家", 3: "宇喜多家", 4: "上杉家", 5: "徳川家", 6: "小早川家", 7: "伊達家", 8: "立花家", 9: "長宗我部家", 10: "島津家", 11: "福島家", 12: "石田家", 20:"東西戦場1", 21:"東西戦場2" },
+  
+  SOLDIER_COLOR   = { "": "", 足軽: "#F5DED5", 長槍足軽: "#F6CBBF", 武士: "#ECA896", 国人衆: "#FFA3A3", 弓足軽: "#E9D8F4", 長弓兵: "#DABDF8", 弓騎馬: "#BB93E2", 海賊衆: "#D6A1FF", 騎馬兵: "#F6DC8D", 精鋭騎馬: "#F8D165", 赤備え: "#E7BB43", 母衣衆: "#FDEC6D", 破城鎚: "#B5BEBC", 攻城櫓: "#7198B8", 大筒兵: "#798D9D", 鉄砲足軽: "#9E8680", 騎馬鉄砲: "#B1A178", 焙烙火矢: "#693", 雑賀衆: "#ACAC4F" },
+  SOLDIER_TYPE_NO = { "": "", 足軽: "321", 長槍足軽: "322", 武士: "323", 国人衆: "324", 弓足軽: "325", 長弓兵: "326", 弓騎馬: "327", 海賊衆: "328", 騎馬兵: "329", 精鋭騎馬: "330", 赤備え: "331", 母衣衆: "332", 破城鎚: "333", 攻城櫓: "334", 大筒兵: "335", 鉄砲足軽: "336", 騎馬鉄砲: "337", 焙烙火矢: "345", 雑賀衆: "338" },
+  SOLDIER_NO_TYPE = { "": "", 321: "足軽", 322: "長槍足軽", 323: "武士", 324: "国人衆", 325: "弓足軽", 326: "長弓兵", 327: "弓騎馬", 328: "海賊衆", 329: "騎馬兵", 330: "精鋭騎馬", 331: "赤備え", 332: "母衣衆", 333: "破城鎚", 334: "攻城櫓", 335: "大筒兵", 336: "鉄砲足軽", 337: "騎馬鉄砲", 345: "焙烙火矢", 338: "雑賀衆" },
+  SOLDIER_LIST    = [ "長槍足軽", "武士", "国人衆", "長弓兵", "弓騎馬", "海賊衆", "精鋭騎馬", "赤備え", "母衣衆", "鉄砲足軽", "焙烙火矢", "騎馬鉄砲", "雑賀衆", "破城鎚", "攻城櫓", "大筒兵" ],
+  FILTER_GROUP    = { "": "", 321: "槍", 322: "槍", 323: "槍", 324: "槍", 325: "弓", 326: "弓", 327: "弓", 328: "弓", 329: "馬", 330: "馬", 331: "馬", 332: "馬", 333: "器", 334: "器", 335: "器", 336: "砲", 337: "砲", 345: "砲", 338: "砲" },
+  INDEX_SOLDIER   = { 1:"足軽", 2:"長槍足軽", 3:"武士", 4:"弓足軽", 5:"長弓兵", 6:"弓騎馬", 7:"騎馬兵", 8:"精鋭騎馬", 9:"赤備え", 10:"鉄砲足軽", 11:"騎馬鉄砲", 12:"焙烙火矢", 13:"破城鎚", 14:"攻城櫓", 15:"大筒兵" },
+  BOOKMARK_COLOR  = { bookmark: "saddlebrown", bookmark2: "darkolivegreen" },
 
-  var BOOKMARK_COLOR = {
-    bookmark: "saddlebrown",
-    bookmark2: "darkolivegreen"
-  };
-
-  var FILTER_CATEGORY_MENU = [
+  UNIT_KEY = { "": "", yari1: "足軽", yari2: "長槍足軽", yari3: "武士", yari4: "国人衆", yumi1: "弓足軽", yumi2: "長弓兵", yumi3: "弓騎馬", yumi4: "海賊衆", kiba1: "騎馬兵", kiba2: "精鋭騎馬", kiba3: "赤備え", kiba4: "母衣衆", heiki1: "破城鎚", heiki2: "攻城櫓", heiki3: "大筒兵", heiki4: "鉄砲足軽", heiki5: "騎馬鉄砲", heiki6: "雑賀衆", heiki7: "焙烙火矢" },
+  UNIT_TYPE_KEY = { "": "", "321": "yari1", "322": "yari2", "323": "yari3", "324": "yari4", "325": "yumi1", "326": "yumi2", "327": "yumi3", "328": "yumi4", "329": "kiba1", "330": "kiba2", "331": "kiba3", "332": "kiba4", "333": "heiki1", "334": "heiki2", "335": "heiki3", "336": "heiki4", "337": "heiki5", "338": "heiki6", "345": "heiki7" },
+  LEADERSHIP = { SSS: 1.20, SS: 1.15, S: 1.10, A: 1.05, B: 1, C: 0.95, D: 0.9, E: 0.85, F: 0.80 },
+  UNIT_DATA_10S = {
+      "足軽"　　: { typeno: 321, off: 11, def:  12, mov: 15, des:  2, tp1: "t1", tp2: "t1", cmd1: "yari" , cmd2: "yari" , cost: [ 8, 10,  5,  6] },
+      "長槍足軽": { typeno: 322, off: 17, def:  18, mov: 16, des:  2, tp1: "t1", tp2: "t1", cmd1: "yari" , cmd2: "yari" , cost: [12, 18,  8,  9] },
+      "武士"　　: { typeno: 323, off: 21, def:  22, mov: 18, des:  3, tp1: "t1", tp2: "t3", cmd1: "yari" , cmd2: "yumi" , cost: [20, 26, 10, 12] },
+      "国人衆"　: { typeno: 324, off: 19, def:  18, mov: 19, des:  4, tp1: "t1", tp2: "t1", cmd1: "yari" , cmd2: "yari" , cost: [] },
+      "弓足軽"　: { typeno: 325, off: 10, def:  13, mov: 16, des:  1, tp1: "t3", tp2: "t3", cmd1: "yumi" , cmd2: "yumi" , cost: [10,  8,  6,  5] },
+      "長弓兵"　: { typeno: 326, off: 16, def:  19, mov: 18, des:  1, tp1: "t3", tp2: "t3", cmd1: "yumi" , cmd2: "yumi" , cost: [18, 12,  9,  8] },
+      "弓騎馬"　: { typeno: 327, off: 20, def:  23, mov: 23, des:  1, tp1: "t2", tp2: "t3", cmd1: "kiba" , cmd2: "yumi" , cost: [26, 20, 12, 10] },
+      "海賊衆"　: { typeno: 328, off: 18, def:  19, mov: 20, des:  2, tp1: "t3", tp2: "t3", cmd1: "yumi" , cmd2: "yumi" , cost: [] },
+      "騎馬兵"　: { typeno: 329, off: 12, def:  11, mov: 22, des:  1, tp1: "t2", tp2: "t2", cmd1: "kiba" , cmd2: "kiba" , cost: [ 5,  6,  8, 10] },
+      "精鋭騎馬": { typeno: 330, off: 18, def:  16, mov: 23, des:  1, tp1: "t2", tp2: "t2", cmd1: "kiba" , cmd2: "kiba" , cost: [ 8,  9, 12, 18] },
+      "赤備え"　: { typeno: 331, off: 22, def:  20, mov: 25, des:  1, tp1: "t1", tp2: "t2", cmd1: "yari" , cmd2: "kiba" , cost: [10, 12, 20, 26] },
+      "母衣衆"　: { typeno: 332, off: 20, def:  17, mov: 24, des:  2, tp1: "t2", tp2: "t2", cmd1: "kiba" , cmd2: "kiba" , cost: [] },
+      "破城鎚"　: { typeno: 333, off:  3, def:   8, mov:  8, des: 12, tp1: "t4", tp2: "t4", cmd1: "heiki", cmd2: "heiki", cost: [15,  8,  11, 10] },
+      "攻城櫓"　: { typeno: 334, off: 15, def:   5, mov: 10, des:  8, tp1: "t4", tp2: "t4", cmd1: "heiki", cmd2: "heiki", cost: [23, 17,  12, 15] },
+      "大筒兵"　: { typeno: 335, off: 10, def:  12, mov:  8, des: 20, tp1: "t3", tp2: "t4", cmd1: "yumi" , cmd2: "heiki", cost: [60, 75, 100, 45] },
+      "鉄砲足軽": { typeno: 336, off: 18, def:  26, mov: 15, des:  1, tp1: "t1", tp2: "t4", cmd1: "yari" , cmd2: "heiki", cost: [70, 50,  85, 75] },
+      "騎馬鉄砲": { typeno: 337, off: 26, def:  19, mov: 21, des:  1, tp1: "t2", tp2: "t4", cmd1: "kiba" , cmd2: "heiki", cost: [50, 85,  70, 75] },
+      "焙烙火矢": { typeno: 345, off: 24, def:  24, mov: 19, des:  2, tp1: "t3", tp2: "t4", cmd1: "yumi" , cmd2: "heiki", cost: [45, 45,  40, 50] },
+      "雑賀衆"　: { typeno: 338, off: 23, def:  18, mov: 18, des:  5, tp1: "t1", tp2: "t4", cmd1: "yari" , cmd2: "heiki", cost: [] },
+      "浪人"　　: { typeno: "" , off:  0, def:  12, mov:  0, des:  0, tp1: "t1", tp2: "t1", cmd1: "yari" , cmd2: "yari" , cost: [] },
+      "抜け忍"　: { typeno: "" , off:  0, def:  12, mov:  0, des:  0, tp1: "t3", tp2: "t3", cmd1: "yumi" , cmd2: "yumi" , cost: [] },
+      "野盗"　　: { typeno: "" , off:  0, def:  12, mov:  0, des:  0, tp1: "t2", tp2: "t2", cmd1: "kiba" , cmd2: "kiba" , cost: [] },
+      "農民"　　: { typeno: "" , off:  0, def:   5, mov:  0, des:  0, tp1: ""  , tp2: ""  , cmd1: ""     , cmd2: ""     , cost: [] },
+      "鬼"　　　: { typeno: "" , off:  0, def:  88, mov:  0, des:  0, tp1: ""  , tp2: ""  , cmd1: ""     , cmd2: ""     , cost: [] },
+      "天狗"　　: { typeno: "" , off:  0, def: 112, mov:  0, des:  0, tp1: ""  , tp2: ""  , cmd1: ""     , cmd2: ""     , cost: [] }
+  },
+  UNIT_DATA_11S = (function() {
+    var object = $.extend(true, {}, UNIT_DATA_10S),
+      new_unit = {
+        "破城鎚"　: { typeno: 333, off:  8, def:  8, mov: 12, des: 12, tp1: "t4", tp2: "t4", cmd1: "heiki", cmd2: "heiki", cost: [21, 10,  17, 14] },
+        "攻城櫓"　: { typeno: 334, off: 15, def: 10, mov: 13, des: 10, tp1: "t4", tp2: "t4", cmd1: "heiki", cmd2: "heiki", cost: [36, 24,  12, 18] },
+        "大筒兵"　: { typeno: 335, off: 14, def: 12, mov: 14, des: 20, tp1: "t3", tp2: "t4", cmd1: "yumi" , cmd2: "heiki", cost: [60, 75, 100, 45] },
+        "鉄砲足軽": { typeno: 336, off: 24, def: 27, mov: 18, des:  1, tp1: "t1", tp2: "t4", cmd1: "yari" , cmd2: "heiki", cost: [45, 20,  55, 50] },
+        "騎馬鉄砲": { typeno: 337, off: 27, def: 23, mov: 21, des:  1, tp1: "t2", tp2: "t4", cmd1: "kiba" , cmd2: "heiki", cost: [20, 55,  45, 50] },
+        "焙烙火矢": { typeno: 345, off: 25, def: 25, mov: 19, des:  2, tp1: "t3", tp2: "t4", cmd1: "yumi" , cmd2: "heiki", cost: [45, 50,  20, 55] }
+      };
+    for (var key in object) {
+      for (var key2 in new_unit) {
+        if (key == key2) {
+          object[key] = new_unit[key];
+        }
+      }
+    }
+    return object;
+  }()),
+  UNIT_DATA_12S = (function() {
+    var object = $.extend(true, {}, UNIT_DATA_10S),
+    new_unit = {
+      "足軽"　　: { typeno: 321, off: 11, def: 12, mov: 16, des:  4, tp1: "t1", tp2: "t1", cmd1: "yari" , cmd2: "yari" , cost: [ 8, 10,   5,  6] },
+      "長槍足軽": { typeno: 322, off: 17, def: 18, mov: 17, des:  4, tp1: "t1", tp2: "t1", cmd1: "yari" , cmd2: "yari" , cost: [12, 18,   8,  9] },
+      "武士"　　: { typeno: 323, off: 21, def: 22, mov: 19, des:  5, tp1: "t1", tp2: "t3", cmd1: "yari" , cmd2: "yumi" , cost: [20, 26,  10, 12] },
+      "国人衆"　: { typeno: 324, off: 19, def: 18, mov: 20, des:  6, tp1: "t1", tp2: "t1", cmd1: "yari" , cmd2: "yari" , cost: [] },
+      "弓足軽"　: { typeno: 325, off: 10, def: 13, mov: 17, des:  2, tp1: "t3", tp2: "t3", cmd1: "yumi" , cmd2: "yumi" , cost: [10,  8,   6,  5] },
+      "長弓兵"　: { typeno: 326, off: 16, def: 19, mov: 19, des:  2, tp1: "t3", tp2: "t3", cmd1: "yumi" , cmd2: "yumi" , cost: [18, 12,   9,  8] },
+      "弓騎馬"　: { typeno: 327, off: 20, def: 23, mov: 24, des:  3, tp1: "t2", tp2: "t3", cmd1: "kiba" , cmd2: "yumi" , cost: [26, 20,  12, 10] },
+      "海賊衆"　: { typeno: 328, off: 18, def: 19, mov: 21, des:  4, tp1: "t3", tp2: "t3", cmd1: "yumi" , cmd2: "yumi" , cost: [] },
+      "騎馬兵"　: { typeno: 329, off: 12, def: 11, mov: 22, des:  2, tp1: "t2", tp2: "t2", cmd1: "kiba" , cmd2: "kiba" , cost: [ 5,  6,   8, 10] },
+      "精鋭騎馬": { typeno: 330, off: 18, def: 16, mov: 23, des:  2, tp1: "t2", tp2: "t2", cmd1: "kiba" , cmd2: "kiba" , cost: [ 8,  9,  12, 18] },
+      "赤備え"　: { typeno: 331, off: 22, def: 20, mov: 25, des:  3, tp1: "t1", tp2: "t2", cmd1: "yari" , cmd2: "kiba" , cost: [10, 12,  20, 26] },
+      "母衣衆"　: { typeno: 332, off: 20, def: 17, mov: 24, des:  4, tp1: "t2", tp2: "t2", cmd1: "kiba" , cmd2: "kiba" , cost: [] },
+      "破城鎚"　: { typeno: 333, off: 10, def: 10, mov: 15, des: 12, tp1: "t4", tp2: "t4", cmd1: "heiki", cmd2: "heiki", cost: [21, 10,  17, 14] },
+      "攻城櫓"　: { typeno: 334, off: 18, def: 11, mov: 16, des:  8, tp1: "t4", tp2: "t4", cmd1: "heiki", cmd2: "heiki", cost: [36, 24,  12, 18] },
+      "大筒兵"　: { typeno: 335, off: 18, def: 12, mov: 16, des: 20, tp1: "t3", tp2: "t4", cmd1: "yumi" , cmd2: "heiki", cost: [60, 75, 100, 45] },
+      "鉄砲足軽": { typeno: 336, off: 24, def: 27, mov: 19, des:  3, tp1: "t1", tp2: "t4", cmd1: "yari" , cmd2: "heiki", cost: [45, 20,  55, 50] },
+      "騎馬鉄砲": { typeno: 337, off: 27, def: 23, mov: 21, des:  3, tp1: "t2", tp2: "t4", cmd1: "kiba" , cmd2: "heiki", cost: [20, 55,  45, 50] },
+      "焙烙火矢": { typeno: 345, off: 25, def: 25, mov: 19, des:  4, tp1: "t3", tp2: "t4", cmd1: "yumi" , cmd2: "heiki", cost: [45, 50,  20, 55] },
+    };
+    for (var key in object) {
+      for (var key2 in new_unit) {
+        if (key == key2) {
+          object[key] = new_unit[key];
+        }
+      }
+    }
+    return object;
+  }()),
+  SKILL_TARGET = {
+    足軽: "槍", 長槍足軽: "槍", 武士: "槍", 国人衆: "槍",
+    弓足軽: "弓", 長弓兵: "弓", 弓騎馬: "弓", 海賊衆: "弓",
+    騎馬兵: "馬", 精鋭騎馬: "馬", 赤備え: "馬", 母衣衆: "馬",
+    破城鎚: "器", 攻城櫓: "器", 大筒兵: "器",
+    鉄砲足軽: "砲", 騎馬鉄砲: "砲", 焙烙火矢: "砲", 雑賀衆: "砲"
+  },
+  FILTER_CATEGORY_MENU = [
     [ "未設定", "レベルUP", "ランクUP", "-", "-", "-", "-" ],
     [ "配置可能", "配置不可", "兵数最大", "兵数2以上", "兵数1以上", "兵数1", "兵数0" ],
     [ "栞壱", "栞弐", "お気に入り", "精鋭部隊", "登録なし", "-", "-" ],
@@ -1004,9 +1098,7 @@ function MokoMain($) {
     return sound.play();
   };
 
-// ^ Global
-
-// === 設定 === 
+  //** 設定
 
   var Setting = {
     // class
@@ -1024,7 +1116,7 @@ function MokoMain($) {
       depa: '出陣',
       deal: '取引/合成'
     },
-    // keys
+    //keys
     optionsKeys: {
       //全般1
       chapter_change_mod: {tag: 'all', caption: '舞台'},
@@ -1042,6 +1134,7 @@ function MokoMain($) {
       warskil_summary_init: {tag: 'all', caption: 'サマリー機能を使用する[合戦報告書(城主)][格付(同盟)]'},
       war_list_2pane: {tag: 'all', caption: '合戦報告書を2ペイン表示にする'},
       ar_point_cmp: {tag: 'all', caption: '同盟ポイント比較機能を使用する'},
+      gmPointSummary: {tag: 'all', caption: '金山発掘集計機能を使用する'},
       //全般2
       menu_reversal: {tag: 'all2', caption: '資源バーの位置を変更する'},
       menu_reversal_mod: {tag: 'all2', caption: '位置変更の選択'},
@@ -1057,7 +1150,7 @@ function MokoMain($) {
       non_cardview: {tag: 'all2', caption: 'サイドボックスのカードを非表示にする'},
       soldier_status: {tag: 'all2', caption: '兵士状況を使用する'},
       alliance_report_link: {tag: 'all2', caption: '合戦期間、同盟合戦報告書と敵襲状況リンクを表示する'},
-      base_blind: {tag: 'all2', caption: '他国の拠点を選択中は自国を隠す'},
+      bases_blind: {tag: 'all2', caption: '他国の拠点を選択中は自国を隠す'},
       base_shortcut: {tag: 'all2', caption: 'サイドボックスの表示選択拠点にショートカット'},
       sort_village: {tag: 'all2', caption: 'サイドボックスの拠点をソート'},
       sort_village_mod: {tag: 'all2', caption: 'ソートの昇順降順の選択'},
@@ -1066,6 +1159,8 @@ function MokoMain($) {
       //チャット
       coordinate_to_link: {tag: 'chat', caption: 'チャット・掲示板・書状の座標っぽいものをリンクに'},
       hide_deleted_comments: {tag: 'chat', caption: '削除されたコメントを非表示'},
+      slack_notify: {tag: 'chat', caption: 'Slackに敵襲を投稿する'},
+      slack_notify_mod: {tag: 'chat', caption: 'Slack Webhook URL'},
       //部隊
       rank_lock: {tag: 'deck', caption: 'カード一括削除の非活性化'},
       rank_lock_mod: {tag: 'deck', caption: '非活性レベルの選択'},
@@ -1078,8 +1173,8 @@ function MokoMain($) {
       all_platoon_remove: {tag: 'deck', caption: '「全小隊長を外す」を表示する(全部隊)'},
       platoon_leader_remove: {tag: 'deck', caption: '「小隊長を外す」を表示する(部隊内)'},
       deck_scroll: {tag: 'deck', caption: 'スクロールボタンを表示する'},
-      troops_strength_display: {tag: 'deck', caption: '部隊戦力を表示する'},
-      favorite_sort: {tag: 'deck', caption: 'お気に入りソート登録を使用する'},
+      unit_power: {tag: 'deck', caption: '部隊戦力を表示する'},
+      favoriteSort: {tag: 'deck', caption: 'お気に入りソート登録を使用する'},
       width_display: {tag: 'deck', caption: '待機武将一覧をワイド表示にする'},
       width_display_mod: {tag: 'deck', caption: 'ワイド表示の表示列の選択'},
       pager_ajax: {tag: 'deck', caption: 'ページャーを変更する'},
@@ -1090,7 +1185,7 @@ function MokoMain($) {
       map_butai_status_mod: {tag: 'map', caption: '部隊行動状況表示のタイプの選択'},
       panel_attack: {tag: 'map', caption: '部隊行動状況/敵襲をマーク表示'},
       all_area_map: {tag: 'map', caption: '広域マップを使用する'},
-      war_situation_map: {tag: 'map', caption: '戦況マップを使用する'},
+      all_map_status: {tag: 'map', caption: '戦況マップを使用する'},
       map_reg: {tag: 'map', caption: '座標記録を使用する'},
       map_potential: {tag: 'map', caption: '空き地戦力を表示する'},
       potential_regist: {tag: 'map', caption: '空き地戦力登録機能を使用する'},
@@ -1131,15 +1226,14 @@ function MokoMain($) {
       //取引・合成
       deal_favorite: {tag: 'deal', caption: 'お気に入り取引検索を使用する'},
       card_tool: {tag: 'deal', caption: '栞/取引検索/合成のツールチップを使用する'},
-      trade_auxiliary: {tag: 'deal', caption: '出品補助機能を使用する'},
-      trade_auto_pager: {tag: 'deal', caption: '取引オートページャー'}
+      trade_auxiliary: {tag: 'deal', caption: '出品補助機能を使用する'}
     },
-    // 初期値
+    //ダイアログ
     defaultValue: function() {
       for (var key in this.optionsKeys) {
         if (typeof(options[key]) == 'undefined') {
           // 指定値
-          if (key == 'place_skip_mod') {
+          if (key == 'place_skip_mod' || key == 'slack_notify_mod') {
             options[key] = '';
           } else if (key == 'all_deck_setting_mod' || key == 'pager_ajax_mod') {
             options[key] = '1';
@@ -2240,6 +2334,60 @@ function MokoMain($) {
       } else {
         target.parent().removeAttr('style');
       }
+      if (BATTLE_MODE == '東西戦中' && !$('#map_textarea').length) {
+        submenu.css({
+          'left': '-140px',
+          'max-height': '360px'
+        });
+        $.ajax({
+          type: 'post',
+          url: '/war/war_situation.php'
+        }).then(function(html) {
+          var $status_map = $(html).find('#ig_battle_status_map'),
+            $status_mapin = $(html).find('#ig_battle_status_mapin');
+          tmpl = '<table id="ew_fort_list" class="map_box_table">' +
+              '<tbody>' +
+              '<tr><th colspan="3" id="title_west">西軍</th><th colspan="3" id="title_east">東軍</th></tr>' +
+              '<tr>';
+          $status_map.find('ul.westTeam li').each(function() {
+            tmpl += '<th>' + $(this).children('img').attr('alt') + '</th>';
+          });
+          $status_map.find('ul.eastTeam li').each(function() {
+            tmpl += '<th>' + $(this).children('img').attr('alt') + '</th>';
+          });
+          tmpl += '</tr><tr>';
+          var $a, url, src;
+          $status_mapin.find('img.btIconCastle').each(function() {
+            $a = $(this).parent('a');
+            url = $a.attr('href');
+            src = $a.prev().attr('src');
+            tmpl += '<td class="_mr" url="' + url + '" style="background-image: url(' + src + ');">大殿</td>';
+          });
+          tmpl += '</tr>';
+          for (var i = 1; i <= 10; i++) {
+            $a = $status_mapin.find('a[data-village_name$="国砦' + i + '"]');
+            for (var j = 0, jj = $a.length; j < jj; j++) {
+              url = $a.eq(j).attr('href');
+              src = $a.eq(j).prev().attr('src');
+              if (j === 0) {
+                tmpl += '<tr>';
+              }
+              tmpl += '<td url="' + url + '" style="background-image: url(' + src + ');">砦' + i + '</td>';
+              if (j === (jj - 1)) {
+                tmpl += '</tr>';
+              }
+            }
+          }
+          tmpl += '</tbody></table>';
+          target.append(tmpl);
+        });
+      } else {
+        var country = '';
+        if (location.pathname == '/map.php') {
+          country = Map.coord().c;
+        }
+      }
+
     },
     recordedMark: function() {
       var map_list = getStorage({}, 'ixamoko_map_list');
@@ -4110,6 +4258,33 @@ function MokoMain($) {
       $('#BushoDrama').remove();
     }
   }
+  //Slack敵襲投稿
+  function slack_notify(list) {
+    console.log(list);
+    var name = 'ixa_bot';
+    var username = $('#lordName').text();
+    var world = location.host.match(/^y0(\d\d)/);
+    if(world == null) { return; }
+    world = location.host.match(/^y0(\d\d)/)[1];
+    channel = '#' + world + 'saba';
+
+    for(var i = 0; i < list.length; i++) {
+      var text = '<!channel> ' +
+        username + 'さんに敵襲です！\n' +
+        '着弾時間: ' + list[i]['date'] + '\n' +
+        '残り時間: ' + list[i]['time'] + '\n' +
+        '詳細    : ' + list[i]['text'];
+      $.ajax({
+        url: options.slack_notify_mod,
+        type: 'post',
+        data: 'payload=' + JSON.stringify({
+          "channel": channel,
+          "username": name,
+          "text": text
+        })
+      });
+    }
+  }
   //統合敵襲警報 ループ
   var raidSystemLoop = null;
   function raidSystem() {
@@ -4158,6 +4333,9 @@ function MokoMain($) {
             apiEnemyPop();
             if (options.raid_sound) {
               raidSoundPlay();
+            }
+            if (options.slack_notify && rrr.length > 0) {
+              slack_notify(rrr);
             }
           }
         },
@@ -21141,10 +21319,11 @@ function MokoMain($) {
   dungeonCheck();               //facility/dungeon
   dungeonSoldiers();            //facility/dungeon
   dungeonTroops();              //facility/dungeon
-  
+
   storeAlliesBase();            //alliance/info
   alliancePointComparison();    //alliance/info
   doumeiScore();                //alliance/info
+  gmPointSummary();          //alliance/info
   leaderInformationSummary();   //alliance/list
 
   warDetailNavi();              //report/detail && /war/detail && /message/detail
@@ -21209,8 +21388,8 @@ function MokoMain($) {
     }
     $(document.body).on('click', '.new_worldmap_mappanel_window', eventFunc);
   }());
-
 }
+
 // ^ Moko.main
 
 // load and execute Moko
