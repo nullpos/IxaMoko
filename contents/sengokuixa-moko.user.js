@@ -4327,27 +4327,43 @@ function MokoMain($) {
   }
   //Slack敵襲投稿
   function slack_notify(list) {
-    console.log(list);
-    var name = 'ixa_bot';
-    var username = $('#lordName').text();
-    var world = location.host.match(/^y0(\d\d)/);
+    var name = 'ixa_bot',
+      username = $('#lordName').text(),
+      world = location.host.match(/^y0(\d\d)/);
     if(world == null) { return; }
     world = location.host.match(/^y0(\d\d)/)[1];
-    channel = '#' + world + 'saba';
+    var channel = '#' + world + 'saba',
+      baseUrl = 'http://y0'+ world +'.sengokuixa.jp';
 
     for(var i = 0; i < list.length; i++) {
+      var date = new Date((list[i]['date'] + list[i]['time']) * 1000),
+        h = date.getHours(), m = "0" + date.getMinutes(), s = "0" + date.getSeconds(),
+        fmtTime = h + ':' + m.substr(-2) + ':' + s.substr(-2);
+
+      var $tr = j$(list[i]['html']).find('td'),
+        fromUser = [$tr.eq(1).find('a').text(), $tr.eq(1).find('a').attr('href')],
+        fromMap  = [$tr.eq(3).find('a').text().replace(/\n| |　/g, ''),
+          $tr.eq(3).find('a').attr('href')],
+        toMap    = [$tr.eq(5).find('a').text().replace(/\n| |　/g, ''),
+          $tr.eq(5).find('a').attr('href')];
+
+      console.log($tr);
+
       var text = '<!channel> ' +
-        username + 'さんに敵襲です！\n' +
-        '着弾時間: ' + list[i]['date'] + '\n' +
-        '残り時間: ' + list[i]['time'] + '\n' +
-        '詳細    : ' + list[i]['text'];
+        username + 'に敵襲が来ているぞ！\n' +
+        '着弾時間は*' + fmtTime + '*、あと*' + list[i]['time'] + '*秒だ。\n' +
+        '<' + baseUrl + fromUser[1] + '|' + fromUser[0] + '> の ' +
+        '<' + baseUrl + fromMap[1]  + '|' + fromMap[0]  + '> から ' +
+        '<' + baseUrl + toMap[1]    + '|' + toMap[0]    + '> への敵襲だ。';
+      console.log(text);
       $.ajax({
         url: options.slack_notify_mod,
         type: 'post',
         data: 'payload=' + JSON.stringify({
           "channel": channel,
           "username": name,
-          "text": text
+          "text": text,
+          "mrkdwn": true
         })
       });
     }
