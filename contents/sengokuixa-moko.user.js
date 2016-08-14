@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      10.10.2210.8
+// @version      10.10.2211.0
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -49,7 +49,7 @@ function MokoLogin($) {
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 10.10.2210.8";
+  var VERSION_NAME = "ver 10.10.2211.0";
 
 // === Plugin === 
 
@@ -601,14 +601,30 @@ function MokoMain($) {
     [132,108], [156, 84], [108,156], [132,132], [156,108], [132,156], [156,132], [156,156]
   ],
   // 東西戦砦座標 10章~
-  EW_FORT_MAP = [
-    [[-121,   1],  [-121, 41], [-101, 21], [-81, 1], [-101, -19], [-121, -39], [-61, 41], [-41, 21], [-41, 1]],
-    [[-121, 101],  [-141,121], [-121,141], [-101,121], [-81,101], [-101,81], [-61,141], [-41,121], [-21,101]],
-    [[-101, -79],  [-121,-99], [-101,-119], [-81,-99], [-81,-79], [-101,-59], [-41,-59], [-41,-79], [-21,-99]],
-    [[  99,   1],  [99,41], [79,21], [79,1], [79,-19], [99,-39], [39,41], [19,21], [39,1]],
-    [[ 119, 121],  [139,101], [119,101], [99,101], [99,121], [79,141], [19,141], [39,121], [19,101]],
-    [[ 119, -99],  [139,-119], [119,-139], [99,-119], [79,-99], [99,-79], [39,-59], [59,-79], [39,-99]]
-  ];
+  EW_FORT_MAP = (function() {
+    var array = [   //10章~
+      [[-121, 101],  [-141,121], [-121,141], [-101,121], [-81,101], [-101,81], [-61,141], [-41,121], [-21,101]],
+      [[-121,   1],  [-121, 41], [-101, 21], [-81, 1], [-101, -19], [-121, -39], [-61, 41], [-41, 21], [-41, 1]],
+      [[-101, -79],  [-121,-99], [-101,-119], [-81,-99], [-81,-79], [-101,-59], [-41,-59], [-41,-79], [-21,-99]],
+      [[ 119, 121],  [139,101], [119,101], [99,101], [99,121], [79,141], [19,141], [39,121], [19,101]],
+      [[  99,   1],  [99,41], [79,21], [79,1], [79,-19], [99,-39], [39,41], [19,21], [39,1]],
+      [[ 119, -99],  [139,-119], [119,-139], [99,-119], [79,-99], [99,-79], [39,-59], [59,-79], [39,-99]]
+    ];
+    var array_12s = [
+      [[-41,81], [-41,61]],
+      [[-21,-19], [-61,-39]],
+      [[41,-119], [21,-139]],
+      [[39,81], [59,81]],
+      [[19,-19], [39,-39]],
+      [[39,-119], [59,-119]]
+    ];
+    if (login_data.chapter >= 12) {
+      for (var i = 0, len = array.length; i < len; i++) {
+        array[i].push(array_12s[i][0], array_12s[i][1]);
+      }
+    }
+    return array;
+  }());
 
   var BOOKMARK_COLOR = {
     bookmark: "saddlebrown",
@@ -2009,7 +2025,7 @@ function MokoMain($) {
     s = (Math.floor(sec - h * 3600 - m * 60) + 100).toString().substr(-2);
     return h + ':' + m + ':' + s;
   },
-  // 時間文字列からミリ秒へ変換
+  // 時間文字列から秒へ変換
   millisecondConvert = function (str) {
     var array = str.match(/\d+/g).map(function(v, i) {
       return v * (i === 0 ? 3600 : i === 1 ? 60 : 1);
@@ -2373,7 +2389,7 @@ function MokoMain($) {
         html += '<td class="_mr" url="' + url + '" style="background-image: url(' + src + ');">大殿</td>';
       });
       html += '</tr>';
-      for (var i = 1; i <= 8; i++) {
+      for (var i = 1; i <= 10; i++) {
         $a = $status_mapin.find('a[data-village_name$="国砦' + i + '"]');
         for (var j = 0, jj = $a.length; j < jj; j++) {
           url = $a.eq(j).attr('href');
@@ -3483,13 +3499,13 @@ function MokoMain($) {
           for (j = 0; j < 2; j++) {
             num_arr[j] = toHankaku(num_arr[j]);
           }
-          msg = msg.replace(coord_arr[i], '<a class="mk_create_link" style="display:inline;" href="/map.php?x=' + num_arr[0] + '&y=' + num_arr[1] + '">' + coord_arr[i] + '</a>');
+          msg = msg.replace(new RegExp(coord_arr[i], 'g'), '<a class="mk_create_link" style="display:inline;" href="/map.php?x=' + num_arr[0] + '&y=' + num_arr[1] + '">' + coord_arr[i] + '</a>');
         }
         stringsChangeLink.flag = true;
       }
       if (url_arr) {
         for (i = 0, len = url_arr.length; i < len; i++) {
-          msg = msg.replace(url_arr[i], '<a href="' + url_arr[i] + '" target="_blank">' + url_arr[i] + '</a>');
+          msg = msg.replace(url_arr[i], '<a class="mk_create_link" href="' + url_arr[i] + '" target="_blank">' + url_arr[i] + '</a>');
         }
         stringsChangeLink.flag = true;
       }
@@ -13997,7 +14013,7 @@ function MokoMain($) {
     if (location.pathname != '/map.php') {
       return;
     }
-    var $otono_name = $('img.otono_name').css('cursor', 'pointer'),
+    var $otono_name = $('img.otono_name'),
     $change_menu = $('<div id="change_menu" />').css({
       'left': '20px',
       'top': '41px'
@@ -14007,19 +14023,21 @@ function MokoMain($) {
     $.each(COUNTRY.numberKey, function(i, o) {
       $change_menu.append('<a href="' + url + i + '">' + o + '</a>');
     });
-    $otono_name.click(function() {
+    $otono_name.on('click', function() {
+      if ($('div.new_worldmap_close_btn').length) { return; }
       $change_menu.slideDown('fast');
       $otono_name.css('background-color', '#8F7124');
     }).hover(function() {
-      $otono_name.css('background-color', '#8F7124');
+      if ($('div.new_worldmap_close_btn').length) { return; }
+      $otono_name.css({'cursor': 'pointer', 'background-color': '#8F7124'});
     }, function() {
-      $otono_name.css('background-color', '');
+      $otono_name.removeAttr('style');
     });
     $change_menu.hover(function() {
       $otono_name.css('background-color', '#8F7124');
     }, function() {
       $(this).slideUp('fast');
-      $otono_name.css('background-color', '');
+      $otono_name.removeAttr('style');
     });
     if (BATTLE_MODE != '東西戦中') {
       $change_menu.find('a').slice(12).remove();
@@ -17880,15 +17898,18 @@ function MokoMain($) {
             return a;
           }());
         }
+        var card_num;
         for (i = 0, len = array.length; i < len; i++) {
           if (array[i].indexOf(data.author) == -1 || array[i].match(/】部隊が、【/)) {
             continue;
           }
-          key = '' + array[i].replace(/^[\s\S]*】の【/, '').replace(/】が、【[\s\S]*$/, '');
-          value = '' + array[i].replace(/^[\s\S]*】が、【/, '').replace(/】/, '');
+          // 同名カードの識別対応 ※12章から
+          card_num = $(img[i]).attr('src') ? $(img[i]).attr('src').match(/\d+/g)[2] : '0000';
+          key = card_num + '/' + array[i].replace(/^[\s\S]*】の【/, '').replace(/】が、【[\s\S]*$/, '');
+          value = array[i].replace(/^[\s\S]*】が、【/, '').replace(/】/, '');
           if (!data.summary[key]) {
             data.summary[key] = {
-              str: '' + value,
+              str: value,
               img: img[i] || ''
             };
           } else if (!data.summary[key].str.match(value)) {
@@ -17911,7 +17932,7 @@ function MokoMain($) {
           '<tr>' +
             '<td style="padding: 0; text-align: left;">' +
               img +
-              '<span style="padding: 0 8px; font-weight: bold;' + (img ? '' : ' font-size: 14px;') + '">' + key + '</span>' +
+              '<span style="padding: 0 8px; font-weight: bold;' + (img ? '' : ' font-size: 14px;') + '">' + key.split('/')[1] + '</span>' +
             '</td>' +
             '<td style="text-align: left;">' + value + '</td>' +
           '</tr>';
@@ -19660,10 +19681,38 @@ function MokoMain($) {
         if (card_id_arr.length) {
           param.material_cid = card_id_arr;
         }
-        return $.form({
+        // sortを元に戻してから移動
+        var sort_order = (function(){
+          var array = [];
+          $('select[name="sort_order[]"]').each(function(){
+            array.push($(this).val());
+          });
+          return array;
+        }());
+        var sort_order_type = (function(){
+          var array = [];
+          $('select[name="sort_order_type[]"]').each(function(){
+            array.push($(this).val());
+          });
+          return array;
+        }());
+        $.ajax({
+          url: location.href,
           type: 'post',
-          url: '/union/special_confirm.php',
-          data: param
+          data: {
+            select_card_group: $('inpu[name="select_card_group"]').val(),
+            select_filter_num: $('inpu[name="select_filter_num"]').val(),
+            'sort_order[]': sort_order,
+            'sort_order_type[]': sort_order_type,
+            show_deck_card_count: $('inpu[name="show_deck_card_count"]').val(),
+            btn_change_flg: 1
+          }
+        }).then(function(){
+          return $.form({
+            type: 'post',
+            url: '/union/special_confirm.php',
+            data: param
+          });  
         });
       });
     });
@@ -20544,11 +20593,11 @@ function MokoMain($) {
     })
     .then(function(html) {
       var $clone = $(html).find('#soldiers_catalog').clone(),
-        $table = $clone.attr({
-          'id': 'soldiers_catalog_clone',
-          'class': 'moko_table_gray'
-        }),
-        $th = $table.find('th');
+      $table = $clone.attr({
+        'id': 'soldiers_catalog_clone',
+        'class': 'moko_table_gray'
+      }),
+      $th = $table.find('th');
       $th.eq(3).width('60px');
       $th.eq(4).html('<span>訓練中</span>').width('60px');
       $th.eq(5).attr('colspan', '2').html('<span>兵セット</span>');
@@ -20565,36 +20614,40 @@ function MokoMain($) {
       $table.find('td.td_border_right').remove();
       var len = $table.find('tr').slice(1).length + 1;
       $table.find('td').eq(6).after('<td class ="td_border_right" rowspan="' + len + '" />');
-      var tmpl = '<tr><td />' +
-            '<td>対象</td>' +
-            '<td colspan="2" style="text-align: center;">' +
+      var tmpl = '' +
+        '<tr>' +
+          '<td />' +
+          '<td>対象</td>' +
+          '<td colspan="2" style="text-align: center;">' +
             '<select id="select_group_type">';
       for (var i = 1; i < GROUPS_MENU.length; i++) {
         tmpl += '<option value="' + GROUPS_MENU[i][0] +'">' + GROUPS_MENU[i][1] + '</option>'; 
       }
-        tmpl += '</select>' +
-            '</td>' +
-            '<td>全兵種</td>' +
-            '<td><input type="button" id="soldiers_all_open" value="兵1" /></td>' +
-            '<td><input type="button" id="soldiers_all_pack" value="最大"></td>' + '</tr>';
+      tmpl += '' +
+            '</select>' +
+          '</td>' +
+          '<td>全兵種</td>' +
+          '<td><input type="button" id="soldiers_all_open" value="兵1" /></td>' +
+          '<td><input type="button" id="soldiers_all_pack" value="最大"></td>' +
+        '</tr>';
       $table.find('tbody').append(tmpl);
       //他でデータ取得有 重複するのでidを変更する
       $table.find('td[id^="unit_count_"]').each(function() {
         $(this).attr('id', 'clone_' + $(this).attr('id'));
       });
       $('#soldier_status_box').html($table);
-      $('input.soldiers_open').click(function() {
+      $('input.soldiers_open').on('click', function() {
         var unit_type = $(this).closest('tr').find('td[id^="clone_unit_count_"]').attr('id').match(/\d+/g)[0];
         return sendUnitType(unit_type, '1');
       });
-      $('input.soldiers_pack').click(function() {
+      $('input.soldiers_pack').on('click', function() {
         var unit_type = $(this).closest('tr').find('td[id^="clone_unit_count_"]').attr('id').match(/\d+/g)[0];
         return sendUnitType(unit_type, 'max_unit_count');
       });
-      $('#soldiers_all_open').click(function() {
+      $('#soldiers_all_open').on('click', function() {
         return sendUnitType('all_unit', '1');
       });
-      $('#soldiers_all_pack').click(function() {
+      $('#soldiers_all_pack').on('click', function() {
         return sendUnitType('all_unit', 'max_unit_count');
       });
       return getCatalogStatus();
@@ -21934,6 +21987,8 @@ window.addEventListener('DOMContentLoaded', function() {
     'h3.unit_info_unit_name b.pointer { cursor: pointer; border-bottom: 1px solid currentcolor; }' + 
     'div[class*="ig_tilesection_innerborder"].passive { height: 24px; overflow: hidden;  }' +
     'div[class*="ig_tilesection_innerborder"].passive div.ig_tilesection_training_info, div[class*="ig_tilesection_innerborder"].passive div.ig_tilesection_iconarea, div[class*="ig_tilesection_innerborder"].passive p, div[class*="ig_tilesection_innerborder"].passive table { display: none; }' +
+    /*必要資源*/
+    '.table_tile div[class^="icon_"] { white-space: nowrap; }' +
   /* /facility/unit_status */
     '#enemyMenu { position: absolute; z-index: 10; width: 100px; margin: -5px 0 0 0; font-weight: normal; }' +
     '#enemyMenu > ul { display: none; width: 260px; height: 108px; }' +
