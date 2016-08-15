@@ -1083,8 +1083,6 @@ function MokoMain($) {
       //チャット
       coordinate_to_link: {tag: 'chat', caption: 'チャット・掲示板・書状の座標っぽいものをリンクに'},
       hide_deleted_comments: {tag: 'chat', caption: '削除されたコメントを非表示'},
-      slack_notify: {tag: 'chat', caption: 'Slackに敵襲を投稿する'},
-      slack_notify_mod: {tag: 'chat', caption: 'Slack Webhook URL'},
       //部隊
       rank_lock: {tag: 'deck', caption: 'カード一括削除の非活性化'},
       rank_lock_mod: {tag: 'deck', caption: '非活性レベルの選択'},
@@ -1158,7 +1156,7 @@ function MokoMain($) {
       for (var key in this.optionsKeys) {
         if (typeof(options[key]) == 'undefined') {
           // 指定値
-          if (key == 'place_skip_mod' || key == 'slack_notify_mod') {
+          if (key == 'place_skip_mod') {
             options[key] = '';
           } else if (key == 'all_deck_setting_mod' || key == 'pager_ajax_mod') {
             options[key] = '1';
@@ -1530,10 +1528,6 @@ function MokoMain($) {
                   '<input id="output_potential_data" type="button" value="データを出力" />' +
                   '</li>';
                 setting_list += this.createList(key, html);
-                break;
-              case 'slack_notify':
-                html = '<div>Webhook URL：<input type="text" key="slack_notify_mod" value="' + (!options.slack_notify_mod ? '' : options.slack_notify_mod) + '" class="ixamoko_setting" maxlength="128" /></div>';
-                setting_list += this.createList(key, html, '', '', true);
                 break;
               default:
                 setting_list += key.indexOf('_mod') != -1 ? '' : this.createList(key);
@@ -4172,50 +4166,6 @@ function MokoMain($) {
       $('#BushoDrama').remove();
     }
   }
-  //Slack敵襲投稿
-  function slack_notify(list) {
-    var name = 'ixa_bot',
-      username = $('#lordName').text(),
-      world = location.host.match(/^y0(\d\d)/);
-    if(world == null) { return; }
-    world = location.host.match(/^y0(\d\d)/)[1];
-    var channel = '#' + world + 'saba',
-      baseUrl = 'http://y0'+ world +'.sengokuixa.jp';
-
-    for(var i = 0; i < list.length; i++) {
-      var date = new Date((list[i]['date'] + list[i]['time']) * 1000),
-        h = date.getHours(), m = "0" + date.getMinutes(), s = "0" + date.getSeconds(),
-        fmtTime = h + ':' + m.substr(-2) + ':' + s.substr(-2);
-
-      var $tr = j$(list[i]['html']).find('td'),
-        fromUser = [$tr.eq(1).find('a').text(), $tr.eq(1).find('a').attr('href')],
-        fromMap  = [$tr.eq(3).find('a').text().replace(/\n| |　/g, ''),
-          $tr.eq(3).find('a').attr('href')],
-        toMap    = [$tr.eq(5).find('a').text().replace(/\n| |　/g, ''),
-          $tr.eq(5).find('a').attr('href')];
-
-      var text = '<!channel> ' +
-        username + 'に敵襲が来ているぞ！\n' +
-        '着弾時間は*' + fmtTime + '*、あと*' + list[i]['time'] + '*秒だ。\n' +
-        '<' + baseUrl + fromUser[1] + '|' + fromUser[0] + '> の ' +
-        '<' + baseUrl + replace_valid(fromMap[1])  + '|' + fromMap[0]  + '> から ' +
-        '<' + baseUrl + replace_valid(toMap[1])    + '|' + toMap[0]    + '> への敵襲だ。';
-      console.log(text);
-      $.ajax({
-        url: options.slack_notify_mod,
-        type: 'post',
-        data: 'payload=' + JSON.stringify({
-          "channel": channel,
-          "username": name,
-          "text": text,
-          "mrkdwn": true
-        })
-      });
-      function replace_valid(str) {
-        return str.replace(/\&/g, '%26').replace(/\|/g, '%7C');
-      }
-    }
-  }
   //統合敵襲警報 ループ
   var raidSystemLoop = null;
   function raidSystem() {
@@ -4264,9 +4214,6 @@ function MokoMain($) {
             apiEnemyPop();
             if (options.raid_sound) {
               raidSoundPlay();
-            }
-            if (options.slack_notify && rrr.length > 0) {
-              slack_notify(rrr);
             }
           }
         },
