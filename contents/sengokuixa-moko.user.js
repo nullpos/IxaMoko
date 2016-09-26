@@ -17584,7 +17584,7 @@ function MokoMain($) {
     var $table = $('table.battle_box_table');
     var $tr = $table.find('tr').last();
     var $reward = $tr.find('div.reward');
-    if (!$reward.length) {
+    if (!$reward.length && $table.find('tr').length !== 1) {
       $tr.hide();
     }
     $table.find('tr').eq(2).hide();
