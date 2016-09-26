@@ -17136,6 +17136,35 @@ function MokoMain($) {
     total = addFigure(Math.floor(total / 500));
     $('div.ig_decksection_top').append('<span id="doumei_score">同盟スコア：(' + total + ')</span>');
   }
+  //連続防衛表示
+  function continuousDefence() {
+    if (location.pathname != '/alliance/info.php') {
+      return;
+    }
+    var $tr = $('table.common_table1 tr.fs12');
+    $('<button id="show_continuous_defence">連続防衛数を表示</button>')
+      .click(showContinuousDefence)
+      .insertAfter('div.alli_family');
+
+    function showContinuousDefence() {
+      nowLoading();
+      $('table.common_table1').find('tr').eq(0).find('th').eq(-2).text('連続防衛');
+      $tr.each(function() {
+        var $this = $(this);
+        var url = window.location.origin +
+          $this.find('td').eq(2).find('a').attr('href');
+        $.ajax({
+          type: 'get',
+          url: url
+        })
+        .then(function(html) {
+          var def = $(html).find('.common_table1.center').find('tr').eq(1).find('td').eq(4).text().trim();
+          $this.find('td').eq(-2).text(def.replace('連続防衛', '').replace('合戦', ''));
+        }, null);
+      });
+      nowLoading(true);
+    }
+  }
   //同盟ポイント比較機能
   function alliancePointComparison() {
     if (!options.ar_point_cmp || location.pathname != '/alliance/info.php') {
@@ -17235,7 +17264,7 @@ function MokoMain($) {
       var $tr = $('table.common_table1 tr').slice(1);
       var data = {};
       var array =[];
-      $tr.slice(1).each(function() {
+      $tr.each(function() {
         var name = $(this).find('td').eq(0).text();
         var investment = parseInt($(this).find('td').eq(2).text());
         var distance = parseInt($(this).find('td').eq(3).text());
@@ -21121,6 +21150,7 @@ function MokoMain($) {
   storeAlliesBase();            //alliance/info
   alliancePointComparison();    //alliance/info
   doumeiScore();                //alliance/info
+  continuousDefence();          //alliance/info
   gmPointSummary();             //alliance/alliance_gold_mine_history.php
   leaderInformationSummary();   //alliance/list
   eastWestWarCheck();           //country/country_ranking
@@ -21868,6 +21898,7 @@ window.addEventListener('DOMContentLoaded', function() {
     '.para_green1 { width: 145px; }' +
   /* /alliance/info */
     '#store_allies_base { cursor: pointer; height: 26px; width: 184px; margin-bottom: 5px; }' +
+    '#show_continuous_defence { cursor: pointer; height: 26px; width: 184px; margin-bottom: 5px; }' +
     '#doumei_score { font-size: small; margin-left: 20px; }' +
   /* /war/war_briefing */
     '#ig_battle_time { font-family: MS PMincho, serif; }' +
