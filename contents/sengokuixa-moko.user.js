@@ -7903,7 +7903,7 @@ function MokoMain($) {
           $input = $('input[name^="remove_"]');
       for (var key in favorites_troops) {
         for (var i = 0, len = $input.length; i < len; i++) {
-          var name = $input.eq(i).attr('name').split('_')[1];
+          var name = $input.eq(i).attr('name').replace('remove_', '');
           new_favorites[name] = favorites_troops[name];
         }
       }
@@ -17148,21 +17148,22 @@ function MokoMain($) {
 
     function showContinuousDefence() {
       nowLoading();
+      var def_ar = [];
       $('table.common_table1').find('tr').eq(0).find('th').eq(-2).text('連続防衛');
       $tr.each(function() {
         var $this = $(this);
         var url = window.location.origin +
           $this.find('td').eq(2).find('a').attr('href');
-        $.ajax({
+        def_ar.push($.ajax({
           type: 'get',
           url: url
         })
         .then(function(html) {
           var def = $(html).find('.common_table1.center').find('tr').eq(1).find('td').eq(4).text().trim();
           $this.find('td').eq(-2).text(def.replace('連続防衛', '').replace('合戦', ''));
-        }, null);
+        }, null));
       });
-      nowLoading(true);
+      $.when.apply($, def_ar).then(function() { nowLoading(true); });
     }
   }
   //同盟ポイント比較機能
@@ -18535,7 +18536,7 @@ function MokoMain($) {
     }
     var possible_num = shirokuji_possible_num($('#ig_boxInner')),
       capa = Math.min(10, possible_num);
-    if (capa === 0) {
+    if (capa <= 0) {
       return;
     }
     $('span.money_b_txt').html('銅銭　' + whitePrice() + '　<a href="javascript:void(0);" id="white" style="color: greenyellow;">' + capa + '枚引き</a>');
