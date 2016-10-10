@@ -17269,7 +17269,8 @@ function MokoMain($) {
         var name = $(this).find('td').eq(0).text();
         var investment = parseInt($(this).find('td').eq(2).text());
         var distance = parseInt($(this).find('td').eq(3).text());
-        var dousen = parseInt($(this).find('td').eq(4).text().match(/\d+/g) || ['0'] [0]);
+        var dousen = parseInt(($(this).find('td').eq(4).text().match(/銅銭 (\d+)/) || ['0', '0'])[1]);
+        var henrin = parseInt(($(this).find('td').eq(4).text().match(/片鱗 (\d+)/) || ['0', '0'])[1]);
         var treasure = $(this).find('td').eq(4).children('font').text().split('：')[1];
         if (!data[name]) {
           data[name] = {
@@ -17277,6 +17278,7 @@ function MokoMain($) {
             投資資源: investment,
             発掘距離: distance,
             銅銭: dousen,
+            片鱗: henrin,
             宝物: treasure ? [treasure] : [],
             発掘回数: 1
           };
@@ -17284,6 +17286,7 @@ function MokoMain($) {
           data[name].投資資源 += investment;
           data[name].発掘距離 += distance;
           data[name].銅銭 += dousen;
+          data[name].片鱗 += henrin;
           data[name].発掘回数++;
           if (treasure) {
             data[name].宝物.push(treasure);
@@ -17318,7 +17321,10 @@ function MokoMain($) {
           html += '<font color="#ff0000">宝物 ： ' + array[i].宝物[j] + '</font><br />';
         }
         if (array[i].銅銭) {
-          html += '銅銭 ' + addFigure(array[i].銅銭);
+          html += '銅銭 ' + addFigure(array[i].銅銭) + '<br />';
+        }
+        if (array[i].片鱗) {
+          html += '天下の片鱗 ' + addFigure(array[i].片鱗) + '枚';
         }
         html += '</td><td>' + addFigure(array[i].発掘回数) + '</td>' +
           '</tr>';
@@ -17404,7 +17410,7 @@ function MokoMain($) {
     }
 
     function leaderUserSearch(list, search, max_page, num, page, data_list, len, flag) {
-      var limit = 30;
+      var limit = 3;
       Info.count(list[7] + '/' + limit + '位');
       if (list[7] > limit || list[7] > max_page || page > max_page || flag) {
         showLeaderSummary(data_list);
