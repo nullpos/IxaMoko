@@ -17410,7 +17410,7 @@ function MokoMain($) {
     }
 
     function leaderUserSearch(list, search, max_page, num, page, data_list, len, flag) {
-      var limit = 3;
+      var limit = 30;
       Info.count(list[7] + '/' + limit + '位');
       if (list[7] > limit || list[7] > max_page || page > max_page || flag) {
         showLeaderSummary(data_list);
@@ -17424,6 +17424,7 @@ function MokoMain($) {
       }).then(function(html) {
         var $a = $(html).find('tr.fs14').eq(0).find('a').eq(1);
         var source = $a.text();
+        var distance = calcDist(source.split(','));
         var href = $a.attr('href').replace('land', 'map');
         var cord = source.split(',');
         var x = parseInt(cord[0]);
@@ -17455,6 +17456,7 @@ function MokoMain($) {
         var tmp = '<tr>' +
         '<td>' + area + '</td>' +
         '<td><a href="' + href + '" target="_blank">' + source + '</a></td>' +
+        '<td>' + distance + '</td>' +
         '<td><a href="' + list[2] + '" target="_blank">' + list[1] + '</a></td>' +
         '<td>' + state + '</td>' + '<td>' + list[0] + '</td>' +
         '<td><a href="' + list[4] + '" target="_blank">' + list[3] + '</a></td>' +
@@ -17476,12 +17478,13 @@ function MokoMain($) {
       var html = '' +
         '<table id="summary" width="700" class="common_table1 center mt10">' +
         '<thead>' +
-        '<th>方角</th><th>座標</th><th>盟主</th><th>状態</th>' +
-        '<th>順位</th><th>同盟</th><th>同志</th><th>戦功</th>' +
+        '<th>方角</th><th>座標</th><th>距離</th>' +
+        '<th>盟主</th><th>状態</th><th>順位</th>' +
+        '<th>同盟</th><th>同志</th><th>戦功</th>' +
         '</thead>' +
         '<tbody>' + data_list + '</tbody>' +
         '</table>';
-      $('div.common_box3bottom').empty().append(html);
+      $('div.common_box3bottom').empty().append(createLeaderDistSelect()).append(html);
       var area_color = {
         '北東': 'lightblue',
         '北西': 'lightsteelblue',
@@ -17503,7 +17506,50 @@ function MokoMain($) {
         })
       );
     }
+
+    function createLeaderDistSelect() {
+      var $div = $('<div class="center"><select class="form1"></select></div>'),
+      $opt = $div.find('select'),
+      ns = ['北', '南'], ew = ['東', '西'];
+      $opt.append($('<option value="大殿">大殿</option>'));
+      for(var i = 0; i < 2; i++) {
+        for(var j = 0; j < 2; j++) {
+          for(var k = 0; k < 12; k++) {
+            var toride = ns[i] + ew[j] + (k+1);
+            $opt.append($('<option value="' + toride + '">' + toride + '</option>'));
+          }
+        }
+      }
+      $opt.click(function() {
+        var xy, $this = $(this);
+        if($this.val() == '大殿') {
+          xy = [0, 0];
+        } else if($this.val().substr(0, 2) == '北東') {
+          xy = [1, 1];
+        } else if($this.val().substr(0, 2) == '北西') {
+          xy = [-1, 1];
+        } else if($this.val().substr(0, 2) == '南東') {
+          xy = [1, -1];
+        } else if($this.val().substr(0, 2) == '南西') {
+          xy = [-1, -1];
+        }
+        var location = FORTCOORD[$this.val().substr(2)];
+
+        var $tr = $('#summary').find('tr');
+        for(var i = 0; i < $tr.length; i++) {
+          var leader = $tr.eq(i).find('td').eq(1).text().split(',');
+          var distance = calcDist([leader[0] - location[0] * xy[0], leader[1] - location[1] * xy[1]]);
+          $tr.eq(i).find('td').eq(2).text(distance);
+        }
+      });
+      return $div;
+    }
+
+    function calcDist(xy) {
+      return Math.floor(Math.sqrt(Math.pow(xy[0], 2) + Math.pow(xy[1], 2)) * 10.0) / 10.0;
+    }
   }
+
   // 東西戦組分けチェック
   function eastWestWarCheck() {
     if (location.pathname != '/country/country_ranking.php') {
