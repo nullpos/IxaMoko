@@ -20334,7 +20334,7 @@ function MokoMain($) {
         }
         tmp += '</tr>';
       }
-      tmp += '<tr>' + '<td colspan="' + col + '">' + '【 <span style="color: #BDE114;"_>平常</span>｜<span style="color: #808080;">消沈</span> <<< <span style="color: #ff4c4c;">激戦</span> 】<span style="color: #ff4c4c; background-color: cornsilk;">同盟</span>' + '</td>' + '</tr></tbody>' + '<tfoot><tr><td colspan="' + col + '">' + '<input id="update_map" type="button" value="現在の戦況を確認する" />' + '<input id="clear_war_situation_map" type="button" value="リセット" /></td></tr></tfoot>' + '</table></span>';
+      tmp += '<tr>' + '<td colspan="' + col + '">' + '【 <span style="color: #BDE114;"_>平常</span>｜<span style="color: #808080;">消沈</span> <<< <span style="color: #ff4c4c;">激戦</span> 】<span style="color: #ff4c4c; background-color: cornsilk;">同盟</span>' + '</td>' + '</tr></tbody>' + '<tfoot><tr><td colspan="' + col + '">' + '<input id="update_map" type="button" value="現在の戦況を確認する" />' + '<select name="until_num"><option>12</option><option>36</option><option>48</option></select>' + '<input id="clear_war_situation_map" type="button" value="リセット" /></td></tr></tfoot>' + '</table></span>';
       $('#allMapStatusWindow').replaceWith(tmp);
       $.each(COUNTRY.numberKey, function(i, o) {
         $('#target').append('<option value="' + i + '">' + o + '</option>');
@@ -20489,7 +20489,8 @@ function MokoMain($) {
         target.css('background-color', 'cornsilk');
       }
       $('#lastmodify').html(direStr[k] + i);
-      if (i === COORD.length || count == 10) { //平常が10砦続けば方角を変更する
+      var until_num = $('[name=until_num] option:selected').text();
+      if (i === COORD.length || count == until_num) { //平常が10砦続けば方角を変更する
         k++;
         i = 0;
         count = 0;
