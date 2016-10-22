@@ -2065,6 +2065,17 @@ function MokoMain($) {
     return scrollView(0);
   }
 
+  function copyToClipboard(str) {
+      var copyFrom = document.createElement("textarea");
+      copyFrom.textContent = str;
+      var bodyElm = document.getElementsByTagName("body")[0];
+      bodyElm.appendChild(copyFrom);
+      copyFrom.select();
+      var retVal = document.execCommand('copy');
+      bodyElm.removeChild(copyFrom);
+      return retVal;
+  }
+
   var waite_TB_window = function() {
     var $TB_window = $('#TB_window');
     if (!$TB_window[0]) {
@@ -13326,13 +13337,14 @@ function MokoMain($) {
           'text-decoration': 'underline',
           'cursor': 'pointer',
           'color': 'brown'
-        }).attr('title', 'チャットへ入力').click(function() {
+        }).attr('title', 'クリップボードにコピー').click(function() {
           $('INPUT[name="unit_select[]"]').prop('checked', false);
           var time = $(this).text().split(':'),
             i_time = time[1] + ':' + time[2],
             code = $('#x_y').text().split('/').shift(),
             str = code + '到着まで ' + i_time;
-          return inputToChat(str);
+          // return inputToChat(str);
+          return copyToClipboard(str);
         });
       });
     },
