@@ -4096,6 +4096,9 @@ function MokoMain($) {
       $.ajax({
         url: options.slack_notify_mod,
         type: 'post',
+        headers: {
+            'Content-type': 'application/x-www-form-urlencoded'
+        },
         data: 'payload=' + JSON.stringify({
           "channel": channel,
           "username": name,
