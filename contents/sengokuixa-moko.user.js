@@ -17678,6 +17678,9 @@ function MokoMain($) {
   }
   // 12章 報告書レイアウト
   var warReportLayout = function() {
+    if ($('img[alt="陥落報告"]').length) {
+      return;
+    }
     var $table = $('table.battle_box_table');
     var $tr = $table.find('tr').last();
     var $reward = $tr.find('div.reward');
