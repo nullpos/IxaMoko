@@ -1033,6 +1033,7 @@ function MokoMain($) {
       raid_alarm_display_mod: {tag: 'all', caption: '敵襲警報表示位置選択'},
       raid_sound: {tag: 'all', caption: '敵襲警報音'},
       raid_sound_mod: {tag: 'all', caption: 'デフォルト警告音'},
+      near_alarm: {tag: 'all', caption: '近隣敵襲状況を通知する'},
       keybind: {tag: 'all', caption: 'キーバインドを使用する'},
       keybind_mod: {tag: 'all', caption: 'キーバインド(uキー:組み分けの選択)'},
       play_sound: {tag: 'all', caption: 'お知らせ音・警告音の再生'},
@@ -1145,6 +1146,8 @@ function MokoMain($) {
             options[key] = '1';
           } else if (key == 'rank_lock_mod' || key == 'raid_alarm_display_mod') {
             options[key] = '2';
+          } else if (key == 'near_alarm') {
+            options[key] = '39';
           } else if (key == 'punitive_type_mod') {
             options[key] = '330';
           } else if (key == 'unit_link_mod') {
@@ -1325,6 +1328,23 @@ function MokoMain($) {
                   2: 'ホイッスル'
                 };
                 setting_list += this.createList(key, '', list, mod) + '<li id="raid_sound_test" class="setting_sub" />';
+                break;
+              case 'near_alarm':
+                mod = options.near_alarm;
+                setting_list += key.indexOf('_mod') != -1 ? '' : this.createList(key);
+                setting_list += '<li class="setting_sub">' +
+                  '<span>中心位置： </span><input type="text" id="near_alarm_place" value="0,0">' +
+                  '&nbsp;<input id="near_alarm_get_place" type="button" value="本領/出城の位置を取得" />' +
+                  '</li>';
+                setting_list += '<li class="setting_sub">' +
+                  '<span>通知する種類： </span>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="1"'  + ((options[key] & 1 ) ? 'checked' : '') + '/> 本領　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="2"'  + ((options[key] & 2 ) ? 'checked' : '') + '/> 所領　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="4"'  + ((options[key] & 4 ) ? 'checked' : '') + '/> 出城　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="8"'  + ((options[key] & 8 ) ? 'checked' : '') + '/> 陣　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="16"' + ((options[key] & 16) ? 'checked' : '') + '/> 領地　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="32"' + ((options[key] & 32) ? 'checked' : '') + '/> 同盟員　</label>' +
+                  '</li>';
                 break;
               case 'keybind':
                 mod = options.keybind_mod;
@@ -4078,27 +4098,27 @@ function MokoMain($) {
       var date = new Date((list[i]['date'] + list[i]['time']) * 1000),
         h = date.getHours(), m = "0" + date.getMinutes(), s = "0" + date.getSeconds(),
         fmtTime = h + ':' + m.substr(-2) + ':' + s.substr(-2);
-
+      console.log(list[i]['html']);
       var $tr = j$(list[i]['html']).find('td'),
         fromUser = [$tr.eq(1).find('a').text(), $tr.eq(1).find('a').attr('href')],
         fromMap  = [$tr.eq(3).find('a').text().replace(/\n| |　/g, ''),
           $tr.eq(3).find('a').attr('href')],
         toMap    = [$tr.eq(5).find('a').text().replace(/\n| |　/g, ''),
           $tr.eq(5).find('a').attr('href')];
+      if(!fromUser[0]) {
+        fromUser = [$tr.eq(1).find('a').get(1).text(), $tr.eq(1).find('a').get(1).attr('href')];
+      }
 
-      var text = '<!channel> ' +
+      var text = replace_valid('<!channel> ' +
         username + 'に敵襲が来ているぞ！\n' +
-        '着弾時間は*' + fmtTime + '*、あと*' + list[i]['time'] + '*秒だ。\n' +
+        '着弾時間は *' + fmtTime + '* 、あと *' + list[i]['time'] + '* 秒だ。\n' +
         '<' + baseUrl + fromUser[1] + '|' + fromUser[0] + '> の ' +
-        '<' + baseUrl + replace_valid(fromMap[1])  + '|' + fromMap[0]  + '> から ' +
-        '<' + baseUrl + replace_valid(toMap[1])    + '|' + toMap[0]    + '> への敵襲だ。';
+        '<' + baseUrl + fromMap[1]  + '|' + fromMap[0]  + '> から ' +
+        '<' + baseUrl + toMap[1]    + '|' + toMap[0]    + '> への敵襲だ。');
       console.log(text);
       $.ajax({
         url: options.slack_notify_mod,
         type: 'post',
-        headers: {
-            'Content-type': 'application/x-www-form-urlencoded'
-        },
         data: 'payload=' + JSON.stringify({
           "channel": channel,
           "username": name,
@@ -4107,10 +4127,81 @@ function MokoMain($) {
         })
       });
       function replace_valid(str) {
-        return str.replace(/\&/g, '%26').replace(/\|/g, '%7C');
+        return str.replace(/\t/g, '').replace(/\&/g, '%26').replace(/\|/g, '%7C').trim();
       }
     }
   }
+
+  //近隣の敵襲を取得
+  function nearEnemyNotify() {
+    return;
+    function getFullList(p, $data) {
+      var url = '/war/fight_history.php?type=0&find_name=&find_x=170&find_y=170&btn_exec=true' +
+        '&find_length=' + Math.floor(Math.random() * 500 + 495) +
+        '&p=' + p;
+      j$.ajax({
+        type: 'post',
+        url: url,
+        cache: false,
+        success: function(html) {
+          console.log(d);
+          var $html = j$(html),
+            $ul = $html.find('div.ig_battle_pagelist ul');
+          if($ul.get(0)) {
+            $html.find('tr').each(function(e) {
+              $data.append(e);
+            });
+            var $a = $ul.find('a');
+            if($a.get($a.length - 1) && $a.get($a.length - 1).text().trim() == '>>') {
+              return getFullList(p++, $data, d);
+            } else {
+              return $data;
+            }
+          } else {
+            return $html.find('div.ig_battle_table').find('tr');
+          }
+        }
+      });
+    }
+    function raidNearCreateArray($html) {
+      var ret = [];
+      $html.find('tr').each(function(e) {
+        var $td = j$(this).find('td');
+        var type = $td.get(0).text().trim(),
+          name = $td.get(1).text().trim(),
+          alliance = $td.get(2).text().trim(),
+          place = $td.get(3).text().trim().match(/.*?\((-?\d+,-?\d+)\)$/)[1];
+        ret.push({
+          type: type,
+          name: name,
+          alliance: alliance,
+          place: place
+        });
+      });
+      return ret;
+    }
+    function enemyNotify(rrr) {
+      var hostName;
+      if (HOST == 'hm' && !MIXI_FLAG) {
+        hostName = '(h)' + location.hostname;
+      } else if (HOST == 'hm' && MIXI_FLAG) {
+        hostName = '(m)' + location.hostname;
+      } else {
+        hostName = location.hostname;
+      }
+      var n = parseInt(Math.random() * 5) + 1;
+      var notification = new Notification(hostName, {
+        icon: '/img/lot/img_ixadog0' + n + '.png',
+        body: '殿！ 近隣に敵襲で御座います...',
+        tag: 'notification-enemy'
+      });
+      window.onunload = function() {
+        notification.close();
+      };
+    }
+  }
+
+
   //統合敵襲警報 ループ
   var raidSystemLoop = null;
   function raidSystem() {
@@ -4172,6 +4263,7 @@ function MokoMain($) {
           }
         }
       });
+      nearEnemyNotify();
     }
     
     //到達時間21分以下のみhtml生成
@@ -18555,6 +18647,8 @@ function MokoMain($) {
     if (mode != 1 && mode != 4) {
       return;
     }
+    $('#moko_senkuji_container').insertAfter($('#union_submit_message'));
+
     var $moko_senkuji_container = $('#moko_senkuji_container'),
     max_num = $moko_senkuji_container.attr('max_num'),
     send_num = $moko_senkuji_container.attr('send_num'),
@@ -18820,6 +18914,11 @@ function MokoMain($) {
     if ((union_type != 1 && union_type != 4) || (union_type == 4 && !$('div.addslot').length)) {
       return;
     }
+
+    $('.new_union_campaign_info').get(0).hide();
+    $('#union_submit_message').next().hide();
+    $('.new_login_skill_list').get(0).next().hide();
+    $('.new_login_skill_list').insertAfter($('#union_submit_message'));
 
     var max_num = union_type == 1 ? 10 : 5;
     
@@ -19421,7 +19520,9 @@ function MokoMain($) {
                 '<li id="levelup_status" url="' + conf_levelup + '">レベルアップ</li>' +
                 '</ul></li>';
                 
-        } 
+        }
+
+        toolMenu += '<li id="copy_butai_sim">部隊シミュ用コピペ</li>';
         
         toolMenu += '<hr class="separator" />';
       }
@@ -19684,6 +19785,35 @@ function MokoMain($) {
       });
     });
     
+    // 部隊シミュ用コピペ
+    $('#copy_butai_sim').on('click', function() {
+      var str = '';
+      str += data.card_name + '\n\n';
+      str += 'コスト' + data.cost + '\n';
+      if(data.rank == '限界/極限') {
+        str += 'レベル限界突破\n';
+      } else {
+        str += 'レベル★' + data.rank + '｜' + data.level + '\n';
+      }
+      str += '攻撃' + data.att + '\n';
+      str += '防御' + data.def + '\n';
+      str += '兵法' + data.int + '\n';
+      str += '槍' + data.t1 + '馬' + data.t2 + '弓' + data.t3 + '器' + data.t4 + '\n';
+      str += data.sname[0] + 'LV' + data.slv[0] + '\n';
+      if(data.sname[1]) {
+        str += data.sname[1] + 'LV' + data.slv[1] + '\n';
+      } else {
+        str += 'スキル空\n';
+      }
+      if(data.sname[2]) {
+        str += data.sname[2] + 'LV' + data.slv[2] + '\n';
+      } else {
+        str += 'スキル空\n';
+      }
+      str += '指揮兵' + data.type + '' + data.num + ' / ' + data.max;
+      copyToClipboard(str);
+    });
+
     return processing_tooltip($tooltip, e);
   }
 
@@ -20961,6 +21091,7 @@ function MokoMain($) {
       shortcut.add('d', function() { if (get_link()[1].length) { get_link()[1].click(); } },{ 'disable_in_input':true, 'keycode':68 });
     } else if (location.pathname == '/union/levelup_result.php') {
       //スキル強化 実行後
+      $('#union_data').insertAfter($('#level_data'));
       shortcut.add('w', function() { scrollView($('div.common_box1bottom').offset().top); },{ 'disable_in_input':true, 'keycode':87 });
     } else if (location.pathname == '/union/learn.php') {
       //スキル追加
@@ -20978,6 +21109,10 @@ function MokoMain($) {
       //スキル追加 実行
       shortcut.add('w', function() { scrollView($('div.common_box1').offset().top); },{ 'disable_in_input':true, 'keycode':87 });
       shortcut.add('s', function() { scrollView($('div.new_login_skill_list').offset().top); },{ 'disable_in_input':true, 'keycode':83 });
+    } else if (location.pathname == '/union/learn_result.php') {
+      //スキル追加 実行後
+      $('#union_data').insertAfter($('.new_union_result_detail').get(0));
+      shortcut.add('w', function() { scrollView($('div.common_box1bottom').offset().top); },{ 'disable_in_input':true, 'keycode':87 });
     } else if (location.pathname == '/union/rankup.php') {
       //ランクアップ
       var $ig_decksection3 = $('#deck_file #ig_decksection3');
