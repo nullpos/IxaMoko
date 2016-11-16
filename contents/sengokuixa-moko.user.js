@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      10.11.2212.2
+// @version      10.11.2212.20
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -36,6 +36,10 @@ function MokoLogin($) {
       3: '12'
     }[chapter_num];
     var season = parseFloat(season_num).toString(10);
+    // *beta
+    if (world == 'y001') {
+      chapter = '13';
+    }
     if (!chapter) {
       alert('【sengokuixa-moko】\n\nこのワールドの舞台には対応していません');
       return false;
@@ -48,7 +52,7 @@ function MokoLogin($) {
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 10.11.2212.2";
+  var VERSION_NAME = "ver 10.11.2212.20";
 
 // === Plugin === 
 
@@ -136,7 +140,9 @@ function MokoMain($) {
   var COUNTRY = (function() {
     var data = {
       11: { 1:"織田家", 2:"斎藤家", 3: "武田家", 4: "上杉家", 5: "三好家", 6: "毛利家", 7: "最上家", 8: "北条家", 9: "尼子家", 10: "今川家", 11: "大友家", 12: "龍造寺家", 20:"東西戦場1", 21:"東西戦場2" },
-      12: { 1:"真田家", 2:"加藤家", 3: "宇喜多家", 4: "上杉家", 5: "徳川家", 6: "小早川家", 7: "伊達家", 8: "立花家", 9: "長宗我部家", 10: "島津家", 11: "福島家", 12: "石田家", 20:"東西戦場1", 21:"東西戦場2" }
+      12: { 1:"真田家", 2:"加藤家", 3: "宇喜多家", 4: "上杉家", 5: "徳川家", 6: "小早川家", 7: "伊達家", 8: "立花家", 9: "長宗我部家", 10: "島津家", 11: "福島家", 12: "石田家", 20:"東西戦場1", 21:"東西戦場2" },
+      // *beta
+      13: { 1:"真田家", 2:"加藤家", 3: "宇喜多家", 4: "上杉家", 5: "徳川家", 6: "小早川家", 7: "伊達家", 8: "立花家", 9: "長宗我部家", 10: "島津家", 11: "福島家", 12: "石田家", 20:"東西戦場1", 21:"東西戦場2" }
     }[login_data.chapter];
     
     function COUNTRY() { return $.extend({}, data); }
@@ -203,6 +209,29 @@ function MokoMain($) {
         "鉄砲足軽": { number: 336, attack: 24, defense: 27, moving: 19, destroy:  3, tp1: "t1", tp2: "t4", command: "heiki4", skilltype: "砲", cost: [45, 20,  55, 50] },
         "騎馬鉄砲": { number: 337, attack: 27, defense: 23, moving: 21, destroy:  3, tp1: "t2", tp2: "t4", command: "heiki5", skilltype: "砲", cost: [20, 55,  45, 50] },
         "焙烙火矢": { number: 345, attack: 25, defense: 25, moving: 19, destroy:  4, tp1: "t3", tp2: "t4", command: "heiki7", skilltype: "砲", cost: [45, 50,  20, 55] }
+      },
+      // *beta
+      13: {
+        "足軽"　　: { number: 321, attack: 12, defense: 12, moving: 17, destroy:  4, tp1: "t1", tp2: "t1", command: "yari1" , skilltype: "槍", cost: [ 8, 10,   5,  6] },
+        "長槍足軽": { number: 322, attack: 18, defense: 18, moving: 18, destroy:  4, tp1: "t1", tp2: "t1", command: "yari2" , skilltype: "槍", cost: [14, 17,  10,  12] },
+        "武士"　　: { number: 323, attack: 22, defense: 22, moving: 20, destroy:  5, tp1: "t1", tp2: "t3", command: "yari3" , skilltype: "槍", cost: [21, 27,  14, 18] },
+        "国人衆"　: { number: 324, attack: 19, defense: 18, moving: 20, destroy:  6, tp1: "t1", tp2: "t1", command: "yari4" , skilltype: "槍", cost: [] },
+        "弓足軽"　: { number: 325, attack: 11, defense: 13, moving: 18, destroy:  2, tp1: "t3", tp2: "t3", command: "yumi1" , skilltype: "弓", cost: [10,  8,   6,  5] },
+        "長弓兵"　: { number: 326, attack: 17, defense: 19, moving: 19, destroy:  2, tp1: "t3", tp2: "t3", command: "yumi2" , skilltype: "弓", cost: [17, 14,   12,  10] },
+        "弓騎馬"　: { number: 327, attack: 21, defense: 23, moving: 24, destroy:  3, tp1: "t2", tp2: "t3", command: "yumi3" , skilltype: "弓", cost: [27, 21,  18, 14] },
+        "海賊衆"　: { number: 328, attack: 18, defense: 19, moving: 21, destroy:  4, tp1: "t3", tp2: "t3", command: "yumi4" , skilltype: "弓", cost: [] },
+        "騎馬兵"　: { number: 329, attack: 13, defense: 11, moving: 22, destroy:  2, tp1: "t2", tp2: "t2", command: "kiba1" , skilltype: "馬", cost: [ 5,  6,   8, 10] },
+        "精鋭騎馬": { number: 330, attack: 18, defense: 16, moving: 23, destroy:  2, tp1: "t2", tp2: "t2", command: "kiba2" , skilltype: "馬", cost: [ 10,  12,  14, 17] },
+        "赤備え"　: { number: 331, attack: 23, defense: 20, moving: 25, destroy:  3, tp1: "t1", tp2: "t2", command: "kiba3" , skilltype: "馬", cost: [14, 18,  21, 27] },
+        "母衣衆"　: { number: 332, attack: 20, defense: 17, moving: 24, destroy:  4, tp1: "t2", tp2: "t2", command: "kiba4" , skilltype: "馬", cost: [] },
+        "破城鎚"　: { number: 333, attack: 10, defense: 10, moving: 16, destroy: 12, tp1: "t4", tp2: "t4", command: "heiki1", skilltype: "器", cost: [11, 6,  9, 7] },
+        "攻城櫓"　: { number: 334, attack: 18, defense: 11, moving: 17, destroy: 12, tp1: "t4", tp2: "t4", command: "heiki2", skilltype: "器", cost: [17, 10,  12, 14] },
+        "大筒兵"　: { number: 335, attack: 21, defense: 12, moving: 17, destroy: 20, tp1: "t3", tp2: "t4", command: "heiki3", skilltype: "器", cost: [40, 50, 55, 25] },
+        "穴太衆"　: { number: 346, attack: 16, defense: 21, moving: 17, destroy: 14, tp1: "t4", tp2: "t4", command: "heiki8", skilltype: "器", cost: [27, 14, 21, 18] },
+        "鉄砲足軽": { number: 336, attack: 25, defense: 27, moving: 19, destroy:  3, tp1: "t1", tp2: "t4", command: "heiki4", skilltype: "砲", cost: [45, 25,  60, 50] },
+        "騎馬鉄砲": { number: 337, attack: 28, defense: 23, moving: 21, destroy:  3, tp1: "t2", tp2: "t4", command: "heiki5", skilltype: "砲", cost: [25, 60,  45, 50] },
+        "焙烙火矢": { number: 345, attack: 26, defense: 25, moving: 19, destroy:  4, tp1: "t3", tp2: "t4", command: "heiki7", skilltype: "砲", cost: [45, 50,  25, 60] },
+        "雑賀衆"　: { number: 338, attack: 23, defense: 18, moving: 19, destroy:  5, tp1: "t1", tp2: "t4", command: "heiki6", skilltype: "砲", cost: [] }
       }
     };
 
@@ -223,8 +252,11 @@ function MokoMain($) {
     var data;
     if (login_data.chapter == 11) {
       data = soldier_data[11];
-    } else {
+    } else if (login_data.chapter == 12) {
       data = $.extend(true, {}, soldier_data[11], soldier_data[12]);
+    } else {
+      // *beta
+      data = $.extend(true, {}, soldier_data[11], soldier_data[13]);
     }
     SOLDIER.mainData = data;
 
@@ -270,6 +302,7 @@ function MokoMain($) {
       "12_9" : [{"star":1,"value":"10100","npc":{"農民":25,"抜け忍":5}},{"star":1,"value":"01100","npc":{"農民":25,"野盗":5}},{"star":2,"value":"00201","npc":{"農民":20,"浪人":5,"抜け忍":5,"野盗":15}},{"star":2,"value":"11020","npc":{"農民":20,"浪人":10,"抜け忍":10,"野盗":10}},{"star":3,"value":"11101","npc":{"農民":45,"野盗":85}},{"star":3,"value":"11110","npc":{"農民":45,"浪人":85}},{"star":3,"value":"11110","npc":{"農民":45,"抜け忍":85}},{"star":4,"value":"21101","npc":{"雑賀衆":175,"農民":525}},{"star":4,"value":"13100","npc":{"海賊衆":140,"農民":485,"抜け忍":70}},{"star":4,"value":"11310","npc":{"国人衆":150,"農民":495,"浪人":105}},{"star":4,"value":"31141","npc":{"母衣衆":165,"農民":500,"野盗":35}},{"star":5,"value":"60201","npc":{"国人衆":200,"母衣衆":875,"農民":335}},{"star":5,"value":"32010","npc":{"雑賀衆":175,"浪人":850,"抜け忍":425}},{"star":5,"value":"24010","npc":{"国人衆":780,"海賊衆":130,"農民":390,"浪人":325}},{"star":5,"value":"10601","npc":{"雑賀衆":525,"浪人":265,"抜け忍":265,"野盗":265}},{"star":5,"value":"02620","npc":{"海賊衆":825,"母衣衆":140,"農民":410}},{"star":5,"value":"04160","npc":{"国人衆":235,"農民":235,"浪人":390,"野盗":780}},{"star":6,"value":"32210","npc":{"国人衆":1515,"浪人":1515,"抜け忍":1515}},{"star":6,"value":"53311","npc":{"国人衆":2320,"雑賀衆":290,"浪人":1740}},{"star":6,"value":"46232","npc":{"武士":1155,"国人衆":720,"抜け忍":2160}},{"star":6,"value":"26132","npc":{"母衣衆":2035,"雑賀衆":140,"野盗":1760}},{"star":6,"value":"33531","npc":{"海賊衆":1845,"農民":1105,"野盗":1600}},{"star":6,"value":"11450","npc":{"海賊衆":2015,"雑賀衆":125,"抜け忍":1635}},{"star":7,"value":"15152","npc":{"赤備え":1680,"野盗":10045}},{"star":7,"value":"22230","npc":{"農民":1575,"野盗":11025,"鬼":160}},{"star":7,"value":"12610","npc":{"武士":1715,"浪人":10265}},{"star":7,"value":"910651","npc":{"農民":650,"浪人":2600,"抜け忍":2600,"野盗":2600,"鬼":650}},{"star":7,"value":"52222","npc":{"弓騎馬":1810,"抜け忍":9065,"野盗":905}},{"star":7,"value":"33341","npc":{"農民":725,"抜け忍":7230,"鬼":725}},{"star":8,"value":"72221","npc":{"国人衆":2450,"母衣衆":1225,"雑賀衆":1830,"浪人":7335,"鬼":125,"天狗":5}},{"star":8,"value":"27213","npc":{"国人衆":515,"海賊衆":1545,"雑賀衆":515,"抜け忍":4115,"鬼":1025,"天狗":5}},{"star":8,"value":"22700","npc":{"母衣衆":2205,"野盗":4130,"鬼":1105,"天狗":5}},{"star":8,"value":"33342","npc":{"鬼":1265,"天狗":635}}],
       "12_11": [{"star":1,"value":"10100","npc":{"農民":25,"抜け忍":5}},{"star":1,"value":"01100","npc":{"農民":25,"野盗":5}},{"star":2,"value":"00201","npc":{"農民":20,"浪人":5,"抜け忍":5,"野盗":15}},{"star":2,"value":"11020","npc":{"農民":20,"浪人":10,"抜け忍":10,"野盗":10}},{"star":3,"value":"11101","npc":{"農民":45,"野盗":85}},{"star":3,"value":"11110","npc":{"農民":45,"浪人":85}},{"star":3,"value":"11110","npc":{"農民":45,"抜け忍":85}},{"star":4,"value":"21101","npc":{"雑賀衆":175,"農民":525}},{"star":4,"value":"13100","npc":{"海賊衆":140,"農民":485,"抜け忍":70}},{"star":4,"value":"11310","npc":{"国人衆":150,"農民":495,"浪人":105}},{"star":4,"value":"31141","npc":{"母衣衆":165,"農民":500,"野盗":35}},{"star":5,"value":"60201","npc":{"国人衆":200,"母衣衆":875,"農民":335}},{"star":5,"value":"32010","npc":{"雑賀衆":175,"浪人":850,"抜け忍":425}},{"star":5,"value":"24010","npc":{"国人衆":780,"海賊衆":130,"農民":390,"浪人":325}},{"star":5,"value":"10601","npc":{"雑賀衆":525,"浪人":265,"抜け忍":265,"野盗":265}},{"star":5,"value":"02620","npc":{"海賊衆":825,"母衣衆":140,"農民":410}},{"star":5,"value":"04160","npc":{"国人衆":235,"農民":235,"浪人":390,"野盗":780}},{"star":6,"value":"32210","npc":{"国人衆":1625,"浪人":1625,"抜け忍":1625}},{"star":6,"value":"53311","npc":{"国人衆":2490,"雑賀衆":315,"浪人":1865}},{"star":6,"value":"46232","npc":{"武士":1235,"国人衆":770,"抜け忍":2315}},{"star":6,"value":"26132","npc":{"母衣衆":2180,"雑賀衆":150,"野盗":1890}},{"star":6,"value":"33531","npc":{"海賊衆":1980,"農民":1185,"野盗":1715}},{"star":6,"value":"11450","npc":{"海賊衆":2160,"雑賀衆":135,"抜け忍":1755}},{"star":7,"value":"15152","npc":{"赤備え":1920,"野盗":11480}},{"star":7,"value":"22230","npc":{"農民":1800,"野盗":12600,"鬼":180}},{"star":7,"value":"12610","npc":{"武士":1960,"浪人":11735}},{"star":7,"value":"910651","npc":{"農民":740,"浪人":2975,"抜け忍":2975,"野盗":2975,"鬼":740}},{"star":7,"value":"52222","npc":{"弓騎馬":2070,"抜け忍":10360,"野盗":1040}},{"star":7,"value":"33341","npc":{"農民":830,"抜け忍":8260,"鬼":830}},{"star":8,"value":"72221","npc":{"国人衆":2975,"母衣衆":1485,"雑賀衆":2225,"浪人":8905,"鬼":150,"天狗":5}},{"star":8,"value":"27213","npc":{"国人衆":625,"海賊衆":1875,"雑賀衆":625,"抜け忍":4995,"鬼":1245,"天狗":5}},{"star":8,"value":"22700","npc":{"母衣衆":2675,"野盗":5015,"鬼":1340,"天狗":5}},{"star":8,"value":"33342","npc":{"鬼":1535,"天狗":770}}],
       "12_12": [{"star":1,"value":"10100","npc":{"農民":25,"抜け忍":5}},{"star":1,"value":"01100","npc":{"農民":25,"野盗":5}},{"star":2,"value":"00201","npc":{"農民":20,"浪人":5,"抜け忍":5,"野盗":15}},{"star":2,"value":"11020","npc":{"農民":20,"浪人":10,"抜け忍":10,"野盗":10}},{"star":3,"value":"11101","npc":{"農民":45,"野盗":85}},{"star":3,"value":"11110","npc":{"農民":45,"浪人":85}},{"star":3,"value":"11110","npc":{"農民":45,"抜け忍":85}},{"star":4,"value":"21101","npc":{"雑賀衆":185,"農民":560}},{"star":4,"value":"13100","npc":{"海賊衆":150,"農民":525,"抜け忍":75}},{"star":4,"value":"11310","npc":{"国人衆":165,"農民":530,"浪人":110}},{"star":4,"value":"31141","npc":{"母衣衆":180,"農民":540,"野盗":35}},{"star":5,"value":"60201","npc":{"国人衆":215,"母衣衆":935,"農民":360}},{"star":5,"value":"32010","npc":{"雑賀衆":185,"浪人":915,"抜け忍":455}},{"star":5,"value":"24010","npc":{"国人衆":840,"海賊衆":140,"農民":420,"浪人":350}},{"star":5,"value":"10601","npc":{"雑賀衆":560,"浪人":285,"抜け忍":285,"野盗":285}},{"star":5,"value":"02620","npc":{"海賊衆":885,"母衣衆":150,"農民":440}},{"star":5,"value":"04160","npc":{"国人衆":255,"農民":255,"浪人":420,"野盗":840}},{"star":6,"value":"32210","npc":{"国人衆":1625,"浪人":1625,"抜け忍":1625}},{"star":6,"value":"53311","npc":{"国人衆":2490,"雑賀衆":315,"浪人":1865}},{"star":6,"value":"46232","npc":{"武士":1235,"国人衆":770,"抜け忍":2315}},{"star":6,"value":"26132","npc":{"母衣衆":2180,"雑賀衆":150,"野盗":1890}},{"star":6,"value":"33531","npc":{"海賊衆":1980,"農民":1185,"野盗":1715}},{"star":6,"value":"11450","npc":{"海賊衆":2160,"雑賀衆":135,"抜け忍":1755}},{"star":7,"value":"15152","npc":{"赤備え":2040,"野盗":12195}},{"star":7,"value":"22230","npc":{"農民":1910,"野盗":13385,"鬼":195}},{"star":7,"value":"12610","npc":{"武士":2080,"浪人":12465}},{"star":7,"value":"910651","npc":{"農民":790,"浪人":3160,"抜け忍":3160,"野盗":3160,"鬼":790}},{"star":7,"value":"52222","npc":{"弓騎馬":2200,"抜け忍":11005,"野盗":1105}},{"star":7,"value":"33341","npc":{"農民":880,"抜け忍":8780,"鬼":880}},{"star":8,"value":"72221","npc":{"国人衆":3150,"母衣衆":1575,"雑賀衆":2355,"浪人":9430,"鬼":160,"天狗":5}},{"star":8,"value":"27213","npc":{"国人衆":665,"海賊衆":1985,"雑賀衆":665,"抜け忍":5290,"鬼":1320,"天狗":5}},{"star":8,"value":"22700","npc":{"母衣衆":2835,"野盗":5310,"鬼":1420,"天狗":5}},{"star":8,"value":"33342","npc":{"鬼":1625,"天狗":815}}],
+	  "13_13": [{"star":1, "value":"01100", "npc":{"農民":25, "野盗":5}},{"star":1, "value":"10100", "npc":{"農民":25, "抜け忍":5}},{"star":2, "value":"11020", "npc":{"農民":20, "浪人":10, "抜け忍":10, "野盗":10}},{"star":2, "value":"00201", "npc":{"農民":20, "浪人":5, "抜け忍":5, "野盗":15}},{"star":3, "value":"11101", "npc":{"農民":45, "野盗":85}},{"star":3, "value":"11110", "npc":{"農民":45, "抜け忍":85}},{"star":4, "value":"21101", "npc":{"雑賀衆":200, "農民":600}},{"star":4, "value":"11310", "npc":{"国人衆":175, "農民":565, "浪人":120}},{"star":4, "value":"13100", "npc":{"海賊衆":160, "農民":560, "抜け忍":80}},{"star":4, "value":"31141", "npc":{"母衣衆":190, "農民":575, "野盗":40}},{"star":5, "value":"02620", "npc":{"海賊衆":940, "母衣衆":160, "農民":470}},{"star":5, "value":"10601", "npc":{"雑賀衆":600, "浪人":300, "抜け忍":300, "野盗":300}},{"star":5, "value":"04160", "npc":{"国人衆":270, "農民":270, "浪人":445, "野盗":895}},{"star":5, "value":"24010", "npc":{"国人衆":895, "海賊衆":150, "農民":445, "浪人":375}},{"star":5, "value":"32010", "npc":{"雑賀衆":200, "浪人":975, "抜け忍":485}},{"star":5, "value":"60201", "npc":{"国人衆":230, "母衣衆":1000, "農民":380}},{"star":6, "value":"33531", "npc":{"海賊衆":2110, "農民":1260, "野盗":1830}},{"star":6, "value":"53311", "npc":{"国人衆":2655, "雑賀衆":335, "浪人":1990}},{"star":6, "value":"26132", "npc":{"母衣衆":2325, "雑賀衆":160, "野盗":2015}},{"star":6, "value":"32210", "npc":{"国人衆":1735, "浪人":1735, "抜け忍":1735}},{"star":6, "value":"11450", "npc":{"海賊衆":2300, "雑賀衆":140, "抜け忍":1870}},{"star":6, "value":"46232", "npc":{"武士":1320, "国人衆":820, "抜け忍":2470}},{"star":7, "value":"33341", "npc":{"農民":935, "抜け忍":9295, "鬼":935}},{"star":7, "value":"22230", "npc":{"農民":2025, "野盗":14175, "鬼":205}},{"star":7, "value":"52222", "npc":{"弓騎馬":2330, "抜け忍":11655, "野盗":1170}},{"star":7, "value":"910651", "npc":{"農民":835, "浪人":3345, "抜け忍":3345, "野盗":3345, "鬼":835}},{"star":7, "value":"12610", "npc":{"武士":2205, "浪人":13200}},{"star":7, "value":"15152", "npc":{"赤備え":2160, "野盗":12915}},{"star":8, "value":"27213", "npc":{"国人衆":740, "海賊衆":2210, "雑賀衆":740, "抜け忍":5880, "鬼":1470, "天狗":10}},{"star":8, "value":"22700", "npc":{"母衣衆":3150, "野盗":5900, "鬼":1580, "天狗":10}},{"star":8, "value":"72221", "npc":{"国人衆":3500, "母衣衆":1750, "雑賀衆":2620, "浪人":10480, "鬼":180, "天狗":10}},{"star":8, "value":"33342", "npc":{"鬼":1810, "天狗":910}}],
     };
 
     //空き地戦力 集計
@@ -580,14 +613,19 @@ function MokoMain($) {
   };
 
   // 豪族砦座標 11章~
-  var FORTCOORD = [
-    [  0,  0],
-    [ 12, 28], [ 28, 12], [ 12, 52], [ 36, 36], [ 52, 12], [ 12, 76], [ 36, 60], [ 60, 36], [ 76, 12], [ 12,100],
-    [ 36, 84], [ 60, 60], [ 84, 36], [100, 12], [ 12,124], [ 36,108], [ 60, 84], [ 84, 60], [108, 36], [124, 12],
-    [ 12,148], [ 36,132], [ 60,108], [ 84, 84], [108, 60], [132, 36], [148, 12], [ 36,156], [ 60,132], [ 84,108],
-    [108, 84], [132, 60], [156, 36], [ 60,156], [ 84,132], [108,108], [132, 84], [156, 60], [ 84,156], [108,132],
-    [132,108], [156, 84], [108,156], [132,132], [156,108], [132,156], [156,132], [156,156]
-  ],
+  var FORTCOORD = (function() {
+    // *beta
+    return login_data.chapter <= 12 ? [
+      [  0,  0],
+      [ 12, 28], [ 28, 12], [ 12, 52], [ 36, 36], [ 52, 12], [ 12, 76], [ 36, 60], [ 60, 36], [ 76, 12], [ 12,100],
+      [ 36, 84], [ 60, 60], [ 84, 36], [100, 12], [ 12,124], [ 36,108], [ 60, 84], [ 84, 60], [108, 36], [124, 12],
+      [ 12,148], [ 36,132], [ 60,108], [ 84, 84], [108, 60], [132, 36], [148, 12], [ 36,156], [ 60,132], [ 84,108],
+      [108, 84], [132, 60], [156, 36], [ 60,156], [ 84,132], [108,108], [132, 84], [156, 60], [ 84,156], [108,132],
+      [132,108], [156, 84], [108,156], [132,132], [156,108], [132,156], [156,132], [156,156]
+    ]
+    :
+    [[0,0],[14,40],[40,14],[14,69],[42,42],[69,14],[14,98],[42,71],[71,42],[98,14],[14,127],[42,100],[71,71],[100,42],[127,14],[14,156],[42,129],[71,100],[100,71],[129,42],[156,14],[42,158],[71,129],[100,100],[129,71],[158,42],[71,158],[100,129],[129,100],[158,71],[100,158],[129,129],[158,100],[129,158],[158,129],[158,158]];
+  })(),
   // 東西戦砦座標 11章~
   EW_FORT_MAP = (function() {
     var array = [   // 11章~
@@ -3116,6 +3154,18 @@ function MokoMain($) {
       $(this).fadeTo(200, 1.0);
     }).on('click', Setting.createDialog.bind(Setting))
     .appendTo('#navi01 > ul');
+    // *beta
+    if (login_data.chapter >= 13) {
+      $('#navi01 > ul').css('width', '270px');
+      $('#open_setting').css('margin-right', '4px');
+    } else {
+      $('#navi01').css('padding-top', '4px');
+      $('#navi01 ul li.navi01_02 a').css('margin-top', '1px');
+      $('#navi01 ul li a').css({
+        'margin-top': '0',
+        'margin-bottom': '3px'
+      });
+    }
   }
 
   //Ajaxloading
@@ -3414,8 +3464,24 @@ function MokoMain($) {
     }
     html = '<div id="ixamoko_sessout">' + chapter + '章' + season + '期　タイムアウトまで ' + '<span todo="d30m" totime="' + totime + '" class="ixamoko_countdown">' + timeText + '</span>' + '</div>';
     $('#lordSiteArea').hide();
-    $('#lordNameBox').append(html);
-    
+    // $('#lordNameBox').append(html);
+
+    // *beta
+    var $ixamoko_sessout = $(html).appendTo('#lordNameBox');
+    if (login_data.chapter >= 13) {
+      $ixamoko_sessout.css({
+        'position': 'absolute',
+        'top': '36px',
+        'left': '86px',
+        'padding': '2px 8px'
+      });
+    } else {
+      $ixamoko_sessout.css({
+        'padding': '4px 0',
+        'margin': '4px 2px 0 2px'
+      });
+    }
+
     var countdownTimer = 0,
     countDown = function() {
       $('span.ixamoko_countdown').each(function() {
@@ -4440,14 +4506,15 @@ function MokoMain($) {
       '#commentBox #commentNavi li#comBtnEnemy { margin-top: 2px; background-position: 0 -15px; }' +
       '#commentBox #commentNavi li#comBtnEnemy a { background-position: 0 0; }' +
       '#commentBox #commentNavi li#comBtnEnemy a:hover { background-position: 0 -15px; }');
-      
+
     //タブ
     $('<li id="comBtnEnemy"><a href="javascript:void(0);" id="Enemy">敵襲</a></li>').appendTo('#commentNavi');
-    
-    $('#commentNavi li a').click(function() {
-      var id_name = $(this).parent().attr('id').replace('comBtn', '');
+
+    $('#commentNavi li').on('click', function() {
+      var id_name = $(this).attr('id').replace('comBtn', '');
       return tabChangeListKaizou(id_name);
     });
+
     var tab;
     if (BATTLE_MODE == '東西戦中') {
       tab = $('#commentBox #commentNavi li');
@@ -4469,7 +4536,16 @@ function MokoMain($) {
       '</ul>' +
       '</div>';
     $('#commentBody').append(html);
-    
+
+    // *beta
+    if (login_data.chapter >= 13) {
+      $('#commentListEnemy').css({
+        'width': 'auto',
+        'height': '76px',
+        'background': 'none'
+      });
+    }
+
     $('#enemyReload').on({
       'click': function() {
         if (options.raid_system) {
@@ -4595,12 +4671,13 @@ function MokoMain($) {
 
   // デッキ コストの取得
   function get_deck_cost(html) {
-    var source, str, now, max, free;
+    var source, str, now, max, free, numstr;  // *beta
     if (html.find('#select_assign_no').val() == 6) {
       source = html.find('#deck_info_tbl td').eq(2).text().match(/(\d+\.?\d?)\/(\d+\.?\d?)/);
-      str = source ? source[0] : '0/10';
+      numstr = login_data.chapter <= 12 ? '0/10' : '0/12';  // *beta
+      str = source ? source[0] : numstr;
       now = source ? parseFloat(source[1]) : 0;
-      max = 10;
+      max = login_data.chapter <= 12 ? 10 : 12; // *beta
     } else {
       source = $(html).find('div.deckcost span').text().match(/(\d+\.?\d?)\/(\d+\.?\d?)/);
       str = source[0];
@@ -13432,14 +13509,13 @@ function MokoMain($) {
           'text-decoration': 'underline',
           'cursor': 'pointer',
           'color': 'brown'
-        }).attr('title', 'クリップボードにコピー').click(function() {
+        }).attr('title', 'チャットへ入力').click(function() {
           $('INPUT[name="unit_select[]"]').prop('checked', false);
           var time = $(this).text().split(':'),
             i_time = time[1] + ':' + time[2],
             code = $('#x_y').text().split('/').shift(),
             str = code + '到着まで ' + i_time;
-          // return inputToChat(str);
-          return copyToClipboard(str);
+          return inputToChat(str);
         });
       });
     },
@@ -20447,7 +20523,9 @@ function MokoMain($) {
     function warSituationMapEvent() {
       tb_init('a.thickbox');
       waite_TB_window();
-      var array = [
+      // *beta
+      var array = (function() {
+        var data_11s =  [
         ['', 2, 5, 9, 14, 20, 27],
         [1, 4, 8, 13, 19, 26, 33],
         [3, 7, 12, 18, 25, 32, 38],
@@ -20455,8 +20533,18 @@ function MokoMain($) {
         [10, 16, 23, 30, 36, 41, 45],
         [15, 22, 29, 35, 40, 44, 47],
         [21, 28, 34, 39, 43, 46, 48]
-      ];
-      var a = array.length - 1,
+        ];
+        var data_13s =  [
+        ['', 2, 5, 9, 14, 20],
+        [1, 4, 8, 13, 19, 25],
+        [3, 7, 12, 18, 24, 29],
+        [6, 11, 17, 23, 28, 32],
+        [10, 16, 23, 27,31, 34],
+        [15, 21, 26, 30, 33, 35]
+        ];
+        return login_data.chapter <= 12 ? data_11s : data_13s;
+    })();
+    var a = array.length - 1,
         b = array.length,
         col = array.length * 2;
       var tmp = '<span id="allMapStatusWindow">' + '<table id="war_situation_map">' + '<thead><tr><td colspan="' + col + '">' + '<select id="target" />' + '<div id="lastmodify" /></td></tr></thead>' + '<tbody><tr><th colspan="' + b + '">北西</th><th colspan="' + b + '">北東</th></tr>';
@@ -21544,12 +21632,9 @@ window.addEventListener('DOMContentLoaded', function() {
     '#moko_short_dialog dd { display: list-item; list-style:  disc; margin-left: 1.5em; font-size: 85%; line-height: 1.2; }' +
     '#moko_short_dialog.moko_alert { background-color: #F9EDB8; border: 1px solid #EDC967; }' +
     /*Header*/
-    '#navi01 { padding-top: 4px !important; }' +
     '#open_setting { margin-top: 0px; display: block; height: 14px; width: 62px; text-indent: -9999px; opacity: 1; background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAD4AAAAOCAMAAABAZV/bAAAAPFBMVEX///////8AAAC/v7////+fn5/v7+9gYGCvr69AQECAgIDPz88wMDBwcHDf39+Pj48QEBAgICBQUFAAAAC6ZuGEAAAAA3RSTlMAQAAKD4vbAAAA9ElEQVR4XqXSyWrEQAxFUSfvaazR7v//1zjdxqYhEBLfVW0OAqmWD97oc+Gtvvnj7N982C+8I30g9fke+s5nob24RCG5tafRAM/UA+FUwahA6sXnt39xTiMxD3ZxQFA1BNW516OffJR5cZvKDBAtCwNuXTMHO0QGM7wDYhiFJzeWQhw8N9ER0MoeDG/KFBo6GhzDSAiC4MV3T1AO7lU0gCAfjG1VBpgJH8UZg2yC+jb9mdBenGtjoFfqysDWaL6TzGxqlWRNxA93t2PzPR2rMZt5X7NP6VtuTLPULZwiZV0zs/zp26RgOL0WkOo758HvtNzyyxcu4Ran3Hv/5AAAAABJRU5ErkJggg==") no-repeat left top; }' +
-    '#navi01 ul li.navi01_02 a {  margin-top: 1px !important; }' +
-    '#navi01 ul li a { margin-top: 0 !important; margin-bottom: 3px !important; }' +
     /*タイムアウト*/
-    '#ixamoko_sessout { background-color: black; color: white; padding: 4px 0; margin: 4px 2px 0 2px; text-align: center; }' +
+    '#ixamoko_sessout { background-color: black; color: white; text-align: center; }' +
     '#ixamoko_sessout span { font-family: Verdana; font-weight: bold; }' +
     /*チャット敵襲表示 共通*/
     '#enemyComment { float: left; height: 60px; max-width: 475px; margin-left: 2px; overflow: hidden; }' +
