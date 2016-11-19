@@ -4183,18 +4183,18 @@ function MokoMain($) {
         '<' + baseUrl + fromUser[1] + '|' + fromUser[0] + '> の ' +
         '<' + baseUrl + fromMap[1]  + '|' + fromMap[0]  + '> から ' +
         '<' + baseUrl + toMap[1]    + '|' + toMap[0]    + '> への敵襲だ。');
-      console.log(text);
-      var query = 'payload=' + JSON.stringify({
-        "channel": channel,
-        "username": name,
-        "text": text,
-        "mrkdwn": true
-      });
-      chrome.runtime.sendMessage('dfhkieopfjmelajhofomaammadolklcc', {
-          query: query,
-          url: options.slack_notify_mod
-        }, function(res) {
-          console.log(res);
+      $.ajax({
+        url: options.slack_notify_mod,
+        type: 'post',
+        headers: {
+            'Content-type': 'application/x-www-form-urlencoded'
+        },
+        data: 'payload=' + JSON.stringify({
+          "channel": channel,
+          "username": name,
+          "text": text,
+          "mrkdwn": true
+        })
       });
       function replace_valid(str) {
         return str.replace(/\t/g, '').replace(/\&/g, '%26').replace(/\|/g, '%7C').trim();
@@ -4345,21 +4345,25 @@ function MokoMain($) {
   }
   // 敵襲情報の取得
   function getRaidData(elem) {
-    var $a = elem.find('a').eq(0);
+    var $a = elem.find('h3:eq(0)').find('a').eq(0);
     var $td = elem.find('table.table_fightlist').find('td:eq(1)');
     var $td_bggray = elem.find('td.td_bggray');
     var org = $td_bggray.eq(0).find('span').contents();
     var des = $td_bggray.eq(1).find('span').contents();
+    console.log($a.text());
+    console.log($a.attr('href'));
+    console.log(org);
+    console.log(des);
     return {
       sortie_name: $a.text(),
       sortie_href: $a.attr('href'),
       time_arr: $td.text().match(/\d+/g),
-      org_base: org[1].innerText,
-      org_href: org[1].getAttribute('href').replace('/land', '/map'),
-      org_code: org[2].textContent.trim(),
-      des_base: des[1].innerText,
-      des_href: des[1].getAttribute('href').replace('/land', '/map'),
-      des_code: des[2].textContent.trim()
+      org_base: org[0].innerText,
+      org_href: org[0].getAttribute('href').replace('/land', '/map'),
+      org_code: org[1].textContent.trim(),
+      des_base: des[0].innerText,
+      des_href: des[0].getAttribute('href').replace('/land', '/map'),
+      des_code: des[1].textContent.trim()
     };
   }
   //統合敵襲警報 html生成
