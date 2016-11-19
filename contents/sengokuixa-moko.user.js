@@ -142,7 +142,7 @@ function MokoMain($) {
       11: { 1:"織田家", 2:"斎藤家", 3: "武田家", 4: "上杉家", 5: "三好家", 6: "毛利家", 7: "最上家", 8: "北条家", 9: "尼子家", 10: "今川家", 11: "大友家", 12: "龍造寺家", 20:"東西戦場1", 21:"東西戦場2" },
       12: { 1:"真田家", 2:"加藤家", 3: "宇喜多家", 4: "上杉家", 5: "徳川家", 6: "小早川家", 7: "伊達家", 8: "立花家", 9: "長宗我部家", 10: "島津家", 11: "福島家", 12: "石田家", 20:"東西戦場1", 21:"東西戦場2" },
       // *beta
-      13: { 1:"真田家", 2:"加藤家", 3: "宇喜多家", 4: "上杉家", 5: "徳川家", 6: "小早川家", 7: "伊達家", 8: "立花家", 9: "長宗我部家", 10: "島津家", 11: "福島家", 12: "石田家", 20:"東西戦場1", 21:"東西戦場2" }
+      13: { 1:"織田家", 2:"明智家", 3: "武田家", 4: "相馬家", 5: "徳川家", 6: "毛利家", 7: "柴田家", 8: "北条家", 9: "長宗我部家", 10: "島津家", 11: "豊臣家", 12: "里見家", 20:"東西戦場1", 21:"東西戦場2" }
     }[login_data.chapter];
     
     function COUNTRY() { return $.extend({}, data); }
@@ -4182,15 +4182,17 @@ function MokoMain($) {
         '<' + baseUrl + fromMap[1]  + '|' + fromMap[0]  + '> から ' +
         '<' + baseUrl + toMap[1]    + '|' + toMap[0]    + '> への敵襲だ。');
       console.log(text);
-      $.ajax({
-        url: options.slack_notify_mod,
-        type: 'post',
-        data: 'payload=' + JSON.stringify({
-          "channel": channel,
-          "username": name,
-          "text": text,
-          "mrkdwn": true
-        })
+      var query = 'payload=' + JSON.stringify({
+        "channel": channel,
+        "username": name,
+        "text": text,
+        "mrkdwn": true
+      });
+      chrome.runtime.sendMessage('dfhkieopfjmelajhofomaammadolklcc', {
+          query: query,
+          url: options.slack_notify_mod
+        }, function(res) {
+          console.log(res);
       });
       function replace_valid(str) {
         return str.replace(/\t/g, '').replace(/\&/g, '%26').replace(/\|/g, '%7C').trim();
@@ -4357,14 +4359,16 @@ function MokoMain($) {
     }
     
     $statusarea.each(function(idx) {
-      var enemy_nm = $(this).find('a:eq(0)').text(),
-        enemy_href = $(this).find('a:eq(0)').attr('href'),
+      var aplace = 0;
+      if($(this).find('a:eq('+aplace+')').text().indexOf('map')) aplace += 2;
+      var enemy_nm = $(this).find('a:eq('+aplace+')').text(),
+        enemy_href = $(this).find('a:eq('+aplace+')').attr('href'),
         enemy_time = $(this).find('table.paneltable.table_fightlist').find('td:eq(1)').text().match(/\d+/g),
         rt = '&nbsp;(あと ' + enemy_time[6] + ':' + enemy_time[7] + ':' + enemy_time[8] + ')&nbsp;',
         enemy_start = $(this).find('td.td_bggray:eq(0)').text(),
-        enemy_start_href = $(this).find('a:eq(1)').attr('href').replace('/land', '/map'),
+        enemy_start_href = $(this).find('a:eq('+aplace+')').attr('href').replace('/land', '/map'),
         enemy_arrival = $(this).find('td.td_bggray:eq(1)').text(),
-        enemy_arrival_href = $(this).find('a:eq(2)').attr('href').replace('/land', '/map');
+        enemy_arrival_href = $(this).find('a:eq('+aplace+')').attr('href').replace('/land', '/map');
         
       var tmp = '' +
         '<tr>' +
@@ -13509,13 +13513,13 @@ function MokoMain($) {
           'text-decoration': 'underline',
           'cursor': 'pointer',
           'color': 'brown'
-        }).attr('title', 'チャットへ入力').click(function() {
+        }).attr('title', 'クリップボードにコピー').click(function() {
           $('INPUT[name="unit_select[]"]').prop('checked', false);
           var time = $(this).text().split(':'),
             i_time = time[1] + ':' + time[2],
             code = $('#x_y').text().split('/').shift(),
             str = code + '到着まで ' + i_time;
-          return inputToChat(str);
+          return copyToClipboard(str);
         });
       });
     },
