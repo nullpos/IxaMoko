@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IxaTraining
 // @description  一括兵士訓練ツール
-// @version      10.0.2.1
+// @version      10.0.2.2
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -17,6 +17,7 @@
   
   // meta
   function meta($) {
+    'use strict';
     //■ プロトタイプ {
     var XRWstext = function(xhr) {
       return xhr.setRequestHeader('X-Requested-With', 'statusText');
@@ -186,47 +187,47 @@
       }
     });
 
-    //■ MetaStorage {
-    var MetaStorage = (function() {
+    //■ metaStorage {
+    var metaStorage = (function() {
       var storageList = {},
         storagePrefix = 'IM.',
         eventListener = {},
         propNames = 'expires'.split(' ');
         
-      function MetaStorage(name) {
+      function metaStorage(name) {
         var storageName = storagePrefix + name,
           storage, storageArea;
-        storageArea = MetaStorage.keys[storageName];
+        storageArea = metaStorage.keys[storageName];
         if (!storageArea) {
           throw new Error('「' + storageName + '」このストレージ名は存在しません。');
         }
         storage = storageList[storageName];
         if (storage === undefined) {
           storage = new Storage(storageArea, storageName);
-          loadData.call(storage);
+          loadData(storage);
           storageList[storageName] = storage;
         }
         return storage;
       }
-      $.extend(MetaStorage, {
+      $.extend(metaStorage, {
         keys: {},
         registerStorageName: function(storageName) {
           storageName = storagePrefix + storageName;
-          MetaStorage.keys[storageName] = 'local';
+          metaStorage.keys[storageName] = 'local';
         },
         registerSessionName: function(storageName) {
           storageName = storagePrefix + storageName;
-          MetaStorage.keys[storageName] = 'session';
+          metaStorage.keys[storageName] = 'session';
         },
         clearAll: function() {
-          $.each(MetaStorage.keys, function(key, value) {
+          $.each(metaStorage.keys, function(key, value) {
             localStorage.removeItem(key);
           });
           storageList = {};
         },
         import: function(string) {
           var importData = JSON.parse(string),
-            keys = MetaStorage.keys;
+            keys = metaStorage.keys;
           this.clearAll();
           $.each(importData, function(key, value) {
             if (keys[key]) {
@@ -236,7 +237,7 @@
         },
         export: function() {
           var exportData = {};
-          $.each(MetaStorage.keys, function(key, value) {
+          $.each(metaStorage.keys, function(key, value) {
             var stringData = localStorage.getItem(key);
             if (stringData) {
               exportData[value] = stringData;
@@ -259,18 +260,18 @@
       $.extend(Storage.prototype, {
         clear: function() {
           this.data = {};
-          clearData.call(this);
+          clearData(this);
         },
         get: function(key) {
           return this.data[key];
         },
         set: function(key, value) {
           this.data[key] = value;
-          saveData.call(this);
+          saveData(this);
         },
         remove: function(key) {
           delete this.data[key];
-          saveData.call(this);
+          saveData(this);
         },
         begin: function() {
           this.transaction = true;
@@ -281,7 +282,7 @@
           delete this.transaction;
           delete this.tranData;
           if (trans) {
-            saveData.call(this);
+            saveData(this);
           }
         },
         rollback: function() {
@@ -294,28 +295,28 @@
         }
       });
       
-      function loadData() {
-        this.data = load(this.storageArea, this.storageName);
+      function loadData(obj) {
+        obj.data = load(obj.storageArea, obj.storageName);
       }
       
-      function saveData() {
-        if (this.transaction) {
+      function saveData(obj) {
+        if (obj.transaction) {
           return;
         }
-        save(this.storageArea, this.storageName, this.data);
+        save(obj.storageArea, obj.storageName, obj.data);
       }
       
-      function clearData() {
+      function clearData(obj) {
         var storageArea;
-        if (this.transaction) {
+        if (obj.transaction) {
           return;
         }
-        if (this.storageArea == 'local') {
+        if (obj.storageArea == 'local') {
           storageArea = localStorage;
-        } else if (this.storageArea == 'session') {
+        } else if (obj.storageArea == 'session') {
           storageArea = sessionStorage;
         }
-        storageArea.removeItem(this.storageName);
+        storageArea.removeItem(obj.storageName);
       }
       
       function load(storageArea, storageName) {
@@ -352,39 +353,39 @@
       $(window).on('storage', function(event) {
         var storageName = event.originalEvent.key,
           storage;
-        if (!MetaStorage.keys[storageName]) {
+        if (!metaStorage.keys[storageName]) {
           return;
         }
         storage = storageList[storageName];
         if (storage !== undefined) {
-          loadData.call(storage);
+          loadData(storage);
         }
         $(eventListener).trigger(storageName, event);
       });
-      return MetaStorage;
+      return metaStorage;
     })();
 
     'ENVIRONMENT SETTINGS VILLAGE FACILITY ALLIANCE COUNTDOWN UNIT_STATUS USER_FALL USER_INFO FAVORITE_UNIT'.split(' ').forEach(function(value) {
-      MetaStorage.registerStorageName(value);
+      metaStorage.registerStorageName(value);
     });
     '1 2 3 4 5 6 7 8 9 10 11 12 20 21'.split(' ').forEach(function(value) {
-      MetaStorage.registerStorageName('COORD.' + value);
+      metaStorage.registerStorageName('COORD.' + value);
     });
     'UNION_CARD'.split(' ').forEach(function(value) {
-      MetaStorage.registerSessionName(value);
+      metaStorage.registerSessionName(value);
     });
-    MetaStorage.change('UNIT_STATUS', function(event, storageEvent) {
+    metaStorage.change('UNIT_STATUS', function(event, storageEvent) {
       $('#imi_unitstatus').trigger('update');
       $('#imi_raid_list').trigger('update');
       $('#imi_basename').trigger('update');
     });
-    // } MetaStorage
+    // } metaStorage
 
     //■ Env {
     var Env = (function() {
       var ixamoko_login_data = localStorage.ixamoko_login_data,
         login_data = ixamoko_login_data ? JSON.parse(ixamoko_login_data) : {};
-      var storage = MetaStorage('ENVIRONMENT'),
+      var storage = metaStorage('ENVIRONMENT'),
         $server = $('#server_time'),
         $war = $('.situationWorldTable'),
         world = (location.hostname.slice(0, 4).match(/[ -~]+/) || [])[0],
@@ -423,10 +424,10 @@
         if (newseason !== season) {
           //期が変わった場合
           'VILLAGE FACILITY ALLIANCE COUNTDOWN UNIT_STATUS USER_FALL USER_INFO FAVORITE_UNIT'.split(' ').forEach(function(value) {
-            MetaStorage(value).clear();
+            metaStorage(value).clear();
           });
           '1 2 3 4 5 6 7 8 9 10 11 12 20 21'.split(' ').forEach(function(value) {
-            MetaStorage('COORD.' + value).clear();
+            metaStorage('COORD.' + value).clear();
           });
           season = newseason;
         }
@@ -439,8 +440,8 @@
         war = 0;
       }
       if (login && war === 0) {
-        MetaStorage('USER_FALL').clear();
-        MetaStorage('USER_INFO').clear();
+        metaStorage('USER_FALL').clear();
+        metaStorage('USER_INFO').clear();
       }
       return {
         //. loginProcess
@@ -562,7 +563,7 @@
       //. coords
       function coords(country) {
         var list = [],
-          map_list = MetaStorage('COORD.' + country).data;
+          map_list = metaStorage('COORD.' + country).data;
         for (var key in map_list) {
           var point = key.match(/(-?\d+),(-?\d+)/),
             x = point[1].toInt(),
@@ -598,56 +599,63 @@
     
     //■ Soldier {
     var Soldier = (function() {
-      var data = {
-        //槍
-        '足軽':     { type: 321, class: 'yari1', attack: 11, defend: 11, speed: 15, destroy:  2, command: '槍', skillType: '槍', training: [85], dou:   0, require: ['槍', '槍'], order: 1 },
-        '長槍足軽': { type: 322, class: 'yari2', attack: 16, defend: 16, speed: 16, destroy:  2, command: '槍', skillType: '槍', training: [100], dou:  10, require: ['槍', '槍'], order: 2 },
-        '武士':     { type: 323, class: 'yari3', attack: 18, defend: 18, speed: 18, destroy:  3, command: '槍', skillType: '槍', training: [115], dou: 200, require: ['槍', '弓'], order: 3 },
-        '国人衆':   { type: 324, class: 'yari4', attack: 17, defend: 17, speed: 19, destroy:  4, command: '槍', skillType: '槍', training: [], dou:   0, require: ['槍', '槍'], order: 0 },
-        //弓
-        '弓足軽':   { type: 325, class: 'yumi1', attack: 10, defend: 12, speed: 16, destroy:  1, command: '弓', skillType: '弓', training: [90], dou:   0, require: ['弓', '弓'], order: 1 },
-        '長弓兵':   { type: 326, class: 'yumi2', attack: 15, defend: 17, speed: 18, destroy:  1, command: '弓', skillType: '弓', training: [105], dou:  10, require: ['弓', '弓'], order: 2 },
-        '弓騎馬':   { type: 327, class: 'yumi3', attack: 17, defend: 19, speed: 23, destroy:  1, command: '弓', skillType: '弓', training: [120], dou: 200, require: ['弓', '馬'], order: 3 },
-        '海賊衆':   { type: 328, class: 'yumi4', attack: 16, defend: 17, speed: 20, destroy:  2, command: '弓', skillType: '弓', training: [], dou:   0, require: ['弓', '弓'], order: 0 },
-        //馬
-        '騎馬兵':   { type: 329, class: 'kiba1', attack: 12, defend: 10, speed: 22, destroy:  1, command: '馬', skillType: '馬', training: [95], dou:   0, require: ['馬', '馬'], order: 1 },
-        '精鋭騎馬': { type: 330, class: 'kiba2', attack: 17, defend: 15, speed: 23, destroy:  1, command: '馬', skillType: '馬', training: [110], dou:  10, require: ['馬', '馬'], order: 2 },
-        '赤備え':   { type: 331, class: 'kiba3', attack: 21, defend: 20, speed: 25, destroy:  1, command: '馬', skillType: '馬', training: [125], dou: 200, require: ['馬', '槍'], order: 3 },
-        '母衣衆':   { type: 332, class: 'kiba4', attack: 19, defend: 16, speed: 24, destroy:  2, command: '馬', skillType: '馬', training: [], dou:   0, require: ['馬', '馬'], order: 0 },
-        //器
-        '破城鎚':   { type: 333, class: 'heiki1', attack:  3, defend:  8, speed:  8, destroy: 10, command: '器', skillType: '器', training: [143], dou:  10, require: ['器', '器'], order: 1 },
-        '攻城櫓':   { type: 334, class: 'heiki2', attack: 14, defend:  5, speed: 10, destroy:  7, command: '器', skillType: '器', training: [183], dou:  10, require: ['器', '器'], order: 2 },
-        '大筒兵':   { type: 335, class: 'heiki3', attack: 10, defend: 12, speed:  8, destroy: 20, command: '器', skillType: '器', training: [203], dou: 300, require: ['弓', '器'], order: 3 },
-        '鉄砲足軽': { type: 336, class: 'heiki4', attack: 18, defend: 26, speed: 15, destroy:  1, command: '器', skillType: '砲', training: [173], dou: 200, require: ['槍', '器'], order: 5 },
-        '騎馬鉄砲': { type: 337, class: 'heiki5', attack: 26, defend: 18, speed: 21, destroy:  1, command: '器', skillType: '砲', training: [193], dou: 300, require: ['馬', '器'], order: 6 },
-        '雑賀衆':   { type: 338, class: 'heiki6', attack: 23, defend: 17, speed: 18, destroy:  5, command: '器', skillType: '砲', training: [], dou:   0, require: ['槍', '器'], order: 0 },
-        '焙烙火矢': { type: 345, class: 'heiki7', attack: 23, defend: 23, speed: 19, destroy:  2, command: '器', skillType: '砲', training: [183], dou:  10, require: ['弓', '器'], order: 4 },
-        //NPC用
-        '浪人':     { defend:  12, command: '槍' },
-        '抜け忍':   { defend:  12, command: '弓' },
-        '野盗':     { defend:  12, command: '馬' },
-        '農民':     { defend:   5, command: '他' },
-        '鬼':       { defend:  88, command: '他' },
-        '天狗':     { defend: 112, command: '他' }
+      var data_11s = {
+        // 槍
+        '足軽':     { type: 321, training: [85], order: 1 },
+        '長槍足軽': { type: 322, training: [100], order: 2 },
+        '武士':     { type: 323, training: [115], order: 3 },
+        // 弓
+        '弓足軽':   { type: 325, training: [90], order: 1 },
+        '長弓兵':   { type: 326, training: [105], order: 2 },
+        '弓騎馬':   { type: 327, training: [120], order: 3 },
+        // 馬
+        '騎馬兵':   { type: 329, training: [95], order: 1 },
+        '精鋭騎馬': { type: 330, training: [110], order: 2 },
+        '赤備え':   { type: 331, training: [125], order: 3 },
+        // 器
+        '破城鎚':   { type: 333, training: [163], order: 1 },
+        '攻城櫓':   { type: 334, training: [183], order: 2 },
+        '大筒兵':   { type: 335, training: [203], order: 3 },
+        '鉄砲足軽': { type: 336, training: [173], order: 4 },
+        '騎馬鉄砲': { type: 337, training: [193], order: 5 },
+        '焙烙火矢': { type: 345, training: [183], order: 6 }
       };
-      
-      if (Env.chapter >= 11) {
-        //器
-        data['破城鎚'] = { type: 333, class: 'heiki1', attack:  3, defend:  8, speed:  8, destroy: 10, command: '器', skillType: '器', training: [123], dou:  10, require: ['器', '器'], order: 1 };
-        data['攻城櫓'] = { type: 334, class: 'heiki2', attack: 14, defend:  5, speed: 10, destroy:  7, command: '器', skillType: '器', training: [143], dou:  10, require: ['器', '器'], order: 2 };
-      }
+      var data_12s = {
+        // 器
+        '破城鎚':   { type: 333, training: [126], order: 1 },
+        '攻城櫓':   { type: 334, training: [143], order: 2 }
+      };
+      var data_13s = {
+        // 槍
+        '足軽':     { type: 321, training: [82], order: 1 },
+        '長槍足軽': { type: 322, training: [97], order: 2 },
+        '武士':     { type: 323, training: [112], order: 3 },
+        // 弓
+        '弓足軽':   { type: 325, training: [87], order: 1 },
+        '長弓兵':   { type: 326, training: [102], order: 2 },
+        '弓騎馬':   { type: 327, training: [117], order: 3 },
+        // 馬
+        '騎馬兵':   { type: 329, training: [92], order: 1 },
+        '精鋭騎馬': { type: 330, training: [107], order: 2 },
+        '赤備え':   { type: 331, training: [122], order: 3 },
+        // 器
+        '破城鎚':   { type: 333, training: [95], order: 1 },
+        '攻城櫓':   { type: 334, training: [109], order: 2 },
+        '大筒兵':   { type: 335, training: [195], order: 3 },
+        '鉄砲足軽': { type: 336, training: [170], order: 4 },
+        '騎馬鉄砲': { type: 337, training: [190], order: 5 },
+        '焙烙火矢': { type: 345, training: [180], order: 6 },
+        '穴太衆':   { type: 346, training: [200], order: 7 }
+      };
 
-      var rankRate = {
-        'SSS': 120,
-        'SS': 115,
-        'S': 110,
-        'A': 105,
-        'B': 100,
-        'C': 95,
-        'D': 90,
-        'E': 85,
-        'F': 80
-      };
+      var data;
+      if (Env.chapter == 11) {
+        data = data_11s;
+      } else if (Env.chapter == 12) {
+        data = $.extend(data_11s, data_12s);
+      } else {
+        data = data_13s;
+      }
       
       function Soldier() {
         return $.extend({}, data);
@@ -668,32 +676,9 @@
           var name = Soldier.typeKeys[type];
           return this.getByName(name);
         },
-        //. getByClass
-        getByClass: function(className) {
-          var name = this.getNameByClass(className);
-          return this.getByName(name);
-        },
-        //. getNameByType
-        getNameByType: function(type) {
-          return Soldier.typeKeys[type] || '';
-        },
-        //. getNameByClass
-        getNameByClass: function(className) {
-          className = (className.split('_') || [])[1];
-          return Soldier.classKeys[className] || '';
-        },
         //. getType
         getType: function(name) {
           return Soldier.nameKeys[name] || null;
-        },
-        //. modify
-        modify: function(name, commands) {
-          var data = Soldier.getByName(name),
-            modRate = 0;
-          if (!data) return 0;
-          modRate += rankRate[commands[data.require[0]]];
-          modRate += rankRate[commands[data.require[1]]];
-          return modRate / 2;
         }
       });
       
@@ -722,7 +707,7 @@
       },
       //. getVillageByName
       getVillageByName: function(name) {
-        var list = MetaStorage('VILLAGE').get('list') || [],
+        var list = metaStorage('VILLAGE').get('list') || [],
           i, len;
         for (i = 0, len = list.length; i < len; i++) {
           if (list[i].name != name) {
@@ -742,7 +727,7 @@
       },
       //. getVillageById
       getVillageById: function(id) {
-        var list = MetaStorage('VILLAGE').get('list') || [],
+        var list = metaStorage('VILLAGE').get('list') || [],
           i, len;
         for (i = 0, len = list.length; i < len; i++) {
           if (list[i].id != id) {
@@ -816,7 +801,7 @@
               fall: fall
             });
           });
-          MetaStorage('VILLAGE').set('list', list);
+          metaStorage('VILLAGE').set('list', list);
         });
         return list;
       },
@@ -838,7 +823,7 @@
           async: false,
           beforeSend: XRWstext
         })
-        .pipe(function(html) {
+        .then(function(html) {
           var $html = $(html),
             $table, $cell, text;
           text = $html.find('.ig_solder_commentarea').text().split('/')[1].trim();
@@ -890,7 +875,7 @@
       },
       //. getFacility
       getFacility: function(name) {
-        var data = MetaStorage('FACILITY').data,
+        var data = metaStorage('FACILITY').data,
           list = [];
         (function() {
           var facility_list, village, facility;
@@ -1055,7 +1040,7 @@
           async: false,
           beforeSend: XRWstext
         })
-        .pipe(function(html) {
+        .then(function(html) {
           var $html = $(html),
             idx = 0;
           if ($html.find('DIV[id^="TrainingBlock"]').length) {
@@ -1443,7 +1428,7 @@
                 return;
               }
               ol = Display.dialog();
-              $.Deferred().resolve().pipe(function() {
+              $.Deferred().resolve().then(function() {
                 ol.message('取引開始...');
                 var href = Util.getVillageChangeUrl(market.id, '/facility/facility.php?x=' + market.x + '&y=' + market.y);
                 return $.ajax({
@@ -1452,18 +1437,17 @@
                   beforeSend: XRWstext
                 });
               })
-              .pipe(function(html) {
+              .then(function(html) {
                 if ($(html).find('#market_form').length === 0) {
                   Display.alert('市情報が見つかりませんでした。');
                   return $.Deferred().reject();
                 }
               })
-              .pipe(function() {
+              .then(function sendQuery() {
                 if (plans.length === 0) {
                   return;
                 }
-                var self = arguments.callee,
-                  plan = plans.shift();
+                var plan = plans.shift();
                 ol.message('【' + plan.from + '】' + plan.value + ' を【' + plan.to + '】' + plan.receive + 'と取引中...');
                 $.ajax({
                   type: 'post',
@@ -1480,12 +1464,12 @@
                   },
                   beforeSend: XRWstext
                 })
-                .pipe(function() {
+                .then(function() {
                   return Util.wait(100);
                 })
-                .pipe(self);
+                .then(sendQuery);
               })
-              .pipe(function() {
+              .then(function() {
                 ol.message('取引終了');
                 if (!currentVillage) {
                   return;
@@ -1500,7 +1484,7 @@
                   beforeSend: XRWstext
                 });
               })
-              .pipe(function() {
+              .then(function() {
                 return Util.wait(1000);
               })
               .done(dfd.resolve).fail(dfd.reject).always(ol.close).always(self.close);
@@ -1526,7 +1510,7 @@
         });
         if (!Object.keys(obj).length) {
           ol.message('訓練可能な施設は見つかりませんでした。');
-          Util.wait(1000).pipe(ol.close);
+          Util.wait(1000).then(ol.close);
           return false;
         }
         return Display.getTrainingTime(0, 0, obj, ol);
@@ -1548,7 +1532,7 @@
           url: url,
           beforeSend: XRWstext
         })
-        .pipe(function(html) {
+        .then(function(html) {
           $(html).find('.ig_tilesection_innermid, .ig_tilesection_innermid2').each(function() {
             var $this = $(this),
             name, materials, soldata, $div, str;
@@ -1579,7 +1563,7 @@
       //. dialogTraining
       dialogTraining: function(ol) {
         var current = Util.getVillageCurrent(), // 選択中拠点id
-        data = MetaStorage('FACILITY').data,
+        data = metaStorage('FACILITY').data,
         pooldata = Util.getPoolSoldiers(),
         facilities = {},
         fcount = 0,
@@ -1641,7 +1625,7 @@
         
         if (fcount === 0) {
           ol.message('訓練可能な施設は見つかりませんでした。');
-          Util.wait(1000).pipe(ol.close);
+          Util.wait(1000).then(ol.close);
           return;
         }
         
@@ -2035,9 +2019,9 @@
               total = $html.find('.imc_total_material').map(function() {
                 return $(this).text().toInt();
               }).get();
-              $.Deferred().resolve().pipe(function() {
+              $.Deferred().resolve().then(function() {
                 var resource = Util.getResource();
-                result = Util.checkExchange(resource, total);
+                var result = Util.checkExchange(resource, total);
                 if (result === 0) {
                   return $.Deferred().reject();
                 } else if (result == 1) {
@@ -2048,7 +2032,7 @@
                   }
                 }
               })
-              .pipe(function() {
+              .then(function() {
                 ol = Display.dialog();
                 ol.message('一括訓練登録処理開始...');
                 plans = $html.find('.imc_plan').map(function() {
@@ -2056,12 +2040,12 @@
                   return (plan.solnum > 0) ? plan : null;
                 }).get();
               })
-              .pipe(function() {
+              .then(function sendQuery() {
                 var plan = plans.shift();
                 if (!plan) {
                   return;
                 }
-                return $.Deferred().resolve().pipe(function() {
+                return $.Deferred().resolve().then(function() {
                   if (workid == plan.id) {
                     return;
                   }
@@ -2073,7 +2057,7 @@
                     beforeSend: XRWstext
                   });
                 })
-                .pipe(function() {
+                .then(function() {
                   var href = '/facility/facility.php?x=' + plan.x + '&y=' + plan.y,
                     data = {
                       unit_id: plan.type,
@@ -2093,12 +2077,12 @@
                     beforeSend: XRWstext
                   });
                 })
-                .pipe(arguments.callee);
+                .then(sendQuery);
               })
-              .pipe(function() {
+              .then(function() {
                 ol.message('一括訓練処理終了').message('ページを更新します...');
                 var href = Util.getVillageChangeUrl(current.id, '/facility/unit_list.php');
-                Page.move(href);
+                exPage.move(href);
               });
             },
             '閉じる': function() {
@@ -2115,24 +2099,24 @@
           url: href,
           beforeSend: XRWstext
         })
-        .pipe(ol.close);
+        .then(ol.close);
       }
     });
     // Display }
 
-    //■ Page {
-    var Page = function() {
+    //■ exPage {
+    var exPage = function() {
       var path = arguments[0],
         key = '/' + path.join('/'),
-        actionList = Page.actionList,
-        extentionList = Page.extentionList,
+        actionList = exPage.actionList,
+        extentionList = exPage.extentionList,
         action;
       if (Env.loginState == -1) {
-        return new Page.noaction();
+        return new exPage.noaction();
       } else if (Env.loginState === 0) {
-        return new Page.noaction();
+        return new exPage.noaction();
       } else {
-        action = new Page.pageaction();
+        action = new exPage.pageaction();
       }
       if (actionList[key]) {
         $.extend(action, actionList[key]);
@@ -2143,8 +2127,8 @@
       return action;
     };
 
-    //. Page
-    $.extend(Page, {
+    //. exPage
+    $.extend(exPage, {
       //.. actionList
       actionList: {},
       //.. extentionList
@@ -2175,14 +2159,14 @@
       noaction: function() {}
     });
 
-    //. Page.noaction.prototype
-    $.extend(Page.noaction.prototype, {
+    //. exPage.noaction.prototype
+    $.extend(exPage.noaction.prototype, {
       //.. execute
       execute: function() {}
     });
 
-    //. Page.pageaction.prototype
-    $.extend(Page.pageaction.prototype, {
+    //. exPage.pageaction.prototype
+    $.extend(exPage.pageaction.prototype, {
       //.. execute
       execute: function() {
         this.main();
@@ -2195,14 +2179,14 @@
     });
 
     //■ /village
-    Page.registerAction('village', {
+    exPage.registerAction('village', {
       //. main
       main: function() {
         this.getFacilityList();
       },
       //. getFacilityList
       getFacilityList: function() {
-        var storage = MetaStorage('FACILITY'),
+        var storage = metaStorage('FACILITY'),
           basename = $('#basepointTop .basename').text(),
           village = Util.getVillageByName(basename),
           data, list = {};
@@ -2225,12 +2209,12 @@
         storage.data = newdata;
         storage.commit();
         
-        function addList() {
-          var $this = $(this),
+        function addList(index, elm) {
+          var $this = $(elm),
             alt = $this.attr('alt'),
             href = $this.attr('href'),
-            array, name, lv, x, y;
-          array = alt.match(/(.+) LV.(\d+)/);
+            array = alt.match(/(.+) LV.(\d+)/),
+            name, lv, x, y;
           if (!array) {
             return;
           }
@@ -2251,8 +2235,8 @@
     });
     
     //■ 実行
-    Page(Env.path).execute();
-    // Page }
+    exPage(Env.path).execute();
+    // exPage }
     
     // 一括兵士訓練のリンク埋め込み
     (function() {

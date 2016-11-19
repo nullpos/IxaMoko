@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "IxaMoko",
-  "version": "10.11.2212.20",
+  "version": "10.11.2212.3",
   "description": "戦国IXA用ツール 【拡張機能パック】",
   "background": { "scripts": ["contents/background.js"] },
   "content_scripts": [
