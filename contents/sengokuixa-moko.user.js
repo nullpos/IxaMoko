@@ -4159,8 +4159,7 @@ function MokoMain($) {
       world = location.host.match(/^y0(\d\d)/);
     if(world == null) { return; }
     world = location.host.match(/^y0(\d\d)/)[1];
-    var channel = '#' + world + 'saba',
-      baseUrl = 'http://y0'+ world +'.sengokuixa.jp';
+    var channel = '#' + world + 'saba';
 
     for(var i = 0; i < list.length; i++) {
       var date = new Date((list[i]['date'] + list[i]['time']) * 1000),
@@ -4180,9 +4179,9 @@ function MokoMain($) {
       var text = replace_valid('<!channel> ' +
         username + 'に敵襲が来ているぞ！\n' +
         '着弾時間は *' + fmtTime + '* 、あと *' + list[i]['time'] + '* 秒だ。\n' +
-        '<' + baseUrl + fromUser[1] + '|' + fromUser[0] + '> の ' +
-        '<' + baseUrl + fromMap[1]  + '|' + fromMap[0]  + '> から ' +
-        '<' + baseUrl + toMap[1]    + '|' + toMap[0]    + '> への敵襲だ。');
+        '<' + fromUser[1] + '|' + fromUser[0] + '> の ' +
+        '<' + fromMap[1]  + '|' + fromMap[0]  + '> から ' +
+        '<' + toMap[1]    + '|' + toMap[0]    + '> への敵襲だ。');
       $.ajax({
         url: options.slack_notify_mod,
         type: 'post',
@@ -22343,8 +22342,6 @@ window.addEventListener('DOMContentLoaded', function() {
     '#map_status_table td.rest_time { font-weight: bold; font-family: verdana; }' +
     //兵士編成 input select
     '#ig_deck_cardlistmenu2.s11 select { height: 1.8em; }' +
-    // カード裏スキル
-    '.ig_skill_desc { letter-spacing: -1px; }' +
     //整形
     '#ig_deck_cardlistmenu_for_ui_change select { margin-right: 6px; }' +
     'textarea, input, select { font-family: "Hiragino Kaku Gothic Pro w3", Meiryo, "ＭＳ PGothic", sans-serif; font-family: -moz-use-system-font;}' +
