@@ -1186,8 +1186,12 @@ function MokoMain($) {
             options[key] = '1';
           } else if (key == 'rank_lock_mod' || key == 'raid_alarm_display_mod') {
             options[key] = '2';
-          } else if (key == 'near_alarm') {
-            options[key] = '39';
+          } else if (key == 'near_alarm_mod') {
+            options[key] = {
+              place: '0,0',
+              type: '39',
+              alliance: ''
+            };
           } else if (key == 'punitive_type_mod') {
             options[key] = '330';
           } else if (key == 'unit_link_mod') {
@@ -1217,7 +1221,8 @@ function MokoMain($) {
             key == 'remove_bushodrama' ||
             key == 'prod_with_smalllot' ||
             key == 'punitive' ||
-            key == 'potential_regist') {
+            key == 'potential_regist' ||
+            key == 'near_alarm') {
             options[key] = false;
           } else if (key.indexOf('_mod') !== -1) {
             options[key] = '0';
@@ -1373,17 +1378,21 @@ function MokoMain($) {
                 mod = options.near_alarm;
                 setting_list += key.indexOf('_mod') != -1 ? '' : this.createList(key);
                 setting_list += '<li class="setting_sub">' +
-                  '<span>中心位置： </span><input type="text" id="near_alarm_place" value="0,0">' +
+                  '<span>中心位置： </span><input type="text" id="near_alarm_place" value="'+ options[key + '_mod']['place'] +'">' +
                   '&nbsp;<input id="near_alarm_get_place" type="button" value="本領/出城の位置を取得" />' +
                   '</li>';
                 setting_list += '<li class="setting_sub">' +
+                  '<span>同盟名： </span><input type="text" id="near_alarm_alli" value="'+ options[key + '_mod']['alliance'] +'">' +
+                  '&nbsp;<input id="near_alarm_get_alli" type="button" value="同盟名を取得" />' +
+                  '</li>';
+                setting_list += '<li class="setting_sub">' +
                   '<span>通知する種類： </span>' +
-                  '<label><input type="checkbox" class="near_alarm_type" key="1"'  + ((options[key] & 1 ) ? 'checked' : '') + '/> 本領　</label>' +
-                  '<label><input type="checkbox" class="near_alarm_type" key="2"'  + ((options[key] & 2 ) ? 'checked' : '') + '/> 所領　</label>' +
-                  '<label><input type="checkbox" class="near_alarm_type" key="4"'  + ((options[key] & 4 ) ? 'checked' : '') + '/> 出城　</label>' +
-                  '<label><input type="checkbox" class="near_alarm_type" key="8"'  + ((options[key] & 8 ) ? 'checked' : '') + '/> 陣　</label>' +
-                  '<label><input type="checkbox" class="near_alarm_type" key="16"' + ((options[key] & 16) ? 'checked' : '') + '/> 領地　</label>' +
-                  '<label><input type="checkbox" class="near_alarm_type" key="32"' + ((options[key] & 32) ? 'checked' : '') + '/> 同盟員　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="1"'  + ((options[key + '_mod']['type'] & 1 ) ? 'checked' : '') + '/> 本領　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="2"'  + ((options[key + '_mod']['type'] & 2 ) ? 'checked' : '') + '/> 所領　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="4"'  + ((options[key + '_mod']['type'] & 4 ) ? 'checked' : '') + '/> 出城　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="8"'  + ((options[key + '_mod']['type'] & 8 ) ? 'checked' : '') + '/> 陣　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="16"' + ((options[key + '_mod']['type'] & 16) ? 'checked' : '') + '/> 領地　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="32"' + ((options[key + '_mod']['type'] & 32) ? 'checked' : '') + '/> 同盟員　</label>' +
                   '</li>';
                 break;
               case 'keybind':
@@ -1818,6 +1827,36 @@ function MokoMain($) {
           str = '"' + login_data.chapter + '_' + login_data.season + '": ' + toJSON(potential_data) + ',';
         $(this).after('<br /><textarea>' + str + '</textarea>').prop('disabled', true);
       });
+      $('#near_alarm_get_place').click(function() {
+        var base;
+        if($('.sideBoxInner.basename.other_country').length == 0) {
+          base = $('.sideBoxInner.basename.my_country').find('li').eq(0);
+        } else {
+          base = $('.sideBoxInner.basename.other_country').find('li').eq(0);
+        }
+        var x = base.attr('data-village_x'), y = base.attr('data-village_y');
+        options['near_alarm_mod']['place'] = x + ',' + y;
+        $('#near_alarm_place').val(x + ',' + y);
+      });
+      $('#near_alarm_get_alli').click(function() {
+        var url = $('.gMenu07:eq(0)li a:eq(0)').attr('href');
+        $.when((function() {
+          var d = $.Deferred();
+          $.ajax({
+            type: 'get',
+            url: url,
+            cache: false,
+            success: function(html) {
+              var name = $(html).find('.alli_inputtext.mb10').eq(0).text();
+              d.resolve(name);
+            }
+          });
+          return d.promise();
+        })()).then(function(name) {
+          options['near_alarm_mod']['alliance'] = name;
+          $('#near_alarm_alli').val(name);
+        });
+      });
       
       //localStorage
       $('#clear_localStorage').click(function() {
@@ -1878,6 +1917,17 @@ function MokoMain($) {
           result |= $(this).prop('checked') ? $(this).attr('key') : 0;
         });
         options.raid_alarm_display_mod = result;
+        //near alarm
+        var place = $('#near_alarm_place').val(),
+          alli = $('#near_alarm_alli').val(), flag = 0;
+        $('.near_alarm_type').each(function(e) {
+          if($(this).prop('checked')) {
+            flag += Math.pow(2, e);
+          }
+        });
+        options['near_alarm_mod'] = {
+          place: place, type: flag + '', alliance: alli
+        };
         localStorage.setItem('ixa_moko_options', toJSON(options));
         var word;
         if ($('#open_setting').length) {
@@ -4159,7 +4209,8 @@ function MokoMain($) {
       world = location.host.match(/^y0(\d\d)/);
     if(world == null) { return; }
     world = location.host.match(/^y0(\d\d)/)[1];
-    var channel = '#' + world + 'saba';
+    var channel = '#' + world + 'saba',
+      host = location.origin;
 
     for(var i = 0; i < list.length; i++) {
       var date = new Date((list[i]['date'] + list[i]['time']) * 1000),
@@ -4179,9 +4230,9 @@ function MokoMain($) {
       var text = replace_valid('<!channel> ' +
         username + 'に敵襲が来ているぞ！\n' +
         '着弾時間は *' + fmtTime + '* 、あと *' + list[i]['time'] + '* 秒だ。\n' +
-        '<' + fromUser[1] + '|' + fromUser[0] + '> の ' +
-        '<' + fromMap[1]  + '|' + fromMap[0]  + '> から ' +
-        '<' + toMap[1]    + '|' + toMap[0]    + '> への敵襲だ。');
+        '<' + host + fromUser[1] + '|' + fromUser[0] + '> の ' +
+        '<' + host + fromMap[1]  + '|' + fromMap[0]  + '> から ' +
+        '<' + host + toMap[1]    + '|' + toMap[0]    + '> への敵襲だ。');
       $.ajax({
         url: options.slack_notify_mod,
         type: 'post',
@@ -4203,43 +4254,63 @@ function MokoMain($) {
 
   //近隣の敵襲を取得
   function nearEnemyNotify() {
-    return;
-    function getFullList(p, $data) {
+    if(!options['near_alarm']) return;
+    var dArray = [], $data;
+    function getPage(p) {
+      var d = $.Deferred();
       var url = '/war/fight_history.php?type=0&find_name=&find_x=170&find_y=170&btn_exec=true' +
-        '&find_length=' + Math.floor(Math.random() * 500 + 495) +
-        '&p=' + p;
+        '&find_length=' + Math.floor(Math.random() * 500 + 495) + '&p=' + p;
       j$.ajax({
         type: 'post',
         url: url,
         cache: false,
         success: function(html) {
-          console.log(d);
-          var $html = j$(html),
-            $ul = $html.find('div.ig_battle_pagelist ul');
-          if($ul.get(0)) {
-            $html.find('tr').each(function(e) {
-              $data.append(e);
-            });
-            var $a = $ul.find('a');
-            if($a.get($a.length - 1) && $a.get($a.length - 1).text().trim() == '>>') {
-              return getFullList(p++, $data, d);
-            } else {
-              return $data;
-            }
-          } else {
-            return $html.find('div.ig_battle_table').find('tr');
-          }
+          d.resolve($(html));
         }
       });
+      return d.promise();
     }
+    $.when(getPage(1)).then(function($html) {
+      var $ul = $html.find('.ig_battle_pagelist ul');
+      $data = $html.find('.ig_battle_table').eq(0);
+      if($ul.length) {
+        //551があるとき
+        var $a = $ul.find('a'),
+          pageList = [],
+          pageFuncList = [];
+        $a.each(function(e) {
+          pageList.push($a.eq(e).attr('href'));
+        });
+        console.log(pageList);
+        pageList = $.grep(pageList, function(el, index) {
+          return index === $.inArray(el, array);
+        });
+        for(var i = 0; i < pageList; i++) {
+          pageFuncList.push(getPage(pageList[i].slice(-1)));
+        }
+        $.when.apply($, pageFuncList).then(function($htmls) {
+          for(var i = 0; i < arguments.length; i++) {
+            if(!arguments[i][0]) { continue; }
+            arguments[i].find('.ig_battle_table').eq(0).find('tr').each(function() {
+              $data.append($(this));
+            });
+          }
+        });
+      }
+      var alarmArray = filteringNearEnemy(raidNearCreateArray($data));
+      for(var i = 0; i < alarmArray.length; i++) {
+        nearEnemyNotiication(alarmArray[i]);
+      }
+    });
     function raidNearCreateArray($html) {
       var ret = [];
       $html.find('tr').each(function(e) {
-        var $td = j$(this).find('td');
-        var type = $td.get(0).text().trim(),
-          name = $td.get(1).text().trim(),
-          alliance = $td.get(2).text().trim(),
-          place = $td.get(3).text().trim().match(/.*?\((-?\d+,-?\d+)\)$/)[1];
+        if(e == 0) return true;
+        var $td = $(this).find('td');
+        var type   = $td.eq(0).text().trim(),
+          name     = $td.eq(1).text().trim(),
+          alliance = $td.eq(2).text().trim(),
+          place    = $td.eq(3).text().trim().match(/.*?\((-?\d+,-?\d+)\)$/)[1];
         ret.push({
           type: type,
           name: name,
@@ -4249,7 +4320,36 @@ function MokoMain($) {
       });
       return ret;
     }
-    function enemyNotify(rrr) {
+    function filteringNearEnemy(data) {
+      var option = options['near_alarm_mod'],
+        ret = [],
+        center = option['place'].split(','),
+        type = 0;
+      for(var i = 0; i < data.length; i++) {
+        var place = data[i]['place'].split(','),
+          dist = Math.sqrt(Math.pow(center[0] - place[0], 2) + Math.pow(center[1] * place[1], 2));
+        if(dist >= 3000) { continue; }
+        if(data[i][name] == $('#lordName').text()) { continue; }
+        if(((option['type'] & 32) != 0 ) && data[i]['alliance'] != option['alliance']) { continue; }
+        switch(data[i]['type']) {
+          case '本領':
+            type = 1; break;
+          case '所領':
+            type = 2; break;
+          case '出城':
+            type = 4; break;
+          case '陣':
+            type = 8; break;
+          case '領地':
+            type = 16; break;
+        }
+        if((option['type'] & type) != 0 ) {
+          ret.push(data[i]);
+        }
+      }
+      return ret;
+    }
+    function nearEnemyNotiication(enemy) {
       var hostName;
       if (HOST == 'hm' && !MIXI_FLAG) {
         hostName = '(h)' + location.hostname;
@@ -4258,12 +4358,16 @@ function MokoMain($) {
       } else {
         hostName = location.hostname;
       }
-      var n = parseInt(Math.random() * 5) + 1;
+      var n = parseInt(Math.random() * 5) + 1,
+        place = enemy['place'].split(',');
       var notification = new Notification(hostName, {
         icon: '/img/lot/img_ixadog0' + n + '.png',
-        body: '殿！ 近隣に敵襲で御座います...',
+        body: '殿！ ' + enemy['name'] + 'の' + enemy['type'] + '(' + enemy['place'] + ')に敵襲で御座います...',
         tag: 'notification-enemy'
       });
+      notification.onclick = function() {
+        window.open('http://' + hostName +'/map.php?x=' + place[0] + '&y=' + place[1]);
+      }
       window.onunload = function() {
         notification.close();
       };
@@ -4349,20 +4453,16 @@ function MokoMain($) {
     var $td_bggray = elem.find('td.td_bggray');
     var org = $td_bggray.eq(0).find('span').contents();
     var des = $td_bggray.eq(1).find('span').contents();
-    console.log($a.text());
-    console.log($a.attr('href'));
-    console.log(org);
-    console.log(des);
     return {
       sortie_name: $a.text(),
       sortie_href: $a.attr('href'),
       time_arr: $td.text().match(/\d+/g),
-      org_base: org[0].innerText,
-      org_href: org[0].getAttribute('href').replace('/land', '/map'),
-      org_code: org[1].textContent.trim(),
-      des_base: des[0].innerText,
-      des_href: des[0].getAttribute('href').replace('/land', '/map'),
-      des_code: des[1].textContent.trim()
+      org_base: org[1].innerText,
+      org_href: org[1].getAttribute('href').replace('/land', '/map'),
+      org_code: org[2].textContent.trim(),
+      des_base: des[1].innerText,
+      des_href: des[1].getAttribute('href').replace('/land', '/map'),
+      des_code: des[2].textContent.trim()
     };
   }
   //統合敵襲警報 html生成
@@ -13511,13 +13611,13 @@ function MokoMain($) {
           'text-decoration': 'underline',
           'cursor': 'pointer',
           'color': 'brown'
-        }).attr('title', 'チャットへ入力').click(function() {
+        }).attr('title', 'クリップボードにコピー').click(function() {
           $('INPUT[name="unit_select[]"]').prop('checked', false);
           var time = $(this).text().split(':'),
             i_time = time[1] + ':' + time[2],
             code = $('#x_y').text().split('/').shift(),
             str = code + '到着まで ' + i_time;
-          return inputToChat(str);
+          return copyToClipboard(str);
         });
       });
     },
