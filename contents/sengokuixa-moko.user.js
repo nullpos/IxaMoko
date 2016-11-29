@@ -703,7 +703,7 @@ function MokoMain($) {
     4500: '4500',
     5000: '5000'
   },
-  CONSTANT_VALUE = [10, 30, 50, 100, 125, 250, 500, 1000, 1500, 2000];
+  CONSTANT_VALUE = [10, 30, 50, 84, 100, 125, 250, 334, 500, 1000, 1500, 2000];
 
   var HOST = location.hostname.slice(0, 4).match(/[a-z]+/)[0];
   var BATTLE = $('#sideboxBottom').find('img[src*="s5_icon_warnow"]').length;
@@ -1186,8 +1186,9 @@ function MokoMain($) {
             options[key] = '1';
           } else if (key == 'rank_lock_mod' || key == 'raid_alarm_display_mod') {
             options[key] = '2';
-          } else if (key == 'near_alarm_mod') {
+          } else if (key == 'near_alarm') {
             options[key] = {
+              tf: false,
               place: '0,0',
               type: '39',
               alliance: ''
@@ -1221,8 +1222,7 @@ function MokoMain($) {
             key == 'remove_bushodrama' ||
             key == 'prod_with_smalllot' ||
             key == 'punitive' ||
-            key == 'potential_regist' ||
-            key == 'near_alarm') {
+            key == 'potential_regist') {
             options[key] = false;
           } else if (key.indexOf('_mod') !== -1) {
             options[key] = '0';
@@ -1375,24 +1375,25 @@ function MokoMain($) {
                 setting_list += this.createList(key, '', list, mod) + '<li id="raid_sound_test" class="setting_sub" />';
                 break;
               case 'near_alarm':
-                mod = options.near_alarm;
-                setting_list += key.indexOf('_mod') != -1 ? '' : this.createList(key);
+                setting_list += '<li>' +
+                  '<label><input type="checkbox" class="ixamoko_setting" key="near_alarm" ' +
+                  (options[key]['tf'] ? 'checked' : '') + ' /> ' + this.optionsKeys[key].caption + '</label>';
                 setting_list += '<li class="setting_sub">' +
-                  '<span>中心位置： </span><input type="text" id="near_alarm_place" value="'+ options[key + '_mod']['place'] +'">' +
+                  '<span>中心位置： </span><input type="text" id="near_alarm_place" value="'+ options[key]['place'] +'">' +
                   '&nbsp;<input id="near_alarm_get_place" type="button" value="本領/出城の位置を取得" />' +
                   '</li>';
                 setting_list += '<li class="setting_sub">' +
-                  '<span>同盟名： </span><input type="text" id="near_alarm_alli" value="'+ options[key + '_mod']['alliance'] +'">' +
+                  '<span>同盟名： </span><input type="text" id="near_alarm_alli" value="'+ options[key]['alliance'] +'">' +
                   '&nbsp;<input id="near_alarm_get_alli" type="button" value="同盟名を取得" />' +
                   '</li>';
                 setting_list += '<li class="setting_sub">' +
                   '<span>通知する種類： </span>' +
-                  '<label><input type="checkbox" class="near_alarm_type" key="1"'  + ((options[key + '_mod']['type'] & 1 ) ? 'checked' : '') + '/> 本領　</label>' +
-                  '<label><input type="checkbox" class="near_alarm_type" key="2"'  + ((options[key + '_mod']['type'] & 2 ) ? 'checked' : '') + '/> 所領　</label>' +
-                  '<label><input type="checkbox" class="near_alarm_type" key="4"'  + ((options[key + '_mod']['type'] & 4 ) ? 'checked' : '') + '/> 出城　</label>' +
-                  '<label><input type="checkbox" class="near_alarm_type" key="8"'  + ((options[key + '_mod']['type'] & 8 ) ? 'checked' : '') + '/> 陣　</label>' +
-                  '<label><input type="checkbox" class="near_alarm_type" key="16"' + ((options[key + '_mod']['type'] & 16) ? 'checked' : '') + '/> 領地　</label>' +
-                  '<label><input type="checkbox" class="near_alarm_type" key="32"' + ((options[key + '_mod']['type'] & 32) ? 'checked' : '') + '/> 同盟員　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="1"'  + ((options[key]['type'] & 1 ) ? 'checked' : '') + '/> 本領　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="2"'  + ((options[key]['type'] & 2 ) ? 'checked' : '') + '/> 所領　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="4"'  + ((options[key]['type'] & 4 ) ? 'checked' : '') + '/> 出城　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="8"'  + ((options[key]['type'] & 8 ) ? 'checked' : '') + '/> 陣　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="16"' + ((options[key]['type'] & 16) ? 'checked' : '') + '/> 領地　</label>' +
+                  '<label><input type="checkbox" class="near_alarm_type" key="32"' + ((options[key]['type'] & 32) ? 'checked' : '') + '/> 同盟員　</label>' +
                   '</li>';
                 break;
               case 'keybind':
@@ -1835,7 +1836,7 @@ function MokoMain($) {
           base = $('.sideBoxInner.basename.other_country').find('li').eq(0);
         }
         var x = base.attr('data-village_x'), y = base.attr('data-village_y');
-        options['near_alarm_mod']['place'] = x + ',' + y;
+        options['near_alarm']['place'] = x + ',' + y;
         $('#near_alarm_place').val(x + ',' + y);
       });
       $('#near_alarm_get_alli').click(function() {
@@ -1853,7 +1854,7 @@ function MokoMain($) {
           });
           return d.promise();
         })()).then(function(name) {
-          options['near_alarm_mod']['alliance'] = name;
+          options['near_alarm']['alliance'] = name;
           $('#near_alarm_alli').val(name);
         });
       });
@@ -1925,8 +1926,8 @@ function MokoMain($) {
             flag += Math.pow(2, e);
           }
         });
-        options['near_alarm_mod'] = {
-          place: place, type: flag + '', alliance: alli
+        options['near_alarm'] = {
+          tf: $('input[key=near_alarm]').prop('checked'), place: place, type: flag + '', alliance: alli
         };
         localStorage.setItem('ixa_moko_options', toJSON(options));
         var word;
@@ -4254,7 +4255,7 @@ function MokoMain($) {
 
   //近隣の敵襲を取得
   function nearEnemyNotify() {
-    if(!options['near_alarm']) return;
+    if(!options['near_alarm']['tf']) return;
     var dArray = [], $data;
     function getPage(p) {
       var d = $.Deferred();
@@ -4273,6 +4274,8 @@ function MokoMain($) {
     $.when(getPage(1)).then(function($html) {
       var $ul = $html.find('.ig_battle_pagelist ul');
       $data = $html.find('.ig_battle_table').eq(0);
+      if($data.find('tr:eq(1)').text().trim() == '現在、表示できるデータがありません。' ||
+        $data.find('tr:eq(1)').text().trim() == '現在は合戦中ではありません。') return;
       if($ul.length) {
         //551があるとき
         var $a = $ul.find('a'),
@@ -4281,9 +4284,8 @@ function MokoMain($) {
         $a.each(function(e) {
           pageList.push($a.eq(e).attr('href'));
         });
-        console.log(pageList);
         pageList = $.grep(pageList, function(el, index) {
-          return index === $.inArray(el, array);
+          return index === $.inArray(el, pageList);
         });
         for(var i = 0; i < pageList; i++) {
           pageFuncList.push(getPage(pageList[i].slice(-1)));
@@ -4321,24 +4323,26 @@ function MokoMain($) {
       return ret;
     }
     function filteringNearEnemy(data) {
-      var option = options['near_alarm_mod'],
+      var option = options['near_alarm'],
         ret = [],
         center = option['place'].split(','),
         type = 0;
       for(var i = 0; i < data.length; i++) {
         var place = data[i]['place'].split(','),
-          dist = Math.sqrt(Math.pow(center[0] - place[0], 2) + Math.pow(center[1] * place[1], 2));
-        if(dist >= 3000) { continue; }
+          dist = Math.sqrt(Math.pow(center[0] - place[0], 2) + Math.pow(center[1] - place[1], 2));
+        if(dist >= 30 && data[i]['alliance'] != option['alliance']) { continue; }
         if(data[i][name] == $('#lordName').text()) { continue; }
         if(((option['type'] & 32) != 0 ) && data[i]['alliance'] != option['alliance']) { continue; }
         switch(data[i]['type']) {
-          case '本領':
+          case '城':
             type = 1; break;
-          case '所領':
+          case '村':
+          case '砦':
             type = 2; break;
           case '出城':
             type = 4; break;
           case '陣':
+          case '同盟陣':
             type = 8; break;
           case '領地':
             type = 16; break;
