@@ -1675,7 +1675,7 @@
               '</ul>' +
             '</span>' +
             '<select style="width: 65px;" class="imc_input" fname="' + key + '"><option value="0">0</option></select>' +
-            '<input style="width: 63px; display: none;" class="imc_input_val" fname="' + key + '" />' +
+            '<input type="text" style="width: 63px; display: none;" class="imc_input_val" fname="' + key + '" />' +
             '／' +
             '<select class="imc_create_count" fname="' + key + '">';
             
