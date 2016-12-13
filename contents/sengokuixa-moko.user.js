@@ -19147,8 +19147,10 @@ function MokoMain($) {
       return;
     }
 
-    $('.new_union_campaign_info').get(0).hide();
-    $('#union_submit_message').next().hide();
+    if($('.new_union_campaign_info')[0]) {
+      $('.new_union_campaign_info').get(0).hide();
+      $('#union_submit_message').next().hide();
+    }
     $('.new_login_skill_list').get(0).next().hide();
     $('.new_login_skill_list').insertAfter($('#union_submit_message'));
 
@@ -20714,7 +20716,7 @@ function MokoMain($) {
         [1, 4, 8, 13, 19, 25],
         [3, 7, 12, 18, 24, 29],
         [6, 11, 17, 23, 28, 32],
-        [10, 16, 23, 27,31, 34],
+        [10, 16, 22, 27, 31, 34],
         [15, 21, 26, 30, 33, 35]
         ];
         return login_data.chapter <= 12 ? data_11s : data_13s;
