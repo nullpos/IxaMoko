@@ -16179,6 +16179,23 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
       $(this).attr('href', '/village_change.php?village_id=' + vid);
     });
   }
+  // 国移動デフォルト設定
+  function countryMoveUtil() {
+    if (location.pathname != '/facility/country_move.php') {
+      return;
+    }
+    var ids = $('#radio_return').length != 0 ?
+      ["#radio_return",     "#select_return"]:
+      ["#radio_attack_war", "#select_attack_war"];
+
+    $(ids[0]).prop('checked', true);
+    var base = $('#lordSiteArea').text();
+    $(ids[1]).find('option').each(function() {
+      if ($(this).text() == base) {
+        $(this).attr('selected', true).change();
+      }
+    });
+  }
   // お気に入り施設機能
   function facilityFavorites() {
     if (!options.facility_favorites) {
