@@ -19326,6 +19326,18 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
         return false;
       }
     });
+    //divクリックでチェックボックスの状態変更
+    var onclick_div_check = function() {
+      var $chkbox = $(this).find('input[type="checkbox"]');
+      if($chkbox.prop('checked')) {
+        $chkbox.prop('checked', false);
+      } else {
+        $chkbox.prop('checked', true);
+      }
+    }
+    $('.common_box3').each(function(i, e) {
+      $(e).on('click', onclick_div_check);
+    });
     //プレゼントの選択受け取り
     var get_target = function(html) {
       return $(html).find('input[name="id"]');
@@ -19445,6 +19457,7 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
         .then(function(html) {
           var $common_box3 = $(html).find('div.common_box3'),
             $cardWindow = $(html).find('div[id^="cardWindow_"]');
+          $common_box3.on('click', onclick_div_check);
           if (location.pathname == '/user/present.php') {
             create_checkbox($common_box3);
           }
