@@ -13248,6 +13248,27 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
       return mapMinimap(options.map_minimap);
     });
 
+    //ミニマップ領地表示
+    $('<li>領地表示</li>').on('click', function() {
+      $('#moko_panel').hide();
+      $('#moko_panel_content').children().hide();
+
+      $.ajax({
+        type: 'get',
+        url: '/user/'
+      }).then(function(html) {
+        var $tr = $(html).find('.common_box3bottom:eq(1)').find('.common_table1:eq(-1)').find('tr.fs14');
+        $tr.each(function(i, e) {
+          var $e = $(e);
+          if($e.find('td:eq(0)').text().trim() == '領地') {
+            var coord = $e.find('td:eq(2)').text().trim().split(',');
+            var color = '#9400D3';
+            fillDraw(coord, color);
+          }
+        });
+      }, null);
+    }).appendTo($moko_map_menu);
+
     //盟主チェック
     $('<li>盟主城</li>').on('click', function() {
       $('#moko_panel').hide();
@@ -21616,6 +21637,7 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
 
   facilityStuffTextColor();     //facility/facility
   barracksLink();               //facility/unit_list
+  countryMoveUtil();//facility/country_move
 
   enemyPlacementPoint();        //facility/unit_status
   unitStatusCheck();            //facility/unit_status
