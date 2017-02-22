@@ -4228,7 +4228,7 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
   //Slack敵襲投稿
   function slack_notify(list) {
     var name = 'ixa_bot',
-      username = $('#lordName').text(),
+      username = $('#lordName').text().trim(),
       world = location.host.match(/^y0(\d\d)/);
     if(world == null) { return; }
     world = location.host.match(/^y0(\d\d)/)[1];
@@ -4389,11 +4389,12 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
       var notification = new Notification(hostName, {
         icon: '/img/lot/img_ixadog0' + n + '.png',
         body: '殿！ ' + enemy['name'] + 'の' + enemy['type'] + '(' + enemy['place'] + ')に敵襲で御座います...',
-        tag: 'notification-enemy'
+        tag: 'notification-enemy' + enemy['name']
       });
       notification.onclick = function() {
         window.open('http://' + hostName +'/map.php?x=' + place[0] + '&y=' + place[1]);
       }
+      setTimeout(notification.close, 2000);
       window.onunload = function() {
         notification.close();
       };
@@ -12668,7 +12669,7 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
         data.base_x = dest_code[0];
         data.base_y = dest_code[1];
         data.base_c = dest_code[2];
-      } else if (status == '帰還') {
+      } else if (status == '帰還' && !!affi_code) {
         data.base_x = affi_code[0];
         data.base_y = affi_code[1];
         data.base_c = affi_code[2];
@@ -20850,7 +20851,7 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
           if (string.indexOf('stronghold_ga') != -1) {
             alliance++;
           }
-          if (array[j].color && array[j].color.indexOf('ga') != -1) {
+          if (array[j].color && array[j].color.indexOf('ga') != -1 && string.indexOf('camp') == -1) {
             alliance++;
           }
           if (string.indexOf('fall_capital') != -1) {
