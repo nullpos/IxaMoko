@@ -17398,7 +17398,7 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
       if(login_data.chapter == 14) {
         var target = $tr.find('a:eq(1)');
         var code = $('<p>&#8233;</p>').text();
-        var al_name = $('dl,alliance_nickname dd').text().replace(code, '', 'g');
+        var al_name = $('dl.alliance_nickname dd').text().replace(code, '', 'g');
         var al_id = location.search.match(/id=(\d+)/)[1];
         var family = $('div.country_name').text().trim().split('　')[0];
       } else {
@@ -17759,6 +17759,9 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
   //同盟金山履歴集計機能
   function gmPointSummary() {
     if (location.pathname != '/alliance/alliance_gold_mine_history.php') {
+      return;
+    }
+    if (login_data == 14) {
       return;
     }
 
