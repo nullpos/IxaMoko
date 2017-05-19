@@ -17375,9 +17375,15 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
       return;
     }
 
-    $('<button id="store_allies_base">同盟員の拠点を記録</button>')
-      .click(createAllianceObj)
-      .insertAfter('div.alliance_member_control:eq(0)');
+    if(login_data.chapter == 14) {
+      $('<button id="store_allies_base">同盟員の拠点を記録</button>')
+        .click(createAllianceObj)
+        .insertAfter('div.alliance_member_control:eq(0)');
+      } else {
+      $('<button id="store_allies_base">同盟員の拠点を記録</button>')
+        .click(createAllianceObj)
+        .insertAfter('div.alli_family');
+      }
 
     function createAllianceObj() {
       if (!confirm('同盟員の拠点を取得します。100人規模で約1分かかります。よろしいですか?')) {
@@ -17389,11 +17395,19 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
         return;
       }
       nowLoading();
-      var target = $tr.find('a:eq(1)');
-      var code = $('<p>&#8233;</p>').text();
-      var al_name = $('dl,alliance_nickname dd').text().replace(code, '', 'g');
-      var al_id = location.search.match(/id=(\d+)/)[1];
-      var family = $('div.country_name').text().trim().split('　')[0];
+      if(login_data.chapter == 14) {
+        var target = $tr.find('a:eq(1)');
+        var code = $('<p>&#8233;</p>').text();
+        var al_name = $('dl,alliance_nickname dd').text().replace(code, '', 'g');
+        var al_id = location.search.match(/id=(\d+)/)[1];
+        var family = $('div.country_name').text().trim().split('　')[0];
+      } else {
+        var target = $tr.find('a:eq(1)');
+        var code = $('<p>&#8233;</p>').text();
+        var al_name = $('p.alli_inputtext').eq(1).text().replace(code, '', 'g');
+        var al_id = $('#alliance_form input[name="contact"]').val();
+        var family = $('div.family_name p.name').text();
+      }
       var memberData = {};
       var allianceObj = getStorage({}, 'ixamoko_areamap_data');
       if (!allianceObj[family]) {
@@ -17535,6 +17549,22 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
       getMemberData(0);
     }
   }
+  //同盟スコア計算追加2011.11.17
+  function doumeiScore() {
+    if (location.pathname != '/alliance/info.php') {
+      return;
+    }
+    if (login_data.chapter == 14) {
+      return;
+    }
+    var $tr = $('table.common_table1 tr.fs12'),
+        total = 0;
+    $tr.each(function() {
+      total += parseFloat($(this).find('td').eq(3).text().replace(/\,/g, ''));
+    });
+    total = addFigure(Math.floor(total / 500));
+    $('div.ig_decksection_top').append('<span id="doumei_score">同盟スコア：(' + total + ')</span>');
+  }
   //連続防衛表示
   function continuousDefence() {
     if (location.pathname != '/alliance/info.php') {
@@ -17570,85 +17600,161 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
     if (!options.ar_point_cmp || location.pathname != '/alliance/info.php') {
       return;
     }
-    var $tr = $('table.common_table1 tr.fs12').not('.sub'),
-    disp_apc = function() {
-      var data = getStorage({}, 'ixamoko_ar_point');
-      $('#ar_update').html('（ 更新：' + data.date + ' ）');
-      $tr.each(function() {
-        var now_ar_point = $(this).find('td.main_total').text().trim().replace(/\,/g, ''),
-            now_ar_member = $(this).find('td.profile_name a').text().trim(),
-            recorded = data.point[now_ar_member];
-        if (!recorded) {
-          recorded = now_ar_point;
+    if (login_data.chapter == 14) {
+      var $tr = $('table.common_table1 tr.fs12'),
+      disp_apc = function() {
+        var data = getStorage({}, 'ixamoko_ar_point');
+        $('#ar_update').html('（ 更新：' + data.date + ' ）');
+        for(var i = 0; i < $tr.length; i+=2) {
+          var now_ar_point = $tr.eq(i).find('td.main_total').text().trim().replace(/\,/g, ''),
+              now_ar_member = $tr.eq(i).find('td.profile_name > a').text().trim(),
+              recorded = data.point[now_ar_member];
+          console.log(now_ar_point, now_ar_member, recorded);
+          if (!recorded) {
+            recorded = now_ar_point;
+          }
+          var cmpd_value = now_ar_point - recorded;
+          if (cmpd_value > 999) {
+            cmpd_value = cmpd_value + '';
+            while (cmpd_value != (cmpd_value = cmpd_value.replace(/^(-?\d+)(\d{3})/, '$1,$2')));
+          }
+          var $td = $tr.eq(i+1).find('td.cmpd_value');
+          $td.text(cmpd_value).css('color', 'maroon');
         }
-        var cmpd_value = now_ar_point - recorded;
-        if (cmpd_value > 999) {
-          cmpd_value = cmpd_value + '';
-          while (cmpd_value != (cmpd_value = cmpd_value.replace(/^(-?\d+)(\d{3})/, '$1,$2')));
+      },
+      update_flag = function() {
+        var flag = false;
+        var data = getStorage({}, 'ixamoko_ar_point');
+        if (data.id && location.search.replace('?id=', '') == data.id) {
+          flag = true;
         }
-        var $td = $(this).find('td.cmpd_value');
-        if ($td.length) {
-          $td.remove();
-        }
-        $(this).find('td').eq(3).after('<td class="cmpd_value" style="color:maroon;">' + cmpd_value + '</td>');
-      });
-    },
-    update_flag = function() {
-      var flag = false;
-      var data = getStorage({}, 'ixamoko_ar_point');
-      if (data.id && location.search.replace('?id=', '') == data.id) {
-        flag = true;
+        $('#apc').val(flag ? '更新する' : '記録する');
+        return flag;
+      };
+
+      $('div.info_body:eq(-1)')
+        .prepend('<span id="section_inner">同盟ポイント比較<span id="ar_update">（ 更新 --/-- --:--:-- ） </span></span>');
+      $('#ar_update')
+        .after('<input type="button" id="apc" name="apc" value="" />');
+
+      var $tr_sub = $('table.common_table1 tr.sub');
+      $tr_sub.eq(0).find('th:eq(-1)')
+        .after('<th>変動値</th>');
+      $tr_sub.slice(1).find('td:eq(-1)')
+        .after('<td class="cmpd_value">-</td>');
+      $('table.common_table1 tr .main_total').attr('colspan', 3);
+      if (update_flag()) {
+        disp_apc();
       }
-      $('#apc').val(flag ? '更新する' : '記録する');
-      return flag;
-    };
 
-    $('div.info_body:eq(-1)')
-      .prepend('<span id="section_inner">同盟ポイント比較<span id="ar_update">（ 更新 --/-- --:--:-- ） </span></span>');
-    $('#ar_update')
-      .after('<input type="button" id="apc" name="apc" value="" />');
+      $('#apc').click(function() {
+        var data = getStorage({}, 'ixamoko_ar_point'),
+          str;
+        if (!update_flag()) {
+          str = '現在の同盟ポイントを記録をします。\nよろしいですか？';
+        } else {
+          str = data.date + 'のデータが消去されます。\nよろしいですか？';
+        }
+        if (!confirm(str)) {
+          return;
+        }
+        var point_array = {};
+        var $tr_table = $('table.common_table1 tr').slice(2);
+        for(var i = 0; i < $tr_table.length; i+=2) {
+          var ar_point = $tr_table.eq(i).find('td.main_total').text().trim().replace(/\,/g, ''),
+            ar_member = $tr_table.eq(i).find('td.profile_name a').text().trim();
+          point_array[ar_member] = ar_point;
+        }
+        var now = new Date();
+        var ar_date = now.getMonth() + 1 + '/' + now.getDate() + ' ' + now.getHours() + ':' +
+          (now.getMinutes() < 10 ? '0' : '') + now.getMinutes() + ':' +
+          (now.getSeconds() < 10 ? '0' : '') + now.getSeconds();
 
-    var $tr_sub = $('table.common_table1 tr.sub');
-    $tr_sub.eq(0).find('th:eq(-1)')
-      .after('<th>変動値</th>');
-    $tr_sub.slice(1).find('td:eq(-1)')
-      .after('<td class="cmpd_value">-</td>');
-    $('table.common_table1 tr .main_total').attr('colspan', 3);
+        data.name = $('dl.alliance_nickname dd').text().trim();
+        data.id = location.search.replace('?id=', '');
+        data.date = ar_date;
+        data.point = point_array;
+        localStorage.setItem('ixamoko_ar_point', toJSON(data));
+        return disp_apc();
+      });
+    } else {
+      var $tr = $('table.common_table1 tr'),
+      disp_apc = function() {
+        var data = getStorage({}, 'ixamoko_ar_point');
+        $('#ar_update').html('（ 更新：' + data.date + ' ）');
+        $tr.slice(1).each(function() {
+          var now_ar_point = $(this).find('td').eq(3).text().trim().replace(/\,/g, ''),
+              now_ar_member = $(this).find('td').eq(2).text().trim(),
+              recorded = data.point[now_ar_member];
+          if (!recorded) {
+            recorded = now_ar_point;
+          }
+          var cmpd_value = now_ar_point - recorded;
+          if (cmpd_value > 999) {
+            cmpd_value = cmpd_value + '';
+            while (cmpd_value != (cmpd_value = cmpd_value.replace(/^(-?\d+)(\d{3})/, '$1,$2')));
+          }
+          var $td = $(this).find('td.cmpd_value');
+          if ($td.length) {
+            $td.remove();
+          }
+          $(this).find('td').eq(3).after('<td class="cmpd_value" style="color:maroon;">' + cmpd_value + '</td>');
+        });
+      },
+      update_flag = function() {
+        var flag = false;
+        var data = getStorage({}, 'ixamoko_ar_point');
+        if (data.id && location.search.replace('?id=', '') == data.id) {
+          flag = true;
+        }
+        $('#apc').val(flag ? '更新する' : '記録する');
+        return flag;
+      };
 
-    if (update_flag()) {
-      disp_apc();
+      $('div.ig_decksection_top')
+        .append('<span id="section_inner">同盟ポイント比較<span id="ar_update">（ 更新 --/-- --:--:-- ） </span></span>');
+      $('#ar_update')
+        .after('<input type="button" id="apc" name="apc" value="" />');
+
+      $tr.eq(0).find('th:eq(2)')
+        .after('<th>変動値</th>');
+      $tr.slice(1).find('td:eq(3)')
+        .after('<td class="cmpd_value">-</td>');
+      if (update_flag()) {
+        disp_apc();
+      }
+
+      $('#apc').click(function() {
+        var data = getStorage({}, 'ixamoko_ar_point'),
+          str;
+        if (!update_flag()) {
+          str = '現在の同盟ポイントを記録をします。\nよろしいですか？';
+        } else {
+          str = data.date + 'のデータが消去されます。\nよろしいですか？';
+        }
+        if (!confirm(str)) {
+          return;
+        }
+        var point_array = {};
+        $tr.slice(1).each(function() {
+          var $td = $(this).find('td');
+          var ar_point = $td.eq(3).text().trim().replace(/\,/g, ''),
+            ar_member = $td.eq(2).text().trim();
+          point_array[ar_member] = ar_point;
+        });
+        var now = new Date();
+        var ar_date = now.getMonth() + 1 + '/' + now.getDate() + ' ' + now.getHours() + ':' +
+          (now.getMinutes() < 10 ? '0' : '') + now.getMinutes() + ':' +
+          (now.getSeconds() < 10 ? '0' : '') + now.getSeconds();
+
+        data.name = $('div.alliance_title').text().trim();
+        data.id = location.search.replace('?id=', '');
+        data.date = ar_date;
+        data.point = point_array;
+        localStorage.setItem('ixamoko_ar_point', toJSON(data));
+        return disp_apc();
+      });
     }
-
-    $('#apc').click(function() {
-      var data = getStorage({}, 'ixamoko_ar_point'),
-        str;
-      if (!update_flag()) {
-        str = '現在の同盟ポイントを記録をします。\nよろしいですか？';
-      } else {
-        str = data.date + 'のデータが消去されます。\nよろしいですか？';
-      }
-      if (!confirm(str)) {
-        return;
-      }
-      var point_array = {};
-      $tr.slice(1).each(function() {
-        var $td = $(this).find('td');
-        var ar_point = $td.eq(3).text().trim().replace(/\,/g, ''),
-          ar_member = $td.eq(2).text().trim();
-        point_array[ar_member] = ar_point;
-      });
-      var now = new Date();
-      var ar_date = now.getMonth() + 1 + '/' + now.getDate() + ' ' + now.getHours() + ':' +
-        (now.getMinutes() < 10 ? '0' : '') + now.getMinutes() + ':' +
-        (now.getSeconds() < 10 ? '0' : '') + now.getSeconds();
-
-      data.name = $('div.alliance_title').text().trim();
-      data.id = location.search.replace('?id=', '');
-      data.date = ar_date;
-      data.point = point_array;
-      localStorage.setItem('ixamoko_ar_point', toJSON(data));
-      return disp_apc();
-    });
   }
   //同盟金山履歴集計機能
   function gmPointSummary() {
@@ -21739,6 +21845,7 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
 
   storeAlliesBase();            //alliance/info
   alliancePointComparison();    //alliance/info
+  doumeiScore();                //alliance/info
   continuousDefence();          //alliance/info
   gmPointSummary();             //alliance/alliance_gold_mine_history.php
   leaderInformationSummary();   //alliance/list
