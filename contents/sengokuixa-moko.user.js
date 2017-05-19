@@ -17570,28 +17570,49 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
     if (location.pathname != '/alliance/info.php') {
       return;
     }
-    var $tr = $('table.common_table1 tr.fs12');
-    $('<button id="show_continuous_defence">連続防衛数を表示</button>')
-      .click(showContinuousDefence)
-      .insertAfter('div.alli_family');
+    if(login_data.chapter == 14) {
+      $('<button id="show_continuous_defence">連続防衛数を表示</button>')
+        .click(showContinuousDefence)
+        .insertBefore('div.alliance_member_control:eq(-1)');
+    } else {
+      $('<button id="show_continuous_defence">連続防衛数を表示</button>')
+        .click(showContinuousDefence)
+        .insertAfter('div.alli_family');
+    }
 
     function showContinuousDefence() {
       nowLoading();
       var def_ar = [];
       $('table.common_table1').find('tr').eq(0).find('th').eq(-2).text('連続防衛');
-      $tr.each(function() {
-        var $this = $(this);
-        var url = window.location.origin +
-          $this.find('td').eq(2).find('a').attr('href');
-        def_ar.push($.ajax({
-          type: 'get',
-          url: url
-        })
-        .then(function(html) {
-          var def = $(html).find('.common_table1.center').find('tr').eq(1).find('td').eq(4).text().trim();
-          $this.find('td').eq(-2).text(def.replace('連続防衛', '').replace('合戦', ''));
-        }, null));
-      });
+      if (login_data.chapter == 14) {
+        var $tr = $('table.common_table1 tr.fs12').not('.sub');
+        $tr.each(function() {
+          var $this = $(this);
+          var url = $this.find('td.profile_name a').attr('href');
+          def_ar.push($.ajax({
+            type: 'get',
+            url: url
+          })
+          .then(function(html) {
+            var def = $(html).find('.common_table1.center tr:eq(1) td:eq(4)').text().trim();
+            $this.find('td').eq(-2).text(def.replace('連続防衛', '').replace('合戦', ''));
+          }, null));
+        });
+      } else {
+        var $tr = $('table.common_table1 tr.fs12');
+        $tr.each(function() {
+          var $this = $(this);
+          var url = $this.find('td').eq(2).find('a').attr('href');
+          def_ar.push($.ajax({
+            type: 'get',
+            url: url
+          })
+          .then(function(html) {
+            var def = $(html).find('.common_table1.center').find('tr').eq(1).find('td').eq(4).text().trim();
+            $this.find('td').eq(-2).text(def.replace('連続防衛', '').replace('合戦', ''));
+          }, null));
+        });
+      }
       $.when.apply($, def_ar).then(function() { nowLoading(true); });
     }
   }
@@ -17609,7 +17630,6 @@ var SKILL_CANDIDATE = {"攻：槍隊突撃":["攻：槍隊突撃","防：槍隊�
           var now_ar_point = $tr.eq(i).find('td.main_total').text().trim().replace(/\,/g, ''),
               now_ar_member = $tr.eq(i).find('td.profile_name > a').text().trim(),
               recorded = data.point[now_ar_member];
-          console.log(now_ar_point, now_ar_member, recorded);
           if (!recorded) {
             recorded = now_ar_point;
           }
