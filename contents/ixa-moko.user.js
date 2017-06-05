@@ -18930,7 +18930,7 @@ function MokoMain($) {
       return;
     }
     var possible_num = shirokuji_possible_num($('#ig_boxInner')),
-      capa = Math.min(10, possible_num);
+      capa = Math.min(12, possible_num);
     if (capa === 0) {
       return;
     }
@@ -19355,7 +19355,44 @@ function MokoMain($) {
       nowLoading();
       Info.title('プレゼントを受け取り中...');
       return transmission (array);
-    };
+    },
+    card_summary = function() {
+      var summary = {};
+      $('div[id^="cardWindow_"]').each(function(i,e) {
+        var $para = $(e).find('div.parameta_area'),
+          name = $para.find('span.ig_card_name').text(),
+          rank = ($para.find('span.level_star img').attr('width').slice(0, -1) * 1) / 20;
+        if(!summary[name]) {
+          summary[name] = {};
+        }
+        if(!summary[name][rank]){
+          summary[name][rank] = 1;
+        } else {
+          summary[name][rank]++;
+        }
+      });
+      var html = '' +
+      '<div class="common_box3">' +
+        '<div class="common_box3in">' +
+          '<div class="common_box3bottom">' +
+            '<table class="common_table1 center">' +
+              '<tbody></tbody></table></div></div></div>',
+        $html = $(html),
+        $tbody = $html.find('tbody:eq(0)');
+      $tbody.append('<tr><th>武将名</th><th>ランク</th><th>枚数</th></tr>');
+      for(var name in summary) {
+        for(var rank in summary[name]) {
+          var num = summary[name][rank],
+            tr = '<tr class="fs12">' +
+              '<td>' + name + '</td>' +
+              '<td>★' + rank + '</td>' +
+              '<td>' + num + '</td>' +
+              '</tr>';
+          $tbody.append($(tr));
+        }
+      }
+      $html.insertAfter($('#ig_deckheadmenubox'));
+    }
 
     var $html = $('div.ig_decksection_mid'),
       $input = get_target($html),
@@ -19436,6 +19473,12 @@ function MokoMain($) {
       return;
     }
     $(window).scroll(adding_page);
+
+    // 表示範囲のカード集計
+    $('<input />').attr({ type: 'button', id: 'card_summary',  value: 'ページ内のカードを集計' })
+      .css({ 'float': 'right', 'margin-right': '4px' })
+      .insertBefore('#presentAllForm')
+      .click(card_summary);
   }
 
 // ^ プレゼント
