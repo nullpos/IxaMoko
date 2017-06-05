@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.0.2.0
+// @version      14.0.3.0
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.0.2.0";
+  var VERSION_NAME = "ver 14.0.3.0";
 
 // === Plugin ===
 
@@ -4468,7 +4468,7 @@ function MokoMain($) {
   }
   // 敵襲情報の取得
   function getRaidData(elem) {
-    var $a = elem.find('h3:eq(0)').find('a').eq(0);
+    var $a = elem.find('a').eq(0);
     var $td = elem.find('table.table_fightlist').find('td:eq(1)');
     var $td_bggray = elem.find('td.td_bggray');
     var org = $td_bggray.eq(0).find('span').contents();
@@ -10163,7 +10163,7 @@ function MokoMain($) {
     var target = $('#frame_00_top');
     var html = '<ul id="deck_navi"><li class="dummy dfirst" />';
 
-    var num = login_data.chapter >= 13 ? 7 : login_data.chapter == 12 ? 6 : 5;
+    var num = login_data.chapter >= 13 ? 7 : 6;
     var i = 0, text;
 
     if (login_data.chapter >= 13) {
@@ -10240,7 +10240,7 @@ function MokoMain($) {
         html += '<a href="/card/deck.php?ano=' + ano + '&select_card_group=' + GROUPS_MENU[i][0] + '&select_filter_num=0' + '">' + GROUPS_MENU[i][1] + '</a>';
       }
       html += '</div>';
-      html = $(html).width(login_data.chapter >= 13 ? 85 : login_data.chapter == 12 ? 98 : 108);
+      html = $(html).width(login_data.chapter >= 13 ? 85 : 98);
       $(this).children('div').remove();
       $(this).append(html);
       $(this).children('div').slideDown('fast');
@@ -10254,11 +10254,11 @@ function MokoMain($) {
       e.preventDefault();
       var list = (function() {
         var arr = [ 'デッキ1', 'デッキ2', 'デッキ3', 'デッキ4', 'デッキ5', '加勢専用', '加勢専用', '強襲専用' ];
-        login_data.chapter != 13 ? arr[6] = '強襲専用' : void 0;
+        login_data.chapter >= 13 ? arr[6] = '強襲専用' : void 0;
         return arr;
       })();
       var grp = $(this).attr('onClick').match(/\d+/);
-      var deck_num = login_data.chapter >= 13 ? 8 : login_data.chapter == 12 ? 7 : 6;
+      var deck_num = login_data.chapter >= 13 ? 8 : 7;
       var html = '<div class="menu_list">';
       for (var i = 0; i < deck_num; i++) {
         html += '<a href="/card/deck.php?ano=' + i + '&select_card_group=' +
@@ -11572,7 +11572,7 @@ function MokoMain($) {
       var $input = $this.find('input[id^="key_str_array_"]'),
           hp = $input.prev('table').find('td').eq(1).text(),
           rare = $this.find('div[class^="icon_rarity_"]').attr('class').split('_')[2];
-      var limit = login_data.chapter >= 13 ? 8 : login_data.chapter == 12 ? 7 : 6;
+      var limit = login_data.chapter >= 13 ? 8 : 7;
       if (hp != '100/100' || rare == 'miyabi' || rare == 'shuku' || rare == 'bake') {
         return moko_alert('配置不可能なカードです');
       }
@@ -14170,7 +14170,7 @@ function MokoMain($) {
           '</tr>' +
         '</thead>' +
       '</tbody>';
-    var deck_num = login_data.chapter >= 13 ? 8 : login_data.chapter == 12 ? 7 : 6;
+    var deck_num = login_data.chapter >= 13 ? 8 : 7;
     var str;
     for (var i = 0; i < deck_num; i++) {
       if (login_data.chapter >= 13) {
@@ -14319,7 +14319,7 @@ function MokoMain($) {
     }
     //var $sidebox = $('div.sideBox:has(table.stateTable)');
     $('#sideboxTop table.stateTable').after('<div id="mt_butai" />');
-    var deck_num = login_data.chapter >=13 ? 8 : login_data.chapter == 12 ? 7 : 6;
+    var deck_num = login_data.chapter >=13 ? 8 : 7;
     var tmp = '';
     for (var i = 0; i < deck_num; i++) {
       tmp += '' +
@@ -18029,6 +18029,9 @@ function MokoMain($) {
       $('head').append('<link rel="stylesheet" type="text/css" href="/css/battle_report_with_decoration_enable.css">' +
         '<link rel="stylesheet" type="text/css" href="/css/ig_card2.css">');
     }
+    if (login_data.chapter >= 14) {
+      $('head').append('<link rel="stylesheet" type="text/css" href="/css/report_rows_separate_by_side_enable.css">');
+    }
     var $div = $('<div id="scroll_panel" />').css({
       'overflow-y': 'scroll',
       'overflow-x': 'hidden',
@@ -18155,27 +18158,23 @@ function MokoMain($) {
       }).then(function(html) {
         var array, key, value, i ,len;
         var img = [];
-        if (login_data.chapter < 12) {
+        if (login_data.chapter <= 13) {
           array = (function() {
-            var a = [], b, s;
-            b = $(html).find('#ig_battle_reportinfo')[0].innerText.split('\n');
-            for (i = 0, len = b.length; i < len; i++){
-              s = b[i].split('を発動させ')[0].replace(/\s/g, '');
-              if (!s) { continue; }
-              a.push(s);
-            }
+            var a = [];
+            $(html).find('table.battle_box_info_table tr').slice(1).each(function(idx) {
+              a.push($(this).find('td').eq(1).text().split('を発動させ')[0].trim());
+              img.push($(this).find('img')[0].outerHTML);
+            });
             return a;
           }());
         } else {
+          // 14章～
           array = (function() {
             var a = [];
             $(html).find('table.battle_box_info_table tr').each(function(idx) {
               if ($(this).find('th.attack').length) {
                 return;
               }
-
-              // 14章対応: {
-
               if ($(this).text().indexOf('発動武将スキル') != -1) {
                 return;
               }
@@ -18183,11 +18182,18 @@ function MokoMain($) {
                 // 部隊スキルは取得しない
                 return false;
               }
-
-              // }
-
-              a.push($(this).find('td').eq(1).text().split('を発動させ')[0].trim());
-              img.push($(this).find('img')[0].outerHTML);
+              var str_idx;
+              var img_idx;
+              $(this).find('td').each(function() {
+                if ($(this).text().indexOf(data.author) != -1) {
+                  str_idx = $(this).index();
+                  img_idx = str_idx === 1 ? 0 : 3;
+                }
+              });
+              if (str_idx) {
+                a.push($(this).find('td').eq(str_idx).text().split('を発動させ')[0].trim());
+                img.push($(this).find('td').eq(img_idx).children('img').prop('outerHTML'));
+              }
             });
             return a;
           }());
@@ -18199,9 +18205,6 @@ function MokoMain($) {
           }
           // 同名カードの識別対応 ※12章から
           card_num = $(img[i]).attr('src') ? $(img[i]).attr('src').match(/\d+/g)[2] : '0000';
-          // ** 2017/6/1 修正 **
-          // key = card_num + '/' + array[i].replace(/^[\s\S]*】の【/, '').replace(/】が、【[\s\S]*$/, '');
-          // value = array[i].replace(/^[\s\S]*】が、【/, '').replace(/】/, '');
           key = card_num + '/' + array[i].replace(/^[\s\S]*】の【/, '').split('】が、')[0];
           value = array[i].match(/【.+?\】/g)[2];
           if (!data.summary[key]) {
@@ -18584,9 +18587,7 @@ function MokoMain($) {
         return;
       }
 
-      var target = login_data.chapter < 12 ?
-        $('table.commontable_defense p.pcornpc') :
-        $('div.battle_box_block.defence table.battle_box_info_table');
+      var target = $('div.battle_box_block.defence table.battle_box_info_table');
 
       $('<input />').attr({'type': 'button', 'value': 'この空き地の戦力を登録'})
       .insertAfter(target)
@@ -19273,6 +19274,20 @@ function MokoMain($) {
         return false;
       }
     });
+
+    //divクリックでチェックボックスの状態変更
+    var onclick_div_check = function() {
+      var $chkbox = $(this).find('input[type="checkbox"]');
+      if($chkbox.prop('checked')) {
+        $chkbox.prop('checked', false);
+      } else {
+        $chkbox.prop('checked', true);
+      }
+    }
+    $('.common_box3').each(function(i, e) {
+      $(e).on('click', onclick_div_check);
+    });
+
     //プレゼントの選択受け取り
     var get_target = function(html) {
       return $(html).find('input[name="id"]');
@@ -19392,6 +19407,7 @@ function MokoMain($) {
         .then(function(html) {
           var $common_box3 = $(html).find('div.common_box3'),
             $cardWindow = $(html).find('div[id^="cardWindow_"]');
+          $common_box3.on('click', onclick_div_check);
           if (location.pathname == '/user/present.php') {
             create_checkbox($common_box3);
           }
