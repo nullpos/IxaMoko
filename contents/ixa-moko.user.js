@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.0.3.0
+// @version      14.0.4.0
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.0.3.0";
+  var VERSION_NAME = "ver 14.0.4.0";
 
 // === Plugin ===
 
@@ -9631,6 +9631,18 @@ function MokoMain($) {
       }
     });
   }
+  // スキル強化時Lv1のスキルのチェックを外す
+  function levelupWithoutOne() {
+    if (location.pathname != '/union/levelup.php') {
+      return;
+    }
+    $('table.skill_list_table.powerup tr').each(function(i, e) {
+      var $e = $(e);
+      if($e.find('td:eq(0)').text().slice(-1) == "1") {
+        $e.find('input:eq(0)').click();
+      }
+    });
+  }
   // 出品補助機能を使用する
   function tradeAuxiliary() {
     if (!options.trade_auxiliary) {
@@ -19141,7 +19153,7 @@ function MokoMain($) {
       return;
     }
 
-    var max_num = union_type == 1 ? 10 : 5;
+    var max_num = union_type == 1 ? 12 : 5;
 
     $.ajax({
       type: 'post',
@@ -19171,7 +19183,7 @@ function MokoMain($) {
           '</a>' +
         '</div>';
 
-      $('div.common_box3bottom:first').append(tmpl);
+      $(tmpl).insertBefore('div.common_box3bottom:first table:first');
 
       if (new_send_num > 1) {
         $('#run_send_plural').css('visibility', 'visible');
@@ -21605,6 +21617,7 @@ function MokoMain($) {
   delListCheck();               //card_delete
 
   levelupCheck();               //union
+  levelupWithoutOne();          //union/levelup
   unionCardCheck();             //union
   unionGroupImgView();          //union
   tradeAuxiliary();             //card/trade
