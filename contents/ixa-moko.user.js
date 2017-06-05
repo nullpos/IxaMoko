@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.0.4.0
+// @version      14.0.6.0
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.0.4.0";
+  var VERSION_NAME = "ver 14.0.6.0";
 
 // === Plugin ===
 
@@ -18936,7 +18936,7 @@ function MokoMain($) {
       return updateSendNum(new_send_num);
     });
   }
-  // 白くじ10枚引き
+  // 白くじ12枚引き
   function senkujiWhiteLottery() {
     if (location.pathname != '/senkuji/senkuji.php') {
       return;
@@ -19395,16 +19395,38 @@ function MokoMain($) {
       for(var name in summary) {
         for(var rank in summary[name]) {
           var num = summary[name][rank],
-            tr = '<tr class="fs12">' +
+            tr = '<tr class="fs12" title="クリックで選択">' +
               '<td>' + name + '</td>' +
               '<td>★' + rank + '</td>' +
               '<td>' + num + '</td>' +
-              '</tr>';
-          $tbody.append($(tr));
+              '</tr>',
+            $tr = $(tr).hover(function(){$(this).toggleClass('now');}, function(){$(this).toggleClass('now');})
+              .on('click', function(){
+                var name_rank = $(this).find('td:eq(0)').text() + ' ' + $(this).find('td:eq(1)').text();
+                $('div.common_box3').each(function(i, e) {
+                  var $e = $(e);
+                  if($e.find('td a.thickbox span:eq(0)').text() == name_rank) {
+                    var $chkbox = $e.find('td label input[type="checkbox"]:eq(0)');
+                    if(!$chkbox.prop('checked')) {
+                      $chkbox.prop('checked', true);
+                    }
+                  }
+                });
+              });
+          $tbody.append($tr);
         }
       }
       $html.insertAfter($('#ig_deckheadmenubox'));
-    }
+    },
+    add_rank = function($boxes, $cwindows) {
+      $boxes.each(function(i,e) {
+        var $box = $(e),
+          $cwindow = $cwindows.eq(i),
+          rank = ($cwindow.find('div.parameta_area span.level_star img').attr('width').slice(0, -1) * 1) / 20,
+          name = $box.find('td a.thickbox span').text();
+        $box.find('td a.thickbox span').text(name + ' ★' + rank);
+      });
+    };
 
     var $html = $('div.ig_decksection_mid'),
       $input = get_target($html),
@@ -19456,6 +19478,7 @@ function MokoMain($) {
         .then(function(html) {
           var $common_box3 = $(html).find('div.common_box3'),
             $cardWindow = $(html).find('div[id^="cardWindow_"]');
+          add_rank($common_box3, $cardWindow);
           $common_box3.on('click', onclick_div_check);
           if (location.pathname == '/user/present.php') {
             create_checkbox($common_box3);
@@ -19491,6 +19514,9 @@ function MokoMain($) {
       .css({ 'float': 'right', 'margin-right': '4px' })
       .insertBefore('#presentAllForm')
       .click(card_summary);
+
+    // ランクを表示
+    add_rank($('div.ig_decksection_mid div.common_box3'), $('div[id^="cardWindow_"]'));
   }
 
 // ^ プレゼント
