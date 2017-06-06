@@ -18870,12 +18870,23 @@ function MokoMain($) {
   function whitePrice() {
     return 200;
   }
+  function tenderNum() {
+    var deal_page = $.ajax({
+      type: 'get',
+      url: location.origin + '/card/trade.php',
+      beforeSend: xrwStatusText,
+      async: false
+    }).responseText,
+    group = $(deal_page).find('div.t_cardstock.rightF').text().match(/入札：(\d+)件/),
+    tender_num = group[1];
+    return tender_num*1;
+  }
   // 白くじ引き可能数の計算
   function shirokuji_possible_num(html) {
     var $html = $(html),
     source = $html.find('p.l_cardstock').text().match(/\d+/g),
     max = parseInt(source[1]),
-    now = parseInt(source[0]),
+    now = parseInt(source[0]) + tenderNum(),
     card_limit = max - now,
     coin = parseInt($html.find('span.money_b').text()),
     coin_limit = Math.floor(coin / whitePrice());
@@ -19167,7 +19178,8 @@ function MokoMain($) {
       imgSrc = '/img/lot/lot_icon/img_lot_white_icon.jpg',
       token =  $html.find('input[name="senkuji_token"]').val(),
       set_material = $('div.common_box1bottom').find('a.thickbox'),
-      new_send_num = send_num - set_material.length;
+      set_material_remain = max_num - set_material.length,
+      new_send_num = set_material_remain <= send_num ? set_material_remain : (send_num - set_material.length);
 
       $('#moko_senkuji_container').remove();
 
