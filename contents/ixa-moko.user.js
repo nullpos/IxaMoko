@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.0.6.0
+// @version      14.1.0.0
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.0.6.0";
+  var VERSION_NAME = "ver 14.1.0.0";
 
 // === Plugin ===
 
@@ -19523,6 +19523,258 @@ function MokoMain($) {
 
 // === その他 ===
 
+  // まとめて隠し玉
+  function matomeKakushi() {
+    function executeKakushi() {
+      var externalFilePath = (function() {
+        var href = $('LINK[type="image/x-icon"][href^="http://cache"]').attr('href') || '';
+        href = href.match(/^.+(?=\/)/) || '';
+        return href;
+      })();
+
+      var getCardList = function() {
+        return $.ajax('/card/deck.php', {
+          beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+          },
+          async: false
+        }).responseJSON.card_data;
+      },
+      createKakushiList = function(list) {
+        var nameList = [ '小姓の応援', '小姓の隠し玉', '高橋Ｐ', 'ルルハ', 'すみれ' ];
+        return list.filter(function(e) {
+          for(var i = 0; i < nameList.length; i++) {
+            if(e.name == nameList[i] && e.protect_flg != "1") {
+              return e;
+            }
+          }
+        });
+      },
+      createLevelupCardList = function(list) {
+        return list.filter(function(e) {
+          if(e.rank*1 <= 5 && e.level*1 < 20 && e.rarity*1 <= 5) {
+            return e;
+          }
+        });
+      },
+      getIconName = function(card) {
+        var icon;
+        switch(card.rarity) {
+          case '1': icon = 'icon_ten.png'; break;
+          case '2': icon = 'icon_goku.png'; break;
+          case '3': icon = 'icon_toku.png'; break;
+          case '4': icon = 'icon_jou.png'; break;
+          case '5': icon = 'icon_jo.png'; break;
+          case '6':
+            if(card.cost != 0) {
+              icon = 'icon_bake.png';
+            } else {
+              icon = 'icon_warabe.png';
+            }
+            break;
+          default: return true;
+        }
+        return icon;
+      },
+      createSkillNames = function(card) {
+        var array = [];
+        for(var i = 0; i < card.skill.length; i++) {
+          array.push(card.skill[i].skill_name);
+        }
+        return array.join('</br>');
+      },
+      sortRankLevel = function(list) {
+        return list.sort(function(a, b) {
+          var a_rank = a.rank*1, b_rank = b.rank*1,
+            a_level = a.level*1, b_level = b.level*1;
+          if (a_rank < b_rank) return -1;
+          if (a_rank > b_rank) return 1;
+          if (a_level < b_level) return -1;
+          if (a_level > b_level) return 1;
+          return 0;
+        });
+      },
+      create$Tr = function(card) {
+        var tr = '' +
+        '<tr class="fs12">' +
+          '<td><input name="page_card_arr[]" type="checkbox" value="' + card.card_id + '"></td>' +
+          '<td class="left"><img class="middle mr5" src="' + externalFilePath + '/img/card/icon/' + getIconName(card) + '">' + card.name +'</td>' +
+          '<td>' + '★'.repeat( card.rank ) + '☆'.repeat( 5 - card.rank ) + '</br>' + card.level + '</td>' +
+          '<td>' + card.cost + '</td>' +
+          '<td>' + createSkillNames(card) + '</td>' +
+          '<td>' + card.attack + '</td>' +
+          '<td>' + card.defense + '</td>' +
+          '<td>' + card.intellect + '</td>' +
+          '<td>' + card.lead_unit + '</td>' +
+        '</tr>';
+        var $tr = $(tr).on('click', function(e) {
+          if(e.target.localName == 'input') return;
+          var $input = $(e.currentTarget).find('td input[name="page_card_arr[]"]');
+          $input.prop("checked", !$input.prop("checked"));
+        }).hover(function(e){$(e.currentTarget).toggleClass("now")}, function(e){$(e.currentTarget).toggleClass("now")});
+        return $tr;
+      },
+      create$Dialog = function() {
+        var html = '' +
+        '<div id="kakushi_wrapper">' +
+          '<div id="kakushi_dialog">' +
+            '<div id="kakushi_head">' +
+              '<span>まとめて隠し玉</span>' +
+            '</div>' +
+            '<div id="kakushi_inner"></div>' +
+            '<div id="kakushi_exec"></div>' +
+          '</div>' +
+        '</div>';
+        return $(html);
+      },
+      create$Table = function(list) {
+        var contents = '' +
+        '<table class="common_table1 center mt10">' +
+          '<tbody>' +
+            '<tr>' +
+              '<th>選択</th><th>名前</th><th>ランク/LV</th><th>コスト</th><th>スキル</th>' +
+              '<th>攻撃</th><th>防御</th><th>兵法</th><th>指揮力</th>' +
+            '</tr>' +
+          '</tbody>' +
+        '</table>';
+        var $table = $(contents),
+          $tbody = $table.find('tbody:eq(0)');
+        for(var i = 0; i < list.length; i++) {
+          var $tr = create$Tr(list[i]);
+          $tbody.append($tr);
+        }
+        return $table;
+      },
+      addButtons = function($dialog) {
+        var exec = $('<button>').text('実行').on('click', execute),
+          cancel = $('<button>').text('キャンセル').on('click', function() {
+            $('#kakushi_wrapper').remove();
+          });
+        $dialog.find('#kakushi_exec').append(exec).append(cancel);
+      },
+      showDialog = function() {
+        var $dialog = create$Dialog(),
+          list = getCardList(),
+          kakushiList = sortRankLevel(createKakushiList(list)),
+          bushoList = sortRankLevel(createLevelupCardList(list)),
+          $kakushiTable = create$Table(kakushiList).attr('name', 'kakushi'),
+          $bushoTable = create$Table(bushoList).attr('name', 'busho');
+        $dialog.find('#kakushi_inner').append($kakushiTable).append($bushoTable);
+        addButtons($dialog);
+        $('body').append($dialog);
+      },
+      getAdID = function(kakushi, busho) {
+        var postData = {
+          base_cid        : kakushi*1,
+          added_cid       : busho*1,
+          add_flg         : '',
+          new_cid         : '',
+          remove_cid      : '',
+          p               : '',
+          selected_cid    : '',
+          deck_mode       : '',
+          union_type      : '5',
+          btn_change_flg  : ''
+        };
+        var html = $.ajax(location.origin + '/union/special_confirm.php', {
+          async: false,
+          method: 'POST',
+          data: postData
+        }).responseText;
+        return $(html).find('form input[name="ad_id"]').val() * 1;
+      };
+
+      function execute(e) {
+        var kakushi = [], busho = [];
+        $('#kakushi_inner table[name="kakushi"] :checked').each(function() {
+          kakushi.push( $(this).val() );
+        });
+        $('#kakushi_inner table[name="busho"] :checked').each(function() {
+          busho.push( $(this).val() );
+        });
+        if(kakushi.length == 0 || busho.length == 0) {
+          moko_alert('武将が選択されていません');
+          return;
+        }
+
+        var ad_id = getAdID(kakushi[0], busho[0]);
+        $.Deferred().resolve()
+        .then(function() {
+          $('#kakushi_inner').html('');
+        })
+        .then(post);
+
+        function post() {
+          // カード情報を読み込んで存在確認
+          $.ajax(location.origin + '/card/deck.php', {
+            beforeSend: function(xhr) {
+              xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            }
+          })
+          .then( function( responseJson ) {
+            var card_data = responseJson.card_data;
+
+            var remain_kakushi = card_data.filter(function(card) {
+              if(kakushi.indexOf(card.card_id) != -1) {
+                return card;
+              }
+            }).map(function(card) { return card.card_id; });
+
+            var remain_busho = card_data.filter(function(card) {
+              if(busho.indexOf(card.card_id) != -1 && card.level != 20) {
+                return card;
+              }
+            }).map(function(card) { return card.card_id; });
+
+            return [ remain_kakushi, remain_busho ];
+          })
+          .then( function( list ) {
+            [ kakushi, busho ] = list;
+            if( kakushi.length == 0 || busho.length == 0 ) {
+              playSound(SOUND.notice);
+              return;
+            }
+
+            var postData = {
+              base_cid    : kakushi[0]*1,
+              added_cid   : busho[0]*1,
+              'material_cid[]': [],
+              use_cp_flg  : 0,
+              union_type  : 5,
+              exec_btn    : 1,
+              sub_id      : '',
+              ad_id       : ad_id,
+            };
+
+            for( var i = 1; i < kakushi.length && i < 5; i++ ) {
+              postData['material_cid[]'].push( kakushi[i]*1 );
+            }
+
+            $.ajax(location.origin + '/union/special_execute.php', {
+              data: postData,
+              method: 'POST',
+              beforeSend: function( xhr ) { xhr.setRequestHeader('X-Requested-With', ' ')}
+            })
+            .then( function( html ) {
+              var msg = $(html).find('.common_box3bottom P:first').text();
+              if(msg == '武将カードのランクを1つ上昇させます。') {
+                moko_alert('実行できませんでした。');
+              } else {
+                $('#kakushi_inner').append('<span>' + msg +'</span></br>');
+                post();
+              }
+            });
+          });
+        }
+      }
+      showDialog();
+    }
+
+    $('<div><li><a href="javascript:void(0);">【まとめて隠し玉】</a></li></div>')
+        .css('font-color', 'white').on('click', 'a', executeKakushi)
+        .prependTo('li.gMenu01 > ul');
+  }
+
   //簡易配置
   function unionSetLeader(list, base_id) {
     var select_card_group = $('#select_card_group').val();
@@ -21734,6 +21986,7 @@ function MokoMain($) {
   preparationPunitive();        //all     簡易配置討伐
   mapButaiStatus();             //all     部隊行動状況
   raidSystem();                 //all     総合敵襲警報
+  matomeKakushi();              //all     まとめて隠し玉
 
 }
 // ^ Moko.main
@@ -22538,6 +22791,13 @@ window.addEventListener('DOMContentLoaded', function() {
     '#map_status_table td.rest_time { font-weight: bold; font-family: verdana; }' +
     //兵士編成 input select
     '#ig_deck_cardlistmenu2.s11 select { height: 1.8em; }' +
+    //まとめて隠し玉
+    '#kakushi_wrapper { position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; z-index: 2000; }' +
+    '#kakushi_dialog { position: relative; margin: auto; width: 80%; height: 90%; background-color: #f1f0dc; border: solid 2px #666; overflow: hidden; top: 48px; }' +
+    '#kakushi_head { background-color: #ccc; padding: 8px; font-weight: bold; }' +
+    '#kakushi_inner { margin: 8px 0px 8px 8px; padding-right: 8px; font-size: 12px; height: 85%; overflow: auto; }' +
+    '#kakushi_exec { margin: 5px; padding: 5px 10px; border-top: solid 1px black; text-align: right; }' +
+    '#kakushi_exec button { cursor: pointer; margin: 0 4px; width: 100px; height: 30px; }' +
     //整形
     '#ig_deck_cardlistmenu_for_ui_change select { margin-right: 6px; }' +
     'textarea, input, select { font-family: "Hiragino Kaku Gothic Pro w3", Meiryo, "ＭＳ PGothic", sans-serif; font-family: -moz-use-system-font;}' +
