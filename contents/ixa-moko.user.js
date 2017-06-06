@@ -19743,8 +19743,10 @@ function MokoMain($) {
               union_type  : 5,
               exec_btn    : 1,
               sub_id      : '',
-              ad_id       : ad_id,
             };
+            if(!!ad_id) {
+              postData['ad_id'] = ad_id;
+            }
 
             for( var i = 1; i < kakushi.length && i < 5; i++ ) {
               postData['material_cid[]'].push( kakushi[i]*1 );
