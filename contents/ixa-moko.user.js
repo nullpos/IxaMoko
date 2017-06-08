@@ -1977,9 +1977,10 @@ function MokoMain($) {
 
       //ダウンロード補助
       function downloadSettings(obj) {
-        var date = new Date(), y = date.getFullYear(), m = date.getMonth()+1, d = date.getDate(),
-          m = m < 10 ? '0' + m : m, d = d < 10 ? '0' + d : d, chapter = obj['ixamoko_options']['chapter_change_mod'],
-          filename = 'moko_setting_' + y + '_' + m + '_' + d + '_' + chapter +'.json',
+        var date = new Date(), m = date.getMonth()+1, d = date.getDate(),
+          m = m < 10 ? '0' + m : m, d = d < 10 ? '0' + d : d,
+          world = location.host.match(/(.+?)\./)[1],
+          filename = 'moko_setting_' + m + '_' + d + '_' + world +'.json',
           blob = new Blob([toJSON(obj)], {'type': 'text/plain'}),
           url = URL.createObjectURL(blob),
           $link = $('<a>').attr({'download': filename, 'href': url, 'target': '_blank'});
