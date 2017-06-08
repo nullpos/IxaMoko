@@ -19598,11 +19598,14 @@ function MokoMain($) {
       sortRankLevel = function(list) {
         return list.sort(function(a, b) {
           var a_rank = a.rank*1, b_rank = b.rank*1,
-            a_level = a.level*1, b_level = b.level*1;
+            a_level = a.level*1, b_level = b.level*1,
+            a_number = a.card_number*1, b_number = b.card_number*1;
           if (a_rank < b_rank) return -1;
           if (a_rank > b_rank) return 1;
           if (a_level < b_level) return -1;
           if (a_level > b_level) return 1;
+          if (a_number < b_number) return 1;
+          if (a_number > b_number) return -1;
           return 0;
         });
       },
@@ -19744,6 +19747,7 @@ function MokoMain($) {
             [ kakushi, busho ] = list;
             if( kakushi.length == 0 || busho.length == 0 ) {
               playSound(SOUND.notice);
+              $('#kakushi_inner').append('<span>特殊合成を完了しました。</span></br>');
               return;
             }
 
