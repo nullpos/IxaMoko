@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.1.0.0
+// @version      14.2.0.0
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -1284,7 +1284,11 @@ function MokoMain($) {
         '<div id="moko_setting_dialog">' +
           '<div id="moko_setting_dialog_head">' +
             '<div id="moko_setting_dialog_close" class="mk_cross_mark close" />' +
-            '<h1>戦国IXA用ツール 設定<span>' + VERSION_NAME +'</span><input type="button" id="save_settings" value="設定する" /></h1>' +
+            '<h1>戦国IXA用ツール 設定<span>' + VERSION_NAME +'</span><input type="button" id="save_settings" value="設定する" />' +
+              '<input type="button" id="import_settings" value="適用" />' +
+              '<input type="button" id="export_full_settings" value="全保存" />' +
+              '<input type="button" id="export_settings" value="保存" />' +
+            '</h1>' +
           '</div>' +
           '<div class="cleardummy" />' +
           '<div id="moko_set_grp">';
@@ -1924,10 +1928,63 @@ function MokoMain($) {
         moko_notice(word, true);
         location.href = location.pathname + location.search;
       });
+      //インポート
+      $('#import_settings').on('click', function() {
+        var $input = $('<input>').attr('type', 'file');
+        $input.on('change', function(e) {
+          var fileData = e.target.files[0];
+          if(!fileData.name.match('^moko_setting.*\.json$')) {
+            moko_alert('読み込みに失敗しました');
+            return;
+          }
+          var reader = new FileReader();
+          reader.onload = function() {
+            var result = reader.result,
+              obj = JSON.parse(result);
+            for(var key in obj) {
+              if (obj.hasOwnProperty(key)) {
+                setStorage(key, obj[key]);
+              }
+            }
+            playSound(SOUND.notice);
+          }
+          reader.readAsText(fileData);
+        });
+        $input.click();
+      });
+      //エクスポート
+      $('#export_full_settings').on('click', function() {
+        var obj = {};
+        for (key in localStorage) {
+          if (localStorage.hasOwnProperty(key)) {
+            obj[key] = JSON.parse(localStorage.getItem(key));
+          }
+        }
+        downloadSettings(obj);
+      });
+      $('#export_settings').on('click', function() {
+        var option_names = ['ixamoko_options', 'ixamoko_favorites_trade', 'ixamoko_each_setting'],
+          obj = {};
+        for (var i = 0; i < option_names.length; i++) {
+          obj[option_names[i]] = JSON.parse(localStorage.getItem(option_names[i]));
+        }
+        downloadSettings(obj);
+      });
       //閉じる
       $('#moko_setting_dialog_close').on('click', function() {
         $('#ixamoko_mask, #moko_setting_dialog').remove();
       });
+
+      //ダウンロード補助
+      function downloadSettings(obj) {
+        var date = new Date(), y = date.getFullYear(), m = date.getMonth()+1, d = date.getDate(),
+          m = m < 10 ? '0' + m : m, d = d < 10 ? '0' + d : d, chapter = obj['ixamoko_options']['chapter_change_mod'],
+          filename = 'moko_setting_' + y + '_' + m + '_' + d + '_' + chapter +'.json',
+          blob = new Blob([ JSON.stringify(obj, null, '  ')], {'type': 'text/plain'}),
+          url = URL.createObjectURL(blob),
+          $link = $('<a>').attr({'download': filename, 'href': url, 'target': '_blank'});
+        $link[0].click();
+      }
     }
   };
 
