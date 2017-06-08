@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.0.0
+// @version      14.2.1.0
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.0.0";
+  var VERSION_NAME = "ver 14.2.1.0";
 
 // === Plugin ===
 
@@ -19492,13 +19492,13 @@ function MokoMain($) {
       }
       $html.insertAfter($('#ig_deckheadmenubox'));
     },
-    add_rank = function($boxes, $cwindows) {
-      $boxes.each(function(i,e) {
-        var $box = $(e),
+    add_rank = function($spans, $cwindows) {
+      $spans.each(function(i,e) {
+        var $span = $(e),
           $cwindow = $cwindows.eq(i),
           rank = ($cwindow.find('div.parameta_area span.level_star img').attr('width').slice(0, -1) * 1) / 20,
-          name = $box.find('td a.thickbox span').text();
-        $box.find('td a.thickbox span').text(name + ' ★' + rank);
+          name = $span.text();
+        $span.text(name + ' ★' + rank);
       });
     };
 
@@ -19552,7 +19552,7 @@ function MokoMain($) {
         .then(function(html) {
           var $common_box3 = $(html).find('div.common_box3'),
             $cardWindow = $(html).find('div[id^="cardWindow_"]');
-          add_rank($common_box3, $cardWindow);
+          add_rank($common_box3.find('td a.thickbox span'), $cardWindow);
           $common_box3.on('click', onclick_div_check);
           if (location.pathname == '/user/present.php') {
             create_checkbox($common_box3);
@@ -19583,14 +19583,16 @@ function MokoMain($) {
     }
     $(window).scroll(adding_page);
 
-    // 表示範囲のカード集計
-    $('<input />').attr({ type: 'button', id: 'card_summary',  value: 'ページ内のカードを集計' })
-      .css({ 'float': 'right', 'margin-right': '4px' })
-      .insertBefore('#presentAllForm')
-      .click(card_summary);
+    if (!!location.pathname.match(/\/user\/present\.php/)) {
+      // 表示範囲のカード集計
+      $('<input />').attr({ type: 'button', id: 'card_summary',  value: 'ページ内のカードを集計' })
+        .css({ 'float': 'right', 'margin-right': '4px' })
+        .insertBefore('#presentAllForm')
+        .on('click', card_summary);
 
-    // ランクを表示
-    add_rank($('div.ig_decksection_mid div.common_box3'), $('div[id^="cardWindow_"]'));
+      // ランクを表示
+      add_rank($('div.ig_decksection_mid div.common_box3 td a.thickbox span'), $('div[id^="cardWindow_"]'));
+    }
   }
 
 // ^ プレゼント
