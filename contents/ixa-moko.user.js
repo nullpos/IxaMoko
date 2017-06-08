@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.1.0.0";
+  var VERSION_NAME = "ver 14.2.0.0";
 
 // === Plugin ===
 
@@ -1980,7 +1980,7 @@ function MokoMain($) {
         var date = new Date(), y = date.getFullYear(), m = date.getMonth()+1, d = date.getDate(),
           m = m < 10 ? '0' + m : m, d = d < 10 ? '0' + d : d, chapter = obj['ixamoko_options']['chapter_change_mod'],
           filename = 'moko_setting_' + y + '_' + m + '_' + d + '_' + chapter +'.json',
-          blob = new Blob([ JSON.stringify(obj, null, '  ')], {'type': 'text/plain'}),
+          blob = new Blob([toJSON(obj)], {'type': 'text/plain'}),
           url = URL.createObjectURL(blob),
           $link = $('<a>').attr({'download': filename, 'href': url, 'target': '_blank'});
         $link[0].click();
