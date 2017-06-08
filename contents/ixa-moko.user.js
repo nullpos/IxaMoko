@@ -1841,7 +1841,11 @@ function MokoMain($) {
             url: url,
             cache: false,
             success: function(html) {
-              var name = $(html).find('.alli_inputtext.mb10').eq(0).text();
+              if(login_data.chapter >= 14) {
+                var name = $(html).find('dl.alliance_name dd:eq(0)').text();
+              } else {
+                var name = $(html).find('.alli_inputtext.mb10').eq(0).text();
+              }
               d.resolve(name);
             }
           });
