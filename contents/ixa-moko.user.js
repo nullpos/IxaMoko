@@ -4586,6 +4586,7 @@ function MokoMain($) {
     var limit = login_data.chapter > 12 ? 5 : 4;
 
     $statusarea.each(function(idx) {
+      if(!!$(this).find('img[src$="assault.png"]')[0]) { return true; }
       var data = getRaidData($(this));
       var tmp = createRaidView(data, 0);
       var timeleft = data.time_arr[6] * 3600 + data.time_arr[7] * 60 + data.time_arr[8] * 1;
