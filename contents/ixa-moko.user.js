@@ -18069,6 +18069,7 @@ function MokoMain($) {
       if (location.pathname != '/report/detail.php') {
         return;
       }
+      if(!!$('.assault')[0]) { return; } // 強襲の時
       var notOwnBase = function (idx) {
         var target = $table.find('tr').eq(5).children().eq(idx);
         var src = target.find('img').attr('src').split('/').pop();
