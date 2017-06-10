@@ -4586,7 +4586,6 @@ function MokoMain($) {
     var limit = login_data.chapter > 12 ? 5 : 4;
 
     $statusarea.each(function(idx) {
-      if(!!$(this).find('img[src$="assault.png"]')[0]) { return true; }
       var data = getRaidData($(this));
       var tmp = createRaidView(data, 0);
       var timeleft = data.time_arr[6] * 3600 + data.time_arr[7] * 60 + data.time_arr[8] * 1;
@@ -18333,14 +18332,38 @@ function MokoMain($) {
     var html = '<div class="ig_battle_ranksearch_searchbtn" style="float: right;margin-right: 6px;"><input type="button" id="tenka_post" value="Post"></div>';
     $('#ig_battle_rank_search').append($(html));
     var base_uri = document.location.origin + document.location.pathname + '?m=whole_war_point&p=';
+
     $('#tenka_post').on('click', function() {
-      $.when($.get(base_uri + '10'), $.get(base_uri + '100'))
-      .done(function(html100, html1000){
-        var senko100 = $(html100[0]).find('table.ig_battle_table:eq(0)').find('tr:eq(-1)').find('td:eq(4)').text().trim();
-        var senko1000 = $(html1000[0]).find('table.ig_battle_table:eq(0)').find('tr:eq(-1)').find('td:eq(4)').text().trim();
-        var text = '!天下戦功メモ! \n' +
-          '100 位: ' + senko100 + '\n' +
-          '1000位: ' + senko1000;
+      var tensen_border_html = $.ajax({
+        async: false,
+        url: location.origin + '/war/war_situation.php',
+        beforeSend: xrwStatusText,
+        method: 'GET',
+      }).responseText,
+        $tensen_borders_tr = $(tensen_border_html).find('#ig_battle_rewardBox table:eq(-1) tr:gt(0)'),
+        tensen_borders = [];
+      $tensen_borders_tr.each(function(i, e) {
+        tensen_borders.push($(e).find('td:eq(0)').text().match(/(\d+)位/)[1]);
+      });
+
+      var border_deferreds = tensen_borders.map(function(border) {
+        var d = $.Deferred();
+        $.ajax({
+          method: 'GET',
+          url: base_uri + ((border*1) / 10),
+          beforeSend: xrwStatusText
+        }).done(function(html) {
+          d.resolve($(html).find('table.ig_battle_table:eq(0) tr:eq(-1) td:eq(4)').text().trim());
+        });
+        return d.promise();
+      });
+
+      $.when.apply($, border_deferreds)
+      .done(function(){
+        var text = ' *天下戦功メモ* \n';
+        for(var i = 0; i < arguments.length; i++) {
+          text += tensen_borders[i] + '位: ' + arguments[i] + ' \n';
+        }
         $.ajax({
           url: options.slack_notify_mod,
           type: 'post',
