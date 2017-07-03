@@ -4327,7 +4327,7 @@ function MokoMain($) {
       var d = $.Deferred();
       var url = '/war/fight_history.php?type=0&find_name=&find_x=170&find_y=170&btn_exec=true' +
         '&find_length=' + Math.floor(Math.random() * 500 + 495) + '&p=' + p;
-      j$.ajax({
+      $.ajax({
         type: 'post',
         url: url,
         cache: false,
@@ -4398,13 +4398,14 @@ function MokoMain($) {
           dist = Math.sqrt(Math.pow(center[0] - place[0], 2) + Math.pow(center[1] - place[1], 2));
         // 自領
         if(data[i][name] == $('#lordName').text()) { continue; }
+        // 東西戦
         if(BATTLE_MODE == '東西戦中' && (data[i]['type'] == '砦' || data[i]['type'] == '大殿')) {
           ret.push(data[i]);
           continue;
         }
         // 非同盟員
         if(data[i]['alliance'] != option['alliance']) {
-          if(dist >= 30 || // 距離30以上
+          if(dist > 30 || // 距離30より上
             option['type'] & 32 != 0 || // 同盟員にチェックされているとき
             (data[i]['type'] != '城' || data[i]['type'] != '出城') // 本領以外
           ) {
@@ -4424,6 +4425,8 @@ function MokoMain($) {
             type = 8; break;
           case '領地':
             type = 16; break;
+          default:
+            type = 0;
         }
         if((option['type'] & type) != 0){
           ret.push(data[i]);
