@@ -3934,15 +3934,17 @@ function MokoMain($) {
       $war_alliance.css('margin-bottom', '5px');
     }
     $('#alliance_war_report').on('click', function() {
-      if (getAllianceNmae().abbrev) {
-        location.href = '/war/list.php?m=&s=1&name=alliance&word='+ getAllianceNmae().abbrev +'&coord=map&x=&y=';
+      var abbrev = getAllianceNmae().abbrev;
+      if (abbrev) {
+        location.href = '/war/list.php?m=&s=1&name=alliance&word='+ abbrev +'&coord=map&x=&y=';
       } else {
         acquisitionFailure();
       }
     });
     $('#alliance_war_enemy').on('click', function() {
-      if (getAllianceNmae().name) {
-        location.href = '/war/fight_history.php?type=1&find_name='+ getAllianceNmae().name +'&find_x=&find_y=&find_length=&btn_search=true';
+      var name = getAllianceNmae().name;
+      if (name) {
+        location.href = '/war/fight_history.php?type=1&find_name='+ name +'&find_x=&find_y=&find_length=&btn_search=true';
       } else{
         acquisitionFailure();
       }
