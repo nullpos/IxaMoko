@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.2.1
+// @version      14.2.2.2
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.2.1";
+  var VERSION_NAME = "ver 14.2.2.2";
 
 // === Plugin ===
 
@@ -19071,7 +19071,7 @@ function MokoMain($) {
       var dialog = mokoDialog({
         title: '白くじの結果',
         width: 340,
-        height: 340,
+        height: 420,
         button: true,
         load: false
       });
@@ -19090,7 +19090,7 @@ function MokoMain($) {
         data: data,
         beforeSend: xrwStatusText
       }).then(function(html) {
-        var stock_text = $(html).find('#ixaDogFootNavi li.b_loto_cardstock_busho').text(),
+        var stock_text = $(html).find('p.l_cardstock').text(),
           $card_front = $(html).find('#id_deck_card_front'),
           card_name = $card_front.find('span.ig_card_name').text(),
           rare_icon = $card_front.find('span[class^="rarity_"]').attr('class'),
@@ -19212,7 +19212,7 @@ function MokoMain($) {
         html += '</tr>';
       }
       html += '</tbody>' + '</table>';
-      $('div.common_box1bottom').prepend(html);
+      $('div.ig_tilesection_innermid').prepend(html);
       var list = ['', 0, 0, 0, 0, 0, 0, 0, 0, 0],
         rate = [],
         $tr = $('#agg_table tr').slice(1);
@@ -21708,7 +21708,7 @@ function MokoMain($) {
 
     if (location.pathname == '/senkuji/senkuji_result.php') {
       //くじ
-      shortcut.add('Enter', function() { $('img[src$="btn_again.jpg"]').click(); }, { 'disable_in_input':true, 'keycode':13 });
+      shortcut.add('Enter', function() { $('img[src$="btn_again.png"]').click(); }, { 'disable_in_input':true, 'keycode':13 });
     }
 
     //w, s, a, d
