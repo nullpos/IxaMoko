@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.3.0
+// @version      14.2.3.1
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.3.0";
+  var VERSION_NAME = "ver 14.2.3.1";
 
 // === Plugin ===
 
@@ -20225,7 +20225,7 @@ function MokoMain($) {
 
         }
 
-        toolMenu += '<li id="copy_butai_sim">部隊シミュ用コピペ</li>';
+        toolMenu += '<li id="copy_butai_sim">部隊シミュ用D&D</li>';
 
         toolMenu += '<hr class="separator" />';
       }
@@ -20515,7 +20515,24 @@ function MokoMain($) {
         str += 'スキル空\n';
       }
       str += '指揮兵' + data.type + '' + data.num + ' / ' + data.max;
-      copyToClipboard(str);
+
+      var top = target.offset().top,
+        left = target.offset().left,
+        $textarea = $('<textarea>')
+          .val(str)
+          .on('click', function(e){
+            $(this).select()
+          }),
+          close = $('<a>').attr('href', 'javascript:void(0);')
+            .text('閉じる')
+            .on('click', function(){
+              $(this).parent().remove();
+            }),
+          div = $('<div>').append(close).append('<br>').append($textarea)
+            .css({'position': 'absolute', 'z-index': '9999', 'top': top, 'left': left, 'background-color': 'grey'});
+      $('html').append(div);
+      $textarea[0].focus();
+      $textarea[0].select();
     });
 
     return processing_tooltip($tooltip, e);
