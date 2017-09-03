@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.3.1
+// @version      14.2.3.2
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.3.1";
+  var VERSION_NAME = "ver 14.2.3.2";
 
 // === Plugin ===
 
@@ -21832,10 +21832,20 @@ function MokoMain($) {
       shortcut.add('s', function() { scrollView(deck_top()); },{ 'disable_in_input':true, 'keycode':83 });
       shortcut.add('a', function() { if (get_link()[0].length) { get_link()[0].click(); } },{ 'disable_in_input':true, 'keycode':65 });
       shortcut.add('d', function() { if (get_link()[1].length) { get_link()[1].click(); } },{ 'disable_in_input':true, 'keycode':68 });
+      shortcut.add('Enter', function() {
+        if($('#send_one').text().trim() == '0') {
+          $('a.new_union_btn_point.fade.direct.mr10:eq(0)').click();
+        } else if($('#send_plural').text().trim() == '0') {
+          $('#run_send_one').click();
+        } else {
+          $('#run_send_plural').click();
+        }
+      }, { 'disable_in_input':true, 'keycode':13 });
     } else if (location.pathname == '/union/levelup_result.php') {
       //スキル強化 実行後
       shortcut.add('w', function() { scrollView($('div.common_box1bottom').offset().top); },{ 'disable_in_input':true, 'keycode':87 });
       shortcut.add('s', function() { scrollView($('div.common_box3').offset().top); },{ 'disable_in_input':true, 'keycode':83 });
+      shortcut.add('Enter', function() { $('img[src$="btn_again.png"]').click(); }, { 'disable_in_input':true, 'keycode':13 });
     } else if (location.pathname == '/union/learn.php') {
       //スキル追加
       shortcut.add('w', function() { scrollView(0); },{ 'disable_in_input':true, 'keycode':87 });
