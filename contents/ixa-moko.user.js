@@ -19030,8 +19030,9 @@ function MokoMain($) {
           $e.find('input.skill_radio').prop('checked', false);
         }
       });
-    } else if(location.pathname == 'union/levelup_result.php') {
-
+    } else if(location.pathname == '/union/learn.php') {
+      var position = $('div.common_box3in:eq(1)').offset().top;
+      $('html,body').animate({scrollTop: position, duration: 10});
     }
   }
 
@@ -21858,10 +21859,12 @@ function MokoMain($) {
       shortcut.add('s', function() { scrollView($('div.new_login_skill_list').offset().top); },{ 'disable_in_input':true, 'keycode':83 });
       shortcut.add('a', function() { if (get_link()[0].length) { get_link()[0].click(); } },{ 'disable_in_input':true, 'keycode':65 });
       shortcut.add('d', function() { if (get_link()[1].length) { get_link()[1].click(); } },{ 'disable_in_input':true, 'keycode':68 });
-    } else if (location.pathname == '/union/union_levelup.php') {
-      //スキル追加 実行
+      shortcut.add('Enter', function() { $('a.new_union_btn_point.fade.direct.mr10:eq(0)').click(); }, { 'disable_in_input':true, 'keycode':13 });
+    } else if (location.pathname == '/union/learn_result.php') {
+      //スキル追加 実行後
       shortcut.add('w', function() { scrollView($('div.common_box1').offset().top); },{ 'disable_in_input':true, 'keycode':87 });
       shortcut.add('s', function() { scrollView($('div.new_login_skill_list').offset().top); },{ 'disable_in_input':true, 'keycode':83 });
+      shortcut.add('Enter', function() { $('img[src$="btn_again.png"]').click(); }, { 'disable_in_input':true, 'keycode':13 });
     } else if (location.pathname == '/union/rankup.php') {
       //ランクアップ
       var $ig_decksection3 = $('#deck_file #ig_decksection3');
