@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.3.2
+// @version      14.2.3.3
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.3.2";
+  var VERSION_NAME = "ver 14.2.3.3";
 
 // === Plugin ===
 
@@ -4285,7 +4285,6 @@ function MokoMain($) {
       var date = new Date((list[i]['date'] + list[i]['time']) * 1000),
         h = date.getHours(), m = "0" + date.getMinutes(), s = "0" + date.getSeconds(),
         fmtTime = h + ':' + m.substr(-2) + ':' + s.substr(-2);
-      console.log(list[i]['html']);
       var $tr = j$(list[i]['html']).find('td'),
         fromUser = [$tr.eq(1).find('a').text(), $tr.eq(1).find('a').attr('href')],
         fromMap  = [$tr.eq(3).find('a').text().replace(/\n| |　/g, ''),
@@ -4399,7 +4398,7 @@ function MokoMain($) {
         var place = data[i]['place'].split(','),
           dist = Math.sqrt(Math.pow(center[0] - place[0], 2) + Math.pow(center[1] - place[1], 2));
         // 自領
-        if(data[i][name] == $('#lordName').text()) { continue; }
+        if(data[i][name] == $('#lordName').text().trim()) { continue; }
         // 東西戦
         if(BATTLE_MODE == '東西戦中' && (data[i]['type'] == '砦' || data[i]['type'] == '大殿')) {
           ret.push(data[i]);
@@ -4408,7 +4407,7 @@ function MokoMain($) {
         // 非同盟員
         if(data[i]['alliance'] != option['alliance']) {
           if(dist > 30 || // 距離30より上
-            option['type'] & 32 != 0 || // 同盟員にチェックされているとき
+            option['type'] & 32 != 0 || // 同盟員にチェックされていない
             (data[i]['type'] != '城' || data[i]['type'] != '出城') // 本領以外
           ) {
             continue;
@@ -4536,7 +4535,7 @@ function MokoMain($) {
   }
   // 敵襲情報の取得
   function getRaidData(elem) {
-    var $a = elem.find('a').eq(0);
+    var $a = (elem.find('a [href^="/land"]').size() != 0) ? elem.find('a').eq(0) : elem.find('a').eq(1);
     var $td = elem.find('table.table_fightlist').find('td:eq(1)');
     var $td_bggray = elem.find('td.td_bggray');
     var org = $td_bggray.eq(0).find('span').contents();
@@ -4562,7 +4561,7 @@ function MokoMain($) {
       html += '<td>' + data.time_arr[1] + '/' + data.time_arr[2] + '&nbsp;' + data.time_arr[3] + ':' + data.time_arr[4] + ':' + data.time_arr[5] + '</td>';
     }
     html += '' +
-      '<td><a href="' + data.sortie_href + '" class="at_source" title="' + data.sortie_name + '">' + data.sortie_name + '</td>' +
+      '<td><a href="' + data.sortie_href + '" class="at_source" title="' + data.sortie_name + '">' + data.sortie_name + '</a></td>' +
       '<td>の</td>' +
       '<td>' +
         '<a href="' + data.org_href + '" class="at_source" title="' + data.org_base + ' ' + data.org_code + '">' + data.org_base + '</a>' +
