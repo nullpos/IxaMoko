@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.3.4
+// @version      14.2.3.5
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.3.4";
+  var VERSION_NAME = "ver 14.2.3.5";
 
 // === Plugin ===
 
@@ -4345,7 +4345,7 @@ function MokoMain($) {
       if($data.find('tr:eq(1)').text().trim() == '現在、表示できるデータがありません。' ||
         $data.find('tr:eq(1)').text().trim() == '現在は合戦中ではありません。') return;
       if($ul.length) {
-        //551があるとき
+        //次のページがある
         var $a = $ul.find('a'),
           pageList = [],
           pageFuncList = [];
@@ -4374,8 +4374,7 @@ function MokoMain($) {
     });
     function raidNearCreateArray($html) {
       var ret = [];
-      $html.find('tr').each(function(e) {
-        if(e == 0) return true;
+      $html.find('tr').slice(1).each(function(e) {
         var $td = $(this).find('td');
         var type   = $td.eq(0).text().trim(),
           name     = $td.eq(1).text().trim(),
@@ -4398,7 +4397,7 @@ function MokoMain($) {
       for(var i = 0; i < data.length; i++) {
         var place = data[i]['place'].split(','),
           dist = Math.sqrt(Math.pow(center[0] - place[0], 2) + Math.pow(center[1] - place[1], 2));
-        // 自領
+        // 自領 多分動いてない(#loadNameが拾えてない)
         if(data[i][name] == $('#lordName').text().trim()) { continue; }
         // 東西戦
         if(BATTLE_MODE == '東西戦中' && (data[i]['type'] == '砦' || data[i]['type'] == '大殿')) {
@@ -4409,7 +4408,7 @@ function MokoMain($) {
         if(data[i]['alliance'] != option['alliance']) {
           if(dist > 30 || // 距離30より上
             option['type'] & 32 != 0 || // 同盟員にチェックされていない
-            (data[i]['type'] != '城' || data[i]['type'] != '出城') // 本領以外
+            (data[i]['type'] != '城' && data[i]['type'] != '出城') // 本領以外
           ) {
             continue;
           }
@@ -17434,15 +17433,25 @@ function MokoMain($) {
   //同盟スコア計算追加
   function doumeiScore() {
     var createScore = function() {
-      var $tr = $('table.common_table1 tr').not('.sub');
       var total = 0;
-      $tr.slice(1).each(function () {
-        total += parseFloat($(this).find('td').eq(3).text().replace(/\,/g, ''));
-      });
-      total = addFigure(Math.floor(total / 500));
-      var $deck = login_data.chapter >= 14 ? $('div.alliance_member_control:first') : $('div.ig_decksection_top');
-      $('#doumei_score').remove();
-      $deck.append('<span id="doumei_score">同盟スコア: (' + total + ')</span>');
+      if (login_data.chapter < 14) {
+        var $tr = $('table.common_table1 tr').not('.sub');
+        $tr.slice(1).each(function () {
+          total += parseFloat($(this).find('td').eq(3).text().replace(/\,/g, ''));
+        });
+        total = addFigure(Math.floor(total / 500));
+        var $deck = $('div.ig_decksection_top');
+        $('#doumei_score').remove();
+        $deck.append('<span id="doumei_score">同盟スコア: (' + total + ')</span>');
+      } else {
+        var total = $('div.alliance_points:eq(0) dl:eq(2) dd').text();
+        total = parseFloat(total.replace(/\,/g, ''));
+        var total_meishu = addFigure(Math.floor(total / 500));
+        var total_hosa = addFigure(Math.floor(total / 2500));
+        var $deck = $('div.alliance_member_control:first');
+        $('#doumei_score').remove();
+        $deck.append('<span id="doumei_score">盟主陥落: (' + total_meishu + ') 補佐陥落: (' + total_hosa + ')</span>');
+      }
       // execute 同盟ポイント比較機能
       alliancePointComparison();
       $(document).off('ajaxStop', createScore);
