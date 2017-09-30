@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.3.5
+// @version      14.2.3.6
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.3.5";
+  var VERSION_NAME = "ver 14.2.3.6";
 
 // === Plugin ===
 
@@ -16729,7 +16729,7 @@ function MokoMain($) {
       $table = $table.before(tmp);
 
       var list = [];
-      $table.find('tr.fs14').each(function(idx) {
+      $('table.common_table1').slice(1).find('tr.fs14').each(function(idx) {
         var type = $(this).find('td').eq(0).text(),
           source = $(this).find('a').eq(1).attr('href').match(/x=(-?\d+)&y=(-?\d+)&c=(\d+)/)[0],
           code = '/facility/camp_proc.php?' + source,
@@ -18183,7 +18183,8 @@ function MokoMain($) {
         $.ajax({
           method: 'GET',
           url: base_uri + ((border*1) / 10),
-          beforeSend: xrwStatusText
+          beforeSend: xrwStatusText,
+          cache: false
         }).done(function(html) {
           d.resolve($(html).find('table.ig_battle_table:eq(0) tr:eq(-1) td:eq(4)').text().trim());
         });
@@ -18876,6 +18877,9 @@ function MokoMain($) {
         if($e.find('td.name').text().trim().slice(-1) == '1') {
           $e.removeClass('disabled');
           $e.find('input.skill_radio').prop('checked', false);
+        } else if($e.find('td.name').text().trim().slice(-1) != '0') {
+          $e.addClass('disabled');
+          $e.find('input.skill_radio').prop('checked', true);
         }
       });
     } else if(location.pathname == '/union/learn.php') {
