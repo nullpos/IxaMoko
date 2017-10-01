@@ -12,9 +12,10 @@
 
 // https://github.com/metameta/sengokuixa-meta
 // meta【一括兵士訓練】上記を参考にしました
- 
+
+
 (function () {
-  
+
   // meta
   function meta($) {
     'use strict';
@@ -193,7 +194,7 @@
         storagePrefix = 'IM.',
         eventListener = {},
         propNames = 'expires'.split(' ');
-        
+
       function metaStorage(name) {
         var storageName = storagePrefix + name,
           storage, storageArea;
@@ -250,7 +251,7 @@
           $(eventListener).on(storageName, callback);
         }
       });
-      
+
       function Storage(storageArea, storageName) {
         this.storageArea = storageArea;
         this.storageName = storageName;
@@ -294,18 +295,18 @@
           return JSON.stringify(this.data);
         }
       });
-      
+
       function loadData(obj) {
         obj.data = load(obj.storageArea, obj.storageName);
       }
-      
+
       function saveData(obj) {
         if (obj.transaction) {
           return;
         }
         save(obj.storageArea, obj.storageName, obj.data);
       }
-      
+
       function clearData(obj) {
         var storageArea;
         if (obj.transaction) {
@@ -318,7 +319,7 @@
         }
         storageArea.removeItem(obj.storageName);
       }
-      
+
       function load(storageArea, storageName) {
         var parseData = {},
           stringData, storage;
@@ -335,7 +336,7 @@
         }
         return parseData;
       }
-      
+
       function save(storageArea, storageName, data) {
         var stringData = JSON.stringify(data),
           storage;
@@ -596,7 +597,7 @@
       };
     })();
     // BaseList }
-    
+
     //■ Soldier {
     var Soldier = (function() {
       var data_11s = {
@@ -656,11 +657,11 @@
       } else {
         data = data_13s;
       }
-      
+
       function Soldier() {
         return $.extend({}, data);
       }
-      
+
       $.extend(Soldier, {
         nameKeys: {},
         typeKeys: {},
@@ -681,7 +682,7 @@
           return Soldier.nameKeys[name] || null;
         }
       });
-      
+
       $.each(data, function(key, value) {
         value.name = key;
         if (value.type) {
@@ -1179,7 +1180,7 @@
     //■ Display {
     var Display = (function() {
       var $sysmessage;
-      
+
       function Dialog(options) {
         var $overlay = $('<div id="imi_overlay"><div class="imc_overlay" /><div id="imi_dialog_container" /></div>'),
           $container = $overlay.find('#imi_dialog_container'),
@@ -1228,7 +1229,7 @@
         };
         return this;
       }
-      
+
       function show(msg, sound, timeout, cssClass) {
         if (!$sysmessage) {
           $sysmessage = $('<div class="imc_dialog" />').appendTo(document.body);
@@ -1245,7 +1246,7 @@
           audio.play();
         }
       }
-      
+
       function remove($span) {
         $span.remove();
         if ($sysmessage.children().length === 0) {
@@ -1622,13 +1623,13 @@
           facilities[key] = facility;
           fcount++;
         });
-        
+
         if (fcount === 0) {
           ol.message('訓練可能な施設は見つかりませんでした。');
           Util.wait(1000).then(ol.close);
           return;
         }
-        
+
         $html = $('<div><table class="imc_table" style="width: 100%;" /></div>').attr('id', 'imi_training_dialog');
         $table = $html.find('TABLE');
         $tr = $('<tr><th width="150">施設</th></tr>');
@@ -1645,7 +1646,7 @@
           }
         });
         $table.append($tr);
-        
+
         $tr = $('<tr><td>兵種</td></tr>');
         $.each(facilities, function(key, elem) {
           var html = '' +
@@ -1661,7 +1662,7 @@
           $tr.append(html);
         });
         $table.append($tr);
-        
+
         $tr = $('<tr><td>入力方法 ／ 分割</td></tr>');
         $.each(facilities, function(key, elem) {
           var html = '' +
@@ -1678,20 +1679,20 @@
             '<input type="text" style="width: 63px; display: none;" class="imc_input_val" fname="' + key + '" />' +
             '／' +
             '<select class="imc_create_count" fname="' + key + '">';
-            
+
           if (elem.count == 10) {
             html += '<option value="0">0</option>';
           }
           for (var i = 1, len = 10 - elem.count; i <= len; i++) {
             html += '<option value="' + i + '">' + i + '</option>';
           }
-          
+
           html += '</select>' +
               '</td>';
-              
+
           $tr.append(html);
         });
-        
+
         $table.append($tr);
         $table.append('<tr><th>施設</th>' + '<th>Lv</th><th>人数</th><th>時間</th>'.repeat(fcount) + '</tr>');
         //各拠点
@@ -1716,13 +1717,13 @@
           $table.append($tr);
           vcount++;
         });
-        
+
         $tr = $('<tr><th>人数計</th></tr>');
         $.each(facilities, function(key, elem) {
           $tr.append('<th></th><td class="imc_total" fname="' + key + '"></td><th></th>');
         });
         $table.append($tr);
-        
+
         $html.append(
         '<br />' +
         '<table class="imc_table imc_result" style="float: left;">' +
@@ -1750,7 +1751,7 @@
         '<div id="imi_training_message"></div>' +
         '</div>' +
         '');
-        
+
         $html.on('click', '.imc_input_type LI', function() {
           var $this = $(this),
             type = $this.attr('class'),
@@ -2005,7 +2006,7 @@
           }
           $button.attr('disabled', !execute);
         });
-        
+
         dialog = Display.dialog({
           title: '一括兵士訓練',
           width: 935,
@@ -2090,7 +2091,7 @@
             }
           }
         });
-        
+
         $button = dialog.buttons.eq(0).attr('disabled', true);
         $html.find('.imc_soltype').trigger('change');
         var href = Util.getVillageChangeUrl(current.id, '/user/');
@@ -2208,7 +2209,7 @@
         });
         storage.data = newdata;
         storage.commit();
-        
+
         function addList(index, elm) {
           var $this = $(elm),
             alt = $this.attr('alt'),
@@ -2233,11 +2234,11 @@
         }
       }
     });
-    
+
     //■ 実行
     exPage(Env.path).execute();
     // exPage }
-    
+
     // 一括兵士訓練のリンク埋め込み
     (function() {
       $('<div><li><a href="javascript:void(0);">【一括兵士訓練】</a></li></div>')
@@ -2248,11 +2249,11 @@
 
   // load
   window.addEventListener('DOMContentLoaded', function() {
-    
+
     if (location.pathname == '/top' || location.pathname == '/banner/' || location.pathname == '/false/login_sessionout.php' || location.pathname == '/user/first_login.php') {
       return;
     }
-    
+
     var style = document.createElement('style');
     style.setAttribute('type','text/css');
     style.innerHTML = '' +
@@ -2286,14 +2287,14 @@
       '#imi_training_dialog .imc_input_type .imc_pulldown LI { width: 30px; height: 20px; text-align: center; line-height: 20px; }' +
       '#imi_training_dialog .imc_input_type .imc_pulldown LI:hover { background-color: dimGray; }' +
       '#imi_training_dialog .imc_input_val { ime-mode: disabled; }' +
-      
+
       '';
     document.head.appendChild(style);
-    
+
     var scriptMeta = document.createElement('script');
       scriptMeta.setAttribute('type','text/javascript');
       scriptMeta.textContent = '(' + meta.toString() + ')(j213$);';
     document.head.appendChild(scriptMeta);
   });
-  
+
 })();
