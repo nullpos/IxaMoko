@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.3.6
+// @version      14.2.3.8
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.3.6";
+  var VERSION_NAME = "ver 14.2.3.8";
 
 // === Plugin ===
 
@@ -12704,16 +12704,29 @@ function MokoMain($) {
       clearRect();
     }
     var search = '/war/war_ranking.php?m=&c=' + data.country_id + '&find_rank=&find_name=' + data.user_name;
-    $.post(search, function(html) {
-      var $html = $(html).find('table.ig_battle_table');
-      var $td = $html.find('tr.ig_rank_you td');
-      data.rating = $td.eq(0).text().trim() || '-';
-      data.palms = $td.eq(3).text().trim() || '-';
-      data.att_point = $td.eq(4).text().trim() || '-';
-      data.def_point = $td.eq(5).text().trim() || '-';
-      data.des_point = $td.eq(6).text().trim() || '-';
-      return getCrushingDefense(data);
-    });
+    if (BATTLE_MODE = '天下統一戦') {
+      $.post(search, function(html) {
+        var $html = $(html).find('table.ig_battle_table');
+        var $td = $html.find('tr.ig_rank_you td');
+        data.rating = $td.eq(1).text().trim() || '-';
+        data.palms = $td.eq(5).text().trim() || '-';
+        data.att_point = $td.eq(6).text().trim() || '-';
+        data.def_point = $td.eq(7).text().trim() || '-';
+        data.des_point = $td.eq(8).text().trim() || '-';
+        return getCrushingDefense(data);
+      });
+    } else {
+      $.post(search, function(html) {
+        var $html = $(html).find('table.ig_battle_table');
+        var $td = $html.find('tr.ig_rank_you td');
+        data.rating = $td.eq(0).text().trim() || '-';
+        data.palms = $td.eq(3).text().trim() || '-';
+        data.att_point = $td.eq(4).text().trim() || '-';
+        data.def_point = $td.eq(5).text().trim() || '-';
+        data.des_point = $td.eq(6).text().trim() || '-';
+        return getCrushingDefense(data);
+      });
+    }
   }
 
   function getCrushingDefense(data) {
