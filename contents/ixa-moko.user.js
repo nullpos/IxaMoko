@@ -4228,14 +4228,13 @@ function MokoMain($) {
         h = date.getHours(), m = "0" + date.getMinutes(), s = "0" + date.getSeconds(),
         fmtTime = h + ':' + m.substr(-2) + ':' + s.substr(-2);
       var $tr = j$(list[i]['html']).find('td'),
-        fromUser = [$tr.eq(1).find('a').text(), $tr.eq(1).find('a').attr('href')],
+        fromUser = (!!$tr.eq(1).find('a:eq(1)') ?
+          [$tr.eq(1).find('a:eq(1)').text().trim(), $tr.eq(1).find('a:eq(1)').attr('href')] :
+          [$tr.eq(1).find('a:eq(0)').text().trim(), $tr.eq(1).find('a:eq(0)').attr('href')],
         fromMap  = [$tr.eq(3).find('a').text().replace(/\n| |　/g, ''),
           $tr.eq(3).find('a').attr('href')],
         toMap    = [$tr.eq(5).find('a').text().replace(/\n| |　/g, ''),
           $tr.eq(5).find('a').attr('href')];
-      if(!fromUser[0]) {
-        fromUser = [$tr.eq(1).find('a').get(1).text(), $tr.eq(1).find('a').get(1).attr('href')];
-      }
 
       var text = replace_valid('<!channel> ' +
         username + 'に敵襲が来ているぞ！\n' +
