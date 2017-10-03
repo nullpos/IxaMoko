@@ -3794,10 +3794,10 @@ function MokoMain($) {
     var $btnReport = $sidebox.find('TABLE.situationBtnTable:has(img[alt="報告書"])');
     var $btnWarReport = $sidebox.find('TABLE.situationBtnTable:has(img[alt="合戦報告書"])');
     var $information = $sidebox.find('DIV.information_situ');
+    $sideBox.last().find('DIV.sideBoxHead').remove();
     $btnUranai.remove();
     $worldTable.last().before($substatus_btn);
-    $sideBox.eq(4).find('DIV.sideBoxHead').remove();
-    $sideBox.eq(4).before($sideBox.eq(5), $sideBox.eq(3), $sideBox.eq(1));
+    $sideBox.eq(4).after($sideBox.eq(3), $sideBox.eq(1));
     $sideBox.eq(2).append($sideBoxInner.eq(1).append($btnReport, $btnWarReport, $information));
   }
   //IXAタイムを表示
