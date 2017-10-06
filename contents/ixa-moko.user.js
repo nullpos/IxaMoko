@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.3.8
+// @version      14.2.3.9
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.3.8";
+  var VERSION_NAME = "ver 14.2.3.9";
 
 // === Plugin ===
 
@@ -4228,7 +4228,7 @@ function MokoMain($) {
         h = date.getHours(), m = "0" + date.getMinutes(), s = "0" + date.getSeconds(),
         fmtTime = h + ':' + m.substr(-2) + ':' + s.substr(-2);
       var $tr = j$(list[i]['html']).find('td'),
-        fromUser = (!!$tr.eq(1).find('a:eq(1)') ?
+        fromUser = (!!$tr.eq(1).find('a:eq(1)')) ?
           [$tr.eq(1).find('a:eq(1)').text().trim(), $tr.eq(1).find('a:eq(1)').attr('href')] :
           [$tr.eq(1).find('a:eq(0)').text().trim(), $tr.eq(1).find('a:eq(0)').attr('href')],
         fromMap  = [$tr.eq(3).find('a').text().replace(/\n| |　/g, ''),
