@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.3.9
+// @version      14.2.3.10
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.3.9";
+  var VERSION_NAME = "ver 14.2.3.10";
 
 // === Plugin ===
 
@@ -2415,6 +2415,13 @@ function MokoMain($) {
         }
       } else if (location.pathname == '/war/fight_history.php') {
         element = $('table.ig_battle_table tr').slice(1).find('a:eq(2)');
+        for (i = 0, len = element.length; i < len; i++) {
+          target = element.eq(i);
+          coord = map_list[target.attr('href').split('?')[1]];
+          this.markExecution(coord, target);
+        }
+      } else if (location.pathname == '/alliance/list.php') {
+        element = $('#summary tr').slice(1).find('a:eq(0)');
         for (i = 0, len = element.length; i < len; i++) {
           target = element.eq(i);
           coord = map_list[target.attr('href').split('?')[1]];
@@ -17731,6 +17738,7 @@ function MokoMain($) {
           }
         })
       );
+      coordinateRecordMeishu();
     }
 
     function createLeaderDistSelect() {
@@ -17774,6 +17782,52 @@ function MokoMain($) {
     function calcDist(xy) {
       return Math.floor(Math.sqrt(Math.pow(xy[0], 2) + Math.pow(xy[1], 2)) * 10.0) / 10.0;
     }
+
+    function coordinateRecordMeishu() {
+      if (!options.map_reg) {
+        return;
+      }
+      var map_list = getStorage({}, 'ixamoko_map_list'),
+        coordinate_openmenu = function(target, e) {
+          var $tooltip = display_tooltip(e.pageX, e.pageY, 20).empty();
+          var map_list = getStorage({}, 'ixamoko_map_list'),
+            $a, base_name, coord;
+          $a = target.find('a');
+          base_name = $a.eq(2).text().trim();
+          coord = $a.attr('href').split('?')[1];
+          $('<li id="selection_tile">' + base_name + '</li>').appendTo($tooltip);
+          if (map_list[coord]) {
+            $('<li id="reg_map" coord="' + coord + '">座標削除</li>').on('click', function() {
+              General.coordDelete($(this).attr('coord'), $('#selection_tile').text());
+              General.recordedMark();
+            }).appendTo($tooltip);
+          } else {
+            $('<li id="reg_map" coord="' + coord + '">座標記録</li>').on('click', function() {
+              General.coordRecord($(this).attr('coord'), $('#selection_tile').text());
+              General.recordedMark();
+            }).appendTo($tooltip);
+          }
+          $('#reg_map').on('click', function() {
+            $tooltip.hide();
+          });
+          return processing_tooltip($tooltip, e);
+        },
+        openMenu = function(e, obj) {
+          if (e.target.tagName == 'TH' || e.target.tagName == 'A') {
+            return;
+          }
+          coordinate_openmenu(obj, e);
+        },
+        target;
+
+      target = $('#summary tbody tr');
+      General.recordedMark();
+      target.on('contextmenu', function(e) {
+        e.preventDefault();
+        return openMenu(e, $(this));
+      });
+    }
+
   }
   // 東西戦組分けチェック
   function eastWestWarCheck() {
