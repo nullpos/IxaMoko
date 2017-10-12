@@ -12617,7 +12617,7 @@ function MokoMain($) {
         homeFallOverlay(data);
       }
       var target_data = getStorage(null, 'ixamoko_target_data');
-      target_data.home_fall = param.fall_flg;
+      target_data.home_fall = param.fall_flg || 0;
       setStorage('ixamoko_target_data', target_data);
     });
   }
