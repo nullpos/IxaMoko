@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.3.10
+// @version      14.2.4.0
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.3.10";
+  var VERSION_NAME = "ver 14.2.4.0";
 
 // === Plugin ===
 
@@ -19712,19 +19712,21 @@ function MokoMain($) {
       getIconName = function(card) {
         var icon;
         switch(card.rarity) {
-          case '1': icon = 'icon_ten.png'; break;
+          case '1':
+            if(card.cost == 0) {
+              icon = 'icon_warabe.png';
+            } else if(card.cost == 193) {
+              icon = 'icon_syuku.png';
+            } else {
+              icon = 'icon_ten.png';
+            }
+            break;
           case '2': icon = 'icon_goku.png'; break;
           case '3': icon = 'icon_toku.png'; break;
           case '4': icon = 'icon_jou.png'; break;
           case '5': icon = 'icon_jo.png'; break;
-          case '6':
-            if(card.cost != 0) {
-              icon = 'icon_bake.png';
-            } else {
-              icon = 'icon_warabe.png';
-            }
-            break;
-          default: return true;
+          case '6': icon = 'icon_bake.png'; break;
+          default: return false;
         }
         return icon;
       },
