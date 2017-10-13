@@ -4354,7 +4354,7 @@ function MokoMain($) {
         // 非同盟員
         if(data[i]['alliance'] != option['alliance']) {
           if(dist > 30 || // 距離30より上
-            option['type'] & 32 != 0 || // 同盟員にチェックされていない
+            (option['type'] & 32) != 0 || // 同盟員にチェックされていない
             (data[i]['type'] != '城' && data[i]['type'] != '出城') // 本領以外
           ) {
             continue;
