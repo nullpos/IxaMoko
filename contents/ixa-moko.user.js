@@ -18654,6 +18654,101 @@ function MokoMain($) {
       });
     }
   }
+  // 報告書: 敵火力予測・部隊別攻撃力計算
+  function reportCalc() {
+    if (location.pathname != '/report/detail.php') {
+      return;
+    }
+    if ($('table.commontable:eq(0) img:eq(0)').attr('alt') != '戦闘報告') {
+      return;
+    }
+
+    var $td = $('td.parameter .damage.player:not(.defeat):eq(0)').parent().parent();
+    var side, other_side, $hpboxes;
+    if ($td.hasClass('right')) {
+      side = 'right';
+      other_side = 'left';
+    } else {
+      side = 'left';
+      other_side = 'right';
+    }
+
+    expectPower();
+    butaiPower();
+
+    function expectPower() {
+      var total = $('td.bbd1.' + side + ' div.power_point_common:eq(0) div.total:eq(0) span.count:eq(0)').text().trim().replace('～', '').replace(/,/g, '')*1;
+      // HP減少から敵の火力を予想
+      if ($('div.battle_box_block:eq(0) table.battle_box_info_table:eq(0) th:eq(0)').text().trim()[0] == '【') {
+        $hpboxes = $('div.battle_box_block:eq(0) table.battle_box_info_table');
+      } else {
+        $hpboxes = $('div.battle_box_block:eq(1) table.battle_box_info_table');
+      }
+      var damage, max_damage = -1;
+      $hpboxes.each(function() {
+        $(this).find('tr').slice(1).each(function() {
+          damage = $(this).find('td:eq(4)').text().trim().replace(/[\t\s]/g, '').replace(/^.*?:/, '')*-1;
+          if (damage > max_damage) {
+            max_damage = damage;
+          }
+        });
+      });
+      var battle;
+      if ($('table.battle_box_table:eq(0) tr:eq(3) td.total.' + side + ':eq(0) div:eq(0)').hasClass('win')) {
+        battle = 'win';
+      } else {
+        battle = 'lose';
+      }
+      //勝利時 残りHP=100-(敗北側総防御力÷勝利側総攻撃力)×58
+      //敗北時 残りHP=(敗北側総攻撃力÷勝利側総防御力)×42-5
+      //  攻撃勝利時: 敗北側総防御力 = damage*勝利側総攻撃力/58
+      //  防衛敗北時: 勝利側総攻撃力 = 敗北側総防御力*58/damage
+      //  攻撃敗北時: 勝利側総防御力 = 敗北側総攻撃力*42/(105-damage)
+      //  防衛勝利時: 敗北側総攻撃力 = 勝利側総防御力*(105-damage)/42
+      var enemy_total;
+      if (side == 'left' && battle == 'win') {
+        enemy_total = parseInt(max_damage * total / 58);
+      } else if(side == 'right' && battle == 'lose') {
+        enemy_total = parseInt(total * 58 / max_damage);
+      } else if(side == 'left' && battle == 'lose') {
+        enemy_total = parseInt(total * 42 / (105 - max_damage));
+      } else if(side == 'right' && battle == 'win') {
+        enemy_total = parseInt(total * (105 - max_damage) / 42);
+      }
+      $('td.bbd1.' + other_side + ' span.count:eq(0)').text(addFigure(enemy_total));
+    }
+
+    function butaiPower() {
+      // 部隊別攻撃力計算
+      // 逆比、浮動小数点避けに大きい数字からそれぞれ割る
+      var mytotal = $('td.bbd1.' + side + ' div.power_point_common:eq(0) div.player:eq(0) span.count:eq(0)').text().trim().replace('～', '').replace(/,/g, '')*1;
+      var higai_arr = [];
+      var $higai = $('td.bb1.parameter.' + side + ':eq(0) div:not(.damage)').slice(1);
+      var $tmpl = $('<span class="count" style="font-size: 10px; top: 2px; color: black;"></span>');
+      var $tmpldiv = $('<div class="damage"></div>');
+      $higai.each(function() {
+        higai_arr.push($(this).find('div.player span.count:eq(0)').text().trim().replace(/,/g, '') * 1);
+      });
+      var gyaku_higai = higai_arr.map(function(x) {
+        return x == 0 ? 0 : 10000000 / x;
+      });
+      var total_gyaku = gyaku_higai.reduce(function(p, c, i, a) {
+        return p + c;
+      });
+      if (total_gyaku == 0) return;
+      $higai.each(function(i) {
+        var power = addFigure(parseInt(mytotal * gyaku_higai[i] / total_gyaku));
+        var $div = $tmpldiv.clone().append($tmpl.clone().text('【' + power + '】'));
+        if (side == 'right') {
+          $div.find('span:eq(0)').css('right', '0px');
+        }
+        $(this).prepend($div);
+      });
+      $('div.font20.pt5.status').each(function() {
+        $(this).text('');
+      });
+    }
+  }
   // 書状:リスト 全件既読にする
   function allCheckInbox() {
     if (location.pathname != '/message/inbox.php') {
@@ -22051,6 +22146,7 @@ function MokoMain($) {
   warAllPointsBoaderPost();     //war/war_ranking
   reportListCheck();            //report/list
   reportdetailCheck();          //report/detail
+  reportCalc();                 //report/detail
 
   dungeonPickup();              //report/list
   messageCheck();               //message/detail
