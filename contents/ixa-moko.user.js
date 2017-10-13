@@ -19185,7 +19185,7 @@ function MokoMain($) {
       imgSrc = img_root + '/img/lot/lot_icon/img_lot_white_icon.jpg',
       token =  $html.find('input[name="senkuji_token"]').val(),
       set_material = $('div.common_box1bottom').find('a.thickbox'),
-      new_send_num = send_num - set_material.length;
+      new_send_num = Math.min(send_num, max_num - set_material.length);
 
       $('#moko_senkuji_container').remove();
 
