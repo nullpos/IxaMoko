@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.4.0
+// @version      14.2.4.1
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.4.0";
+  var VERSION_NAME = "ver 14.2.4.1";
 
 // === Plugin ===
 
@@ -12710,7 +12710,7 @@ function MokoMain($) {
       clearRect();
     }
     var search = '/war/war_ranking.php?m=&c=' + data.country_id + '&find_rank=&find_name=' + data.user_name;
-    if (BATTLE_MODE = '天下統一戦') {
+    if (BATTLE_MODE == '天下統一戦中') {
       $.post(search, function(html) {
         var $html = $(html).find('table.ig_battle_table');
         var $td = $html.find('tr.ig_rank_you td');
@@ -18684,12 +18684,12 @@ function MokoMain($) {
       } else {
         $hpboxes = $('div.battle_box_block:eq(1) table.battle_box_info_table');
       }
-      var damage, max_damage = -1;
+      var damage, min_damage = 1000;
       $hpboxes.each(function() {
-        $(this).find('tr').slice(1).each(function() {
+        $(this).find('tr').slice(2).each(function() {
           damage = $(this).find('td:eq(4)').text().trim().replace(/[\t\s]/g, '').replace(/^.*?:/, '')*-1;
-          if (damage > max_damage) {
-            max_damage = damage;
+          if (damage < min_damage) {
+            min_damage = damage;
           }
         });
       });
@@ -18699,21 +18699,21 @@ function MokoMain($) {
       } else {
         battle = 'lose';
       }
-      //勝利時 残りHP=100-(敗北側総防御力÷勝利側総攻撃力)×58
-      //敗北時 残りHP=(敗北側総攻撃力÷勝利側総防御力)×42-5
+      //勝利時 残りHP=100-(敗北側総防御力or攻撃力÷勝利側総攻撃力or防御力)×58
+      //敗北時 残りHP=(敗北側総攻撃力or防御力÷勝利側総防御力or攻撃力)×42-5
       //  攻撃勝利時: 敗北側総防御力 = damage*勝利側総攻撃力/58
-      //  防衛敗北時: 勝利側総攻撃力 = 敗北側総防御力*58/damage
+      //  防衛敗北時: 勝利側総攻撃力 = 敗北側総防御力*42/(105-damage)
       //  攻撃敗北時: 勝利側総防御力 = 敗北側総攻撃力*42/(105-damage)
-      //  防衛勝利時: 敗北側総攻撃力 = 勝利側総防御力*(105-damage)/42
+      //  防衛勝利時: 敗北側総攻撃力 = damage*勝利側総防御力/58
       var enemy_total;
-      if (side == 'left' && battle == 'win') {
-        enemy_total = parseInt(max_damage * total / 58);
-      } else if(side == 'right' && battle == 'lose') {
-        enemy_total = parseInt(total * 58 / max_damage);
-      } else if(side == 'left' && battle == 'lose') {
-        enemy_total = parseInt(total * 42 / (105 - max_damage));
-      } else if(side == 'right' && battle == 'win') {
-        enemy_total = parseInt(total * (105 - max_damage) / 42);
+      if (side == 'left' && battle == 'win') {         // 自:攻撃勝利、敵:防御敗北
+        enemy_total = parseInt(min_damage * total / 58);
+      } else if(side == 'right' && battle == 'lose') { // 自:防御敗北、敵:攻撃勝利
+        enemy_total = parseInt(total * 42 / (105 - min_damage));
+      } else if(side == 'left' && battle == 'lose') {  // 自:攻撃敗北、敵:防御勝利
+        enemy_total = parseInt(total * 42 / (105 - min_damage));
+      } else if(side == 'right' && battle == 'win') {  // 自:防御勝利、敵:攻撃敗北
+        enemy_total = parseInt(min_damage * total / 58);
       }
       $('td.bbd1.' + other_side + ' span.count:eq(0)').text(addFigure(enemy_total));
     }
