@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.4.1
+// @version      14.2.4.2
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.4.1";
+  var VERSION_NAME = "ver 14.2.4.2";
 
 // === Plugin ===
 
@@ -19136,23 +19136,16 @@ function MokoMain($) {
       nowLoading();
       Info.title('履歴を集計中...');
       $(this).prop('disabled', true);
-      return getSenkujiHistory({}, 1);
+      return getSenkujiHistory([], 1);
     });
 
-    function getSenkujiHistory(object, i) {
+    function getSenkujiHistory(list, i) {
       var max_page = 1;
       if ($('ul.pager').length) {
         max_page = $('ul.pager a:last').attr('href').match(/\d+/g)[0];
       }
       if (i > max_page) {
-        for (var key in object) {
-          var total = 0;
-          for (var key2 in object[key]) {
-            total += object[key][key2];
-          }
-          object[key]['合計'] = total;
-        }
-        return writeSenkujiSummary(object);
+        return createSenkujiObj(list);
       }
       Info.count(i + '/' + max_page + 'ページ');
       $.ajax({
@@ -19163,28 +19156,86 @@ function MokoMain($) {
         var $html = $(html).find('#ig_deckboxInner'),
           $tr = $html.find('tr.fs12');
         $tr.each(function() {
-          var type = $(this).find('td:last').text(),
-            rare = $(this).find('img').attr('alt');
-          if (!object[type]) {
-            object[type] = {};
-            object[type][rare] = 1;
-            return;
-          }
-          for (var key in object) {
-            if (key == type) {
-              for (var key2 in object[type]) {
-                if (key2 == rare) {
-                  object[type][key2] += 1;
-                } else if (!object[type][rare]) {
-                  object[type][rare] = 1;
-                }
+          var $this = $(this),
+            no   = $this.find('td:eq(0)').text(),
+            rare = $this.find('img').attr('alt'),
+            name = $this.find('td:eq(3)').text(),
+            date = $this.find('td:eq(5)').text(),
+            type = $this.find('td:last').text();
+          list.push({
+            no:   no,
+            rare: rare,
+            name: name,
+            date: date,
+            type: type
+          });
+        });
+        i++;
+        getSenkujiHistory(list, i);
+      }, null);
+    }
+
+    function createSenkujiObj(list) {
+      var kuji_obj = {}, busho_obj = {}, time_obj = {};
+      for (var i = 0; i < list.length; i++) {
+        var [no, rare, name, date, type] = [list[i]['no'], list[i]['rare'], list[i]['name'], list[i]['date'], list[i]['type']];
+        // くじ別
+        if (!kuji_obj[type]) {
+          kuji_obj[type] = {};
+          kuji_obj[type][rare] = 0;
+        }
+        for (var key in kuji_obj) {
+          if (key == type) {
+            for (var key2 in kuji_obj[type]) {
+              if (key2 == rare) {
+                kuji_obj[type][key2] += 1;
+              } else if (!kuji_obj[type][rare]) {
+                kuji_obj[type][rare] = 1;
               }
             }
           }
-        });
-        i++;
-        getSenkujiHistory(object, i);
-      }, null);
+        }
+        // 武将別
+        // 時間別
+        var d = new Date(date), hour = d.getHours();
+        if (!time_obj[type]) {
+          time_obj[type] = {};
+          for (var h = 0; h < 24; h++) {
+            time_obj[type][h] = {};
+          }
+        }
+        if (!time_obj[type][hour][rare]) {
+          time_obj[type][hour][rare] = 0;
+        }
+        time_obj[type][hour][rare]++;
+      }
+      // くじ合計
+      for (var key in kuji_obj) {
+        var total = 0;
+        for (var key2 in kuji_obj[key]) {
+          total += kuji_obj[key][key2];
+        }
+        kuji_obj[key]['合計'] = total;
+      }
+      for (var key in time_obj) { // type
+        for (var key2 in time_obj[key]) { // hour
+          var total = 0;
+          for (var key3 in time_obj[key][key2]) { //rare
+            total += time_obj[key][key2][key3];
+          }
+          time_obj[key][key2]['合計'] = total;
+        }
+      }
+
+      writeSenkujiSummary(kuji_obj);
+      writeSenkujiBushoSummary(busho_obj);
+      writeSenkujiTimeSummary(time_obj);
+      Info.title('集計完了', true);
+      return {
+        kuji: kuji_obj,
+        time: time_obj,
+        busho: busho_obj
+      };
     }
 
     function writeSenkujiSummary(object) {
@@ -19255,7 +19306,49 @@ function MokoMain($) {
       }
       html2 += '<td>-</td></tr>';
       $('#agg_table tbody').append(html2);
-      Info.title('集計完了', true);
+    }
+
+    function writeSenkujiBushoSummary(object) {
+
+    }
+
+    function writeSenkujiTimeSummary(object) {
+      var types = ['戦国くじ【白】', '戦国くじ【戦】', '戦国くじ【天下】', '戦国くじ【天上】', '戦国くじ【天戦】', '戦国くじ【金】'];
+      for (var type_key = 0; type_key < types.length; type_key++) {
+        var array = [], keys;
+        for (var key in object[types[type_key]]) {
+          keys = object[types[type_key]][key];
+          keys.hour = key;
+          array.push(keys);
+        }
+        var rare_icon = {
+            '序': '/img/card/icon/icon_jo.png',
+            '上': '/img/card/icon/icon_jou.png',
+            '特': '/img/card/icon/icon_toku.png',
+            '極': '/img/card/icon/icon_goku.png',
+            '天': '/img/card/icon/icon_ten.png',
+            '雅': '/img/card/icon/miyabi.png',
+            '童': '/img/card/icon/icon_warabe.png',
+            '化': '/img/card/icon/icon_bake.png'
+          },
+          h = ['序', '上', '特', '極', '天', '雅', '童', '化'];
+        var html = '<table class="common_table1 center mt10">' + '<tbody>' + '<tr>' + '<th>' + types[type_key] + '</th>';
+        $.each(rare_icon, function(i, s) {
+          html += '<th><img src="' + img_root + s + '" alt="' + i + '" width="30" height="30" class="middle" /></th>';
+        });
+        var i, len;
+        for (i = 0, len = array.length; i < len; i++) {
+          html += '<tr>' + '<td>' + array[i].hour + '時</td>';
+          for (var j = 0, jlen = h.length; j < jlen; j++) {
+            var num = (array[i][h[j]] ? array[i][h[j]] : 0),
+              p = (array[i][h[j]] ? '</br>' + parseInt(array[i][h[j]] * 10000 / array[i].合計) / 100 + '%' : '')
+            html += '<td>' + num + p  + '</td>';
+          }
+          html += '</tr>';
+        }
+        html += '</tbody>' + '</table>';
+        $('div.ig_tilesection_innermid div.title:eq(0)').before(html);
+      }
     }
   }
   // 合成 白くじ引き
