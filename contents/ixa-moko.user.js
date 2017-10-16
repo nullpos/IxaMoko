@@ -1140,7 +1140,8 @@ function MokoMain($) {
       card_tool: {tag: 'deal', caption: '栞/取引検索/合成のツールチップを使用する'},
       trade_auxiliary: {tag: 'deal', caption: '出品補助機能を使用する'},
       trade_auto_pager: {tag: 'deal', caption: '取引オートページャー'},
-      one_auto_check: {tag: 'deal', caption: 'スキル強化・削除で対象が一つの場合のみ自動チェック'}
+      one_auto_check: {tag: 'deal', caption: 'スキル強化・削除で対象が一つの場合のみ自動チェック'},
+      present_all_get: {tag: 'deal', caption: 'すべてのプレゼントを受け取るを非表示にする'}
     },
     // 初期値
     defaultValue: function() {
@@ -1189,7 +1190,8 @@ function MokoMain($) {
             key == 'remove_bushodrama' ||
             key == 'prod_with_smalllot' ||
             key == 'punitive' ||
-            key == 'potential_regist') {
+            key == 'potential_regist' ||
+            key == 'present_all_get') {
             options[key] = false;
           } else if (key.indexOf('_mod') !== -1) {
             options[key] = '0';
@@ -19668,6 +19670,11 @@ function MokoMain($) {
 
       // ランクを表示
       add_rank($('div.ig_decksection_mid div.common_box3 td a.thickbox span'), $('div[id^="cardWindow_"]'));
+    }
+
+    // すべてのプレゼントを受け取るを非表示にする
+    if (options['present_all_get']) {
+      $('#ig_allbtn').hide();
     }
   }
 
