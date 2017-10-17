@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.4.4
+// @version      14.2.4.5
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.4.4";
+  var VERSION_NAME = "ver 14.2.4.5";
 
 // === Plugin ===
 
@@ -2574,7 +2574,7 @@ function MokoMain($) {
       };
     },
     levelup: function(page) {
-      return {
+      var obj = {
         select_card_group: $('#select_card_group').val(),
         select_filter_num: $('#select_filter_num').val(),
         base_cid: '',
@@ -2587,6 +2587,10 @@ function MokoMain($) {
         union_type: $('#union_type').val(),
         btn_change_flg: $('#btn_change_flg').val()
       };
+      if ($('#target_sort')[0]) {
+        obj['target_sort'] = $('#target_sort').val()
+      }
+      return obj;
     },
     remove: function(page) {
       return {
@@ -9019,7 +9023,7 @@ function MokoMain($) {
   function autoPager() {
     if (location.pathname == '/facility/set_unit_list.php' ||
         !options.pager_ajax || !$('#deck_file').length ||
-        (options.pager_ajax_mod != 1 && !$('#ig_decksection3 div.common_box3').length)) {
+        options.pager_ajax_mod != 1) {
       return;
     }
     var $pager = $('ul.pager');
