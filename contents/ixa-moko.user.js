@@ -608,7 +608,7 @@ function MokoMain($) {
     [ "栞壱", "栞弐", "お気に入り", "精鋭部隊", "登録なし", "-", "-" ],
     [ "cost0", "cost0.5", "cost1", "cost1.5", "cost2", "cost2.5", "cost3" ],
     [ "cost3.5", "cost4", "cost4.5", "-", "-", "-", "-" ],
-    [ "★0", "★1", "★2", "★3", "★4", "★5", "限界/極限" ],
+    [ "★0", "★1", "★2", "★3", "★4", "★5", "限界", "極限" ],
     [ "Lv.0", "Lv.20未満", "Lv.20", "-", "-", "-", "-" ]
   ],
   FILTER_TYPE_MENU = [
@@ -2709,7 +2709,8 @@ function MokoMain($) {
     var card_cost = $ig_card_cost.find('img').length ?
       parseFloat($ig_card_cost.find('img').attr('alt')) : parseFloat($ig_card_cost.text());
     var level = $parameta.find('span.ig_card_level').text() ? parseInt($parameta.find('span.ig_card_level').text()) : 20,
-      rank = $parameta.find('span.level_star img')[0] ? $parameta.find('span.level_star img')[0].outerHTML.match(/\d+/g)[3] / 20 : '限界/極限';
+      rank = $parameta.find('span.level_star img')[0] ? $parameta.find('span.level_star img')[0].outerHTML.match(/\d+/g)[3] / 20 :
+        $parameta.find('span.rank_over_limit img[alt="限界突破"]')[0] ? '限界' : '極限';
     var card_name = $parameta.find('span.ig_card_name').text(),
       hp = parseInt($parameta.find('span.ig_card_status_hp').text().match(/\d+/g)[0]),
       yari = $parameta.find('span.yari').attr('class').split('_')[1].toUpperCase(),
@@ -2817,6 +2818,7 @@ function MokoMain($) {
     var $table = target.find('table.ig_deck_smallcarddata');
 
     if ($table.length) {
+      // 合成ページ
       var $td_0 = $table.eq(0).find('td');
       var $td_1 = $table.eq(1).find('td');
       var $td_2 = $table.eq(2).find('td');
@@ -2828,7 +2830,11 @@ function MokoMain($) {
       rare = target.find('span.ig_deck_smallcard_cardrarety').text();
       card_cost = parseFloat($td_0.eq(0).text());
       if ($td_0.eq(1).find('img').length) {
-        card_rank = '限界/極限';
+        if ($td_0.eq(1).find('img.limitbreak')[0]) {
+          card_rank = '限界';
+        } else {
+          card_rank = '極限';
+        }
         card_level = 20; //限界/極限はLv.20で処理
       } else {
         array = $td_0.eq(1).text().match(/\d+/g);
@@ -2860,6 +2866,7 @@ function MokoMain($) {
         lv_list.push(level);
       }
     } else {
+      // 部隊ページ
       var reality = {
         ten: '天',
         goku: '極',
@@ -2892,7 +2899,11 @@ function MokoMain($) {
       rare = reality[rare];
       card_cost = parseFloat($p_0.eq(0).text().replace('コスト', ''));
       if ($div_0.find('img').length) {
-        card_rank = '限界/極限';
+        if ($div_0.find('img[alt="限界突破"]')[0]) {
+          card_rank = '限界';
+        } else {
+          card_rank = '極限';
+        }
         card_level = 20; //限界/極限はLv.20で処理
       } else {
         array = $p_0.eq(1).text().replace('レベル', '').replace('★', '');
@@ -2967,7 +2978,11 @@ function MokoMain($) {
     if (children.length == 1) {
       rank = 0;
     } else if (children.length == 3) {
-      rank = '限界/極限';
+      if ($rank.eq(0).find('img[alt="限界突破"]')) {
+        rank = '限界';
+      } else {
+        rank = '極限';
+      }
     } else {
       rank = children.item(0).nodeValue.length;
     }
@@ -7003,7 +7018,7 @@ function MokoMain($) {
       var _elem, data;
       _elem = elem.filter(function() {
         data = get_deck_cardarea($(this));
-        if (text != '限界/極限') {
+        if (text != '限界' && text != '極限') {
           text = text.match(/\d+/)[0];
         }
         if (text == data.rank) {
@@ -7093,7 +7108,8 @@ function MokoMain($) {
         case '★3':
         case '★4':
         case '★5':
-        case '限界/極限':
+        case '限界':
+        case '極限':
           deck_rank_filter(elem, text, type);
           break;
         case 'cost0':
@@ -11384,7 +11400,8 @@ function MokoMain($) {
         case '★3':
         case '★4':
         case '★5':
-        case '限界/極限':
+        case '限界':
+        case '極限':
           set_unit_rank_filter(elem, text, type);
           break;
         case 'cost0':
@@ -20623,8 +20640,10 @@ function MokoMain($) {
       var str = '';
       str += data.card_name + '\n\n';
       str += 'コスト' + data.cost + '\n';
-      if(data.rank == '限界/極限') {
+      if(data.rank == '限界') {
         str += 'レベル限界突破\n';
+      } else if(data.rank == '極限') {
+        str += 'レベル極限突破\n';
       } else {
         str += 'レベル★' + data.rank + '｜' + data.level + '\n';
       }
