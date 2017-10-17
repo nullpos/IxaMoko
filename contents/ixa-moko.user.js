@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.4.3
+// @version      14.2.4.4
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.4.3";
+  var VERSION_NAME = "ver 14.2.4.4";
 
 // === Plugin ===
 
@@ -5081,12 +5081,6 @@ function MokoMain($) {
       return;
     }
     if (!options.pager_ajax || options.pager_ajax_mod !== '0') {
-      return;
-    }
-    var $ig_decksection3 = $('#ig_decksection3'),
-      $common_box = $ig_decksection3.find('div.common_box3');
-
-    if ($common_box.length) {
       return;
     }
 
