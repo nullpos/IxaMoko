@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.4.2
+// @version      14.2.4.3
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.4.2";
+  var VERSION_NAME = "ver 14.2.4.3";
 
 // === Plugin ===
 
@@ -5058,7 +5058,7 @@ function MokoMain($) {
       if (i === now_page) {
         html += '<li><span>' + i + '</span></li>';
       } else {
-        html += '<li><a href="javascript:void(0);" class="ixamoko_deckpager" title="' + i + '" >' + i + '</a></li>';
+        html += '<li><a href="javascript:void(0);" class="ixamoko_deckpager" title="' + i + '" onClick="" >' + i + '</a></li>';
       }
     }
     $pager.html(html);
@@ -5125,7 +5125,10 @@ function MokoMain($) {
             new_deck_file = $html.find('#deck_file'),
             $cardarea = new_deck_file.find('div.ig_deck_smallcardarea');
           $cardarea.each(smallcardarea_check);
-          $deck_file.replaceWith(new_deck_file);
+          $deck_file.empty();
+          new_deck_file.children().each(function() {
+            $deck_file.append($(this));
+          });
           $deck_file = null;
           $('input[name="p"]').val(page);
 
@@ -19063,7 +19066,12 @@ function MokoMain($) {
         }
       });
     } else if(location.pathname == '/union/learn.php') {
-      var position = $('div.common_box3in:eq(1)').offset().top;
+      var position;
+      if ($('#ig_deck_smallcardarea_out')[0]) {
+        position = $('#ig_deck_smallcardarea_out').offset().top;
+      } else {
+        position = $('div.common_box3in:eq(1)').offset().top;
+      }
       $('html,body').animate({scrollTop: position, duration: 10});
     }
   }
