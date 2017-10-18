@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.4.5
+// @version      14.2.4.6
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.4.5";
+  var VERSION_NAME = "ver 14.2.4.6";
 
 // === Plugin ===
 
@@ -2588,7 +2588,11 @@ function MokoMain($) {
         btn_change_flg: $('#btn_change_flg').val()
       };
       if ($('#target_sort')[0]) {
-        obj['target_sort'] = $('#target_sort').val()
+        obj['target_sort'] = $('#target_sort').val();
+      }
+      if ($('#multi_select')[0]) {
+        obj['multi_select'] = $('#multi_select').val();
+        obj['added_cid_arr[0]'] = $('#added_cid_arr').val();
       }
       return obj;
     },
