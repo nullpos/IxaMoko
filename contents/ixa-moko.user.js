@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.4.6
+// @version      14.2.4.7
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.4.6";
+  var VERSION_NAME = "ver 14.2.4.7";
 
 // === Plugin ===
 
@@ -2593,6 +2593,11 @@ function MokoMain($) {
       if ($('#multi_select')[0]) {
         obj['multi_select'] = $('#multi_select').val();
         obj['added_cid_arr[0]'] = $('#added_cid_arr').val();
+      }
+      if ($('#material_arr_data')[0]) {
+        $('#material_arr_data input').each(function(i) {
+          obj['material_arr[' + i + ']'] = $(this).val();
+        });
       }
       return obj;
     },
@@ -18268,7 +18273,7 @@ function MokoMain($) {
         tensen_borders.push($(e).find('td:eq(0)').text().match(/(\d+)位/)[1]);
       });
 
-      var border_deferreds = tensen_borders.map(function(border) {
+      var time, border_deferreds = tensen_borders.map(function(border) {
         var d = $.Deferred();
         $.ajax({
           method: 'GET',
@@ -18276,6 +18281,7 @@ function MokoMain($) {
           beforeSend: xrwStatusText,
           cache: false
         }).done(function(html) {
+          time = $(html).find('span.update:eq(0)').text().trim();
           d.resolve($(html).find('table.ig_battle_table:eq(0) tr:eq(-1) td:eq(4)').text().trim());
         });
         return d.promise();
@@ -18283,7 +18289,7 @@ function MokoMain($) {
 
       $.when.apply($, border_deferreds)
       .done(function(){
-        var text = ' *天下戦功メモ* \n';
+        var text = ' *天下戦功メモ* ' + time + '\n';
         for(var i = 0; i < arguments.length; i++) {
           text += tensen_borders[i] + '位: ' + arguments[i] + ' \n';
         }
