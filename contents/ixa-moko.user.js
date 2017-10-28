@@ -4512,7 +4512,7 @@ function MokoMain($) {
   }
   // 敵襲情報の取得
   function getRaidData(elem) {
-    var $a = (elem.find('a [href^="/land"]').size() != 0) ? elem.find('a').eq(0) : elem.find('a').eq(1);
+    var $a = elem.find('a [href^="/user"]:eq(0)');
     var $td = elem.find('table.table_fightlist').find('td:eq(1)');
     var $td_bggray = elem.find('td.td_bggray');
     var org = $td_bggray.eq(0).find('span').contents();
