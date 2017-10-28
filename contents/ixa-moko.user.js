@@ -4478,7 +4478,9 @@ function MokoMain($) {
         url: '/facility/unit_status.php?dmo=enemy',
         cache: false,
         success: function(html) {
-          $html = $(html).find('div.ig_decksection_mid');
+          $html = $(html).find('div.ig_decksection_mid').filter(function(i, e) {
+            return !!$(e).find('a [href^="/land"]')[0];
+          });
           rrr = raidCreateArray($html, d);
           setStorage('ixamoko_raid_check', rrr);
           rTime = rrr[0].time;
