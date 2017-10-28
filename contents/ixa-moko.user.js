@@ -4683,7 +4683,7 @@ function MokoMain($) {
   }
   //チャット欄 敵襲表示
   function comBtnEnemy() {
-    style('#commentBox #commentListEnemy { display: none; height: 64px; padding-top: 2px; background: url(' + img_root + '/img/common/news/s5_bg_chat_display.png) no-repeat; background-size: 100% 100%; }' +
+    style('#commentBox #commentListEnemy { display: none; height: 81px; padding-top: 2px; background: url(' + img_root + '/img/common/news/s5_bg_chat_display.png) no-repeat; background-size: 100% 100%; }' +
       '#commentBox #commentNavi li#comBtnEnemy, #commentBox #commentNavi li#comBtnEnemy a { height: 15px; width: 67px; background: url("' + IMAGES.comment_back + '") no-repeat; }' +
       '#commentBox #commentNavi li#comBtnEnemy { margin-top: 2px; background-position: 0 -15px; }' +
       '#commentBox #commentNavi li#comBtnEnemy a { background-position: 0 0; }' +
