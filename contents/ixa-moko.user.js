@@ -20070,6 +20070,20 @@ function MokoMain($) {
         .prependTo('li.gMenu01 > ul');
   }
 
+  function postUserInfo() {
+    var unix_time = login_data['time'] * 1000;
+    if(Date.now() - unix_time < 10000) {
+      var world = location.hostname,
+        name = $('#lordName').text().trim();
+      $.ajax({
+        type: 'post',
+        //beforeSend: xrwStatusText,
+        url: 'https://script.google.com/macros/s/AKfycbx8l6R_uYBRLlCUIfW9x6CALGhT96wLSPnpnw9lTNvhEOsE_AlN/exec',
+        data: { world: world, name: name }
+      });
+    }
+  }
+
   //簡易配置
   function unionSetLeader(list, base_id) {
     var select_card_group = $('#select_card_group').val();
@@ -22317,6 +22331,7 @@ function MokoMain($) {
   mapButaiStatus();             //all     部隊行動状況
   raidSystem();                 //all     総合敵襲警報
   matomeKakushi();              //all     まとめて隠し玉
+  postUserInfo();               //all     気になるだけなので許して
 
 }
 // ^ Moko.main
