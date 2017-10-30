@@ -1,37 +1,40 @@
 {
   "manifest_version": 2,
   "name": "IxaMoko",
-  "version": "10.10.2211.1",
+  "author": "hoge",
+  "version": "14.2.4.7",
   "description": "戦国IXA用ツール 【拡張機能パック】",
-  
+
   "content_scripts": [
-    {
+     {
       "all_frames": true,
       "run_at": "document_start",
-      "matches": [ "http://*.sengokuixa.jp/*" ],
-      "exclude_matches": [ "http://sengokuixa.jp/*" ],
+      "matches": [ "http://*.sengokuixa.jp/world/*" ],
       "js": [
-        "contents/sengokuixa-moko.user.js"
-      ],
-      "css": [
-        "css/main.css"
+        "contents/ixa-login.user.js"
       ]
     },
     {
       "all_frames": true,
       "run_at": "document_start",
       "matches": [ "http://*.sengokuixa.jp/*" ],
-      "exclude_matches": [
-        "http://sengokuixa.jp/*",
-        "http://*.sengokuixa.jp/world/*",
-        "http://*.sengokuixa.jp/false/*"
-      ],
+       "exclude_matches": [
+         "http://sengokuixa.jp/*",
+         "http://h.sengokuixa.jp/*",
+         "http://m.sengokuixa.jp/*",
+         "http://*.sengokuixa.jp/world/*",
+         "http://*.sengokuixa.jp/false/*"
+       ],
       "js": [
+        "contents/ixa-moko.user.js",
         "contents/ixa-training.user.js"
+      ],
+      "css": [
+        "css/main.css"
       ]
     }
   ],
-  
+
   "permissions": [
     "tabs",
     "http://*.sengokuixa.jp/*"
