@@ -4470,7 +4470,7 @@ function MokoMain($) {
         cache: false,
         success: function(html) {
           $html = $(html).find('div.ig_decksection_mid').filter(function(i, e) {
-            return !!$(e).find('a [href^="/land"]')[0];
+            return !!$(e).find('a[href^="/land"]')[0];
           });
           rrr = raidCreateArray($html, d);
           setStorage('ixamoko_raid_check', rrr);
@@ -4505,7 +4505,7 @@ function MokoMain($) {
   }
   // 敵襲情報の取得
   function getRaidData(elem) {
-    var $a = elem.find('a [href^="/user"]:eq(0)');
+    var $a = elem.find('a[href^="/user"]:eq(0)');
     var $td = elem.find('table.table_fightlist').find('td:eq(1)');
     var $td_bggray = elem.find('td.td_bggray');
     var org = $td_bggray.eq(0).find('span').contents();
