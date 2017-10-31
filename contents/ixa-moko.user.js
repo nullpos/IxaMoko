@@ -4248,14 +4248,10 @@ function MokoMain($) {
       var date = new Date((list[i]['date'] + list[i]['time']) * 1000),
         h = date.getHours(), m = "0" + date.getMinutes(), s = "0" + date.getSeconds(),
         fmtTime = h + ':' + m.substr(-2) + ':' + s.substr(-2);
-      var $tr = j$(list[i]['html']).find('td'),
-        fromUser = (!!$tr.eq(1).find('a:eq(1)')) ?
-          [$tr.eq(1).find('a:eq(1)').text().trim(), $tr.eq(1).find('a:eq(1)').attr('href')] :
-          [$tr.eq(1).find('a:eq(0)').text().trim(), $tr.eq(1).find('a:eq(0)').attr('href')],
-        fromMap  = [$tr.eq(3).find('a').text().replace(/\n| |　/g, ''),
-          $tr.eq(3).find('a').attr('href')],
-        toMap    = [$tr.eq(5).find('a').text().replace(/\n| |　/g, ''),
-          $tr.eq(5).find('a').attr('href')];
+      var $a = j$(list[i]['html']).find('td a'),
+        fromUser = [$a.eq(0).text().trim().replace(/\n| |　/g, ''), $a.eq(0).attr('href')],
+        fromMap  = [$a.eq(1).text().trim().replace(/\n| |　/g, ''), $a.eq(1).attr('href')],
+        toMap    = [$a.eq(2).text().trim().replace(/\n| |　/g, ''), $a.eq(2).attr('href')];
 
       var text = replace_valid('<!channel> ' +
         username + 'に敵襲が来ているぞ！\n' +
@@ -4533,9 +4529,7 @@ function MokoMain($) {
     html += '' +
       '<td><a href="' + data.sortie_href + '" class="at_source" title="' + data.sortie_name + '">' + data.sortie_name + '</a></td>' +
       '<td>の</td>' +
-      '<td>' +
-        '<a href="' + data.org_href + '" class="at_source" title="' + data.org_base + ' ' + data.org_code + '">' + data.org_base + '</a>' +
-      '</td>' +
+      '<td><a href="' + data.org_href + '" class="at_source" title="' + data.org_base + ' ' + data.org_code + '">' + data.org_base + '</a></td>' +
       '<td>から</td>' +
       '<td><a href="' + data.des_href + '" title="' + data.des_base + ' ' + data.des_code + '">' + data.des_base + '</a></td>' +
     '</tr>';
