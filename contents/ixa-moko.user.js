@@ -1157,7 +1157,6 @@ function MokoMain($) {
           } else if (key == 'near_alarm') {
             options[key] = {
               tf: false,
-              place: '0,0',
               type: '39',
               alliance: ''
             };
@@ -1350,10 +1349,6 @@ function MokoMain($) {
                 setting_list += '<li>' +
                   '<label><input type="checkbox" class="ixamoko_setting" key="near_alarm" ' +
                   (options[key]['tf'] ? 'checked' : '') + ' /> ' + this.optionsKeys[key].caption + '</label>';
-                setting_list += '<li class="setting_sub">' +
-                  '<span>中心位置： </span><input type="text" id="near_alarm_place" value="'+ options[key]['place'] +'">' +
-                  '&nbsp;<input id="near_alarm_get_place" type="button" value="本領/出城の位置を取得" />' +
-                  '</li>';
                 setting_list += '<li class="setting_sub">' +
                   '<span>同盟名： </span><input type="text" id="near_alarm_alli" value="'+ options[key]['alliance'] +'">' +
                   '&nbsp;<input id="near_alarm_get_alli" type="button" value="同盟名を取得" />' +
@@ -1789,17 +1784,6 @@ function MokoMain($) {
         var potential_data = getStorage([], 'ixamoko_potential_data'),
           str = '"' + login_data.chapter + '_' + login_data.season + '": ' + toJSON(potential_data) + ',';
         $(this).after('<br /><textarea>' + str + '</textarea>').prop('disabled', true);
-      });
-      $('#near_alarm_get_place').click(function() {
-        var base;
-        if($('.sideBoxInner.basename.other_country').length == 0) {
-          base = $('.sideBoxInner.basename.my_country').find('li').eq(0);
-        } else {
-          base = $('.sideBoxInner.basename.other_country').find('li').eq(0);
-        }
-        var x = base.attr('data-village_x'), y = base.attr('data-village_y');
-        options['near_alarm']['place'] = x + ',' + y;
-        $('#near_alarm_place').val(x + ',' + y);
       });
       $('#near_alarm_get_alli').click(function() {
         var url = $('.gMenu07:eq(0)li a:eq(0)').attr('href');
@@ -4369,8 +4353,15 @@ function MokoMain($) {
     function filteringNearEnemy(data) {
       var option = options['near_alarm'],
         ret = [],
-        center = option['place'].split(','),
+        center,
         type = 0;
+      if(!!$('div.sideBoxInner.basename.other_country')[0]) {
+        var $li = $('div.sideBoxInner.basename.other_country li:eq(0)');
+        center = [$li.attr('data-village_x'), $li.attr('data-village_y')];
+      } else {
+        var $li = $('div.sideBoxInner.basename.my_country li:eq(0)');
+        center = [$li.attr('data-village_x'), $li.attr('data-village_y')];
+      }
       for(var i = 0; i < data.length; i++) {
         var place = data[i]['place'].split(','),
           dist = Math.sqrt(Math.pow(center[0] - place[0], 2) + Math.pow(center[1] - place[1], 2));
