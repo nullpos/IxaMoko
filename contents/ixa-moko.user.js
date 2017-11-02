@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.4.7
+// @version      14.2.4.10
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.4.7";
+  var VERSION_NAME = "ver 14.2.4.10";
 
 // === Plugin ===
 
@@ -1865,15 +1865,14 @@ function MokoMain($) {
         });
         options.raid_alarm_display_mod = result;
         //near alarm
-        var place = $('#near_alarm_place').val(),
-          alli = $('#near_alarm_alli').val(), flag = 0;
+        var alli = $('#near_alarm_alli').val(), flag = 0;
         $('.near_alarm_type').each(function(e) {
           if($(this).prop('checked')) {
             flag += Math.pow(2, e);
           }
         });
         options['near_alarm'] = {
-          tf: $('input[key=near_alarm]').prop('checked'), place: place, type: flag + '', alliance: alli
+          tf: $('input[key=near_alarm]').prop('checked'), type: flag + '', alliance: alli
         };
         setStorage('ixamoko_options', options);
         var word;
@@ -20054,21 +20053,6 @@ function MokoMain($) {
         .css('font-color', 'white').on('click', 'a', executeKakushi)
         .prependTo('li.gMenu01 > ul');
   }
-
-  function postUserInfo() {
-    var unix_time = login_data['time'] * 1000;
-    if(Date.now() - unix_time < 10000) {
-      var world = location.hostname,
-        name = $('#lordName').text().trim();
-      $.ajax({
-        type: 'post',
-        //beforeSend: xrwStatusText,
-        url: 'https://script.google.com/macros/s/AKfycbx8l6R_uYBRLlCUIfW9x6CALGhT96wLSPnpnw9lTNvhEOsE_AlN/exec',
-        data: { world: world, name: name }
-      });
-    }
-  }
-
   //簡易配置
   function unionSetLeader(list, base_id) {
     var select_card_group = $('#select_card_group').val();
@@ -22316,7 +22300,6 @@ function MokoMain($) {
   mapButaiStatus();             //all     部隊行動状況
   raidSystem();                 //all     総合敵襲警報
   matomeKakushi();              //all     まとめて隠し玉
-  postUserInfo();               //all     気になるだけなので許して
 
 }
 // ^ Moko.main

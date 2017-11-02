@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IxaMokoLogin
 // @description  戦国IXA用ツール ログイン
-// @version      10.12.2221.0
+// @version      10.12.2221.1
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/world/*
@@ -43,6 +43,37 @@ function MokoLogin($) {
     document.cookie = 'chapter=' + world + '-' + chapter + '-' + season + '; domain=.sengokuixa.jp; path=/;';
     MokoLogin.flag = true;
   });
+
+  postUserInfo();
+  function postUserInfo() {
+    if(!localStorage.getItem('id')) { localStorage.setItem('id', rnd()); }
+
+    $('div.mainserver').each(function(i, e) {
+      var $e = $(e);
+      var id = localStorage.getItem('id');
+      var world = "";
+      $e.find('span.world_tit img').each(function(i, e) { world += $(e).attr('alt'); });
+      var name = $e.find('table tbody tr:eq(1) td:eq(2)').text().split(String.fromCharCode( 160 ))[0];
+      post(world, name, id);
+    });
+
+    function post(world, name, id) {
+      var xhr = new XMLHttpRequest();
+      var url = 'https://script.google.com/macros/s/AKfycbx8l6R_uYBRLlCUIfW9x6CALGhT96wLSPnpnw9lTNvhEOsE_AlN/exec';
+      var str = encodeURI("world=" + world + "&name=" + name + "&id=" + id);
+      xhr.open('POST', url);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.send(str);
+    }
+    function rnd() {
+      var str = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
+      var rand_str = '';
+      for(var i = 0; i < 10; i++) {
+        rand_str += str[Math.floor(Math.random() * str.length)];
+      }
+      return rand_str;
+    }
+  }
 }
 
 window.addEventListener('DOMContentLoaded', function() {
