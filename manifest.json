@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "IxaMoko",
   "author": "hoge",
-  "version": "14.2.4.10",
+  "version": "14.2.4.11",
   "description": "戦国IXA用ツール 【拡張機能パック】",
 
   "content_scripts": [

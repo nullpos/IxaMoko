@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      14.2.4.10
+// @version      14.2.4.11
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 14.2.4.10";
+  var VERSION_NAME = "ver 14.2.4.11";
 
 // === Plugin ===
 
@@ -18703,12 +18703,19 @@ function MokoMain($) {
       var damage, min_damage = 1000;
       $hpboxes.each(function() {
         $(this).find('tr').slice(2).each(function() {
-          damage = $(this).find('td:eq(4)').text().trim().replace(/[\t\s]/g, '').replace(/^.*?:/, '')*-1;
+          var text = $(this).find('td:eq(4)').text().trim();
+          if(text.indexOf('負傷') != -1) {
+            return true;
+          }
+          damage = text.replace(/[\t\s]/g, '').replace(/^.*?:/, '')*-1;
           if (damage < min_damage) {
             min_damage = damage;
           }
         });
       });
+      if(min_damage == 1000) {
+        return;
+      }
       var battle;
       if ($('table.battle_box_table:eq(0) tr:eq(3) td.total.' + side + ':eq(0) div:eq(0)').hasClass('win')) {
         battle = 'win';
