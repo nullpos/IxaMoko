@@ -13405,11 +13405,13 @@ function MokoMain($) {
                   '<a href="javascript:void(0);" id="nearest_territory_view">最寄りの領地を中心に表示</a>' +
                 '</span>' +
               '</li>';
-
+      var houkokusho = (BATTLE_MODE == '天下統一戦中') ?
+        '<a href="/war/list.php?m=&s=1&name=lord&word=&' + 'x=' + data.x + '&y=' + data.y + '&country_id=' + data.c + '">ここの合戦報告書を見る</a>' :
+        '<a href="/war/list.php?m=&s=1&name=lord&word=&coord=map&' + coordinate + '">ここの合戦報告書を見る</a>';
       html += '<li class="moko_menu">' +
                 '<a href="javascript:void(0);" class="moko_tree_menu">ここの詳細<span>▶</span></a>' +
                 '<span class="' + menu_sub_class + '">' +
-                  '<a href="/war/list.php?m=&s=1&name=lord&word=&coord=map&' + coordinate + '">ここの合戦報告書を見る</a>' +
+                  houkokusho +
                   '<a id="enemy_around" style="display: none;" href="/war/fight_history.php?type=0&find_name=&find_x=' + data.x + '&find_y=' + data.y + '&find_length=10&btn_exec=true">周辺の敵襲状況を見る</a>' +
                   '<a href="javascript:void(0);" id="change_name" data-code="' + coordinate +'" style="display: none;">ここの名称を変更...</a>' +
                 '</span>' +
