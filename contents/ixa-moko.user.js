@@ -4350,7 +4350,7 @@ function MokoMain($) {
         ret = [],
         center,
         type = 0;
-      if(!!$('div.sideBoxInner.basename.other_country')[0]) {
+      if(!!$('div.sideBoxInner.basename.other_country')[0] && BATTLE_MODE != '天下統一戦中') {
         var $li = $('div.sideBoxInner.basename.other_country li:eq(0)');
         center = [$li.attr('data-village_x'), $li.attr('data-village_y')];
       } else {
