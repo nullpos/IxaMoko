@@ -15223,6 +15223,13 @@ function MokoMain($) {
         var $input = $(this).closest('TABLE').find('INPUT[id^="unit_value"]');
         $input.val($(this).text().match(/\d+/g)[0]);
       });
+
+      //コンパクト表示
+      //$('div[id^="TrainingBlock"] div.ig_tilesection_iconarea').hide();
+      $('div.ig_tilesection_training_info').css('border', '0');
+      $('p.ig_tile_explain.unit_info_explain').hide();
+      $('div.gradeup_before').toggleClass('gradeup_before');
+      $('div.gradeup_after').toggleClass('gradeup_after');
     }
     // 市
     if (fname.match(/市/)) {
