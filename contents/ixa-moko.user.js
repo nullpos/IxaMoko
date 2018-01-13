@@ -19083,6 +19083,8 @@ function MokoMain($) {
         position = $('div.common_box3in:eq(1)').offset().top;
       }
       $('html,body').animate({scrollTop: position, duration: 10});
+    } else if(location.pathname == '/union/rankup_result.php') {
+      $('p.mb10.mt10:eq(1)').append('<input type="button" value="ランクアップ画面へ" onclick="javascript:(function(){ window.location=\'/union/rankup.php\' })();" />');
     }
   }
 
