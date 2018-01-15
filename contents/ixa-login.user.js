@@ -32,7 +32,7 @@ function MokoLogin($) {
     var chapter = {
       1: '13',
       2: '14',
-      3: '12'
+      3: '15'
     }[chapter_num];
     var season = parseFloat(season_num).toString(10);
     if (!chapter) {
