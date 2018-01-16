@@ -19730,6 +19730,22 @@ function MokoMain($) {
       create_checkbox($html);
     }
 
+    if (!!location.pathname.match(/\/user\/present\.php/)) {
+      // 表示範囲のカード集計
+      $('<input />').attr({ type: 'button', id: 'card_summary',  value: 'ページ内のカードを集計' })
+        .css({ 'float': 'right', 'margin-right': '4px' })
+        .insertBefore('#presentAllForm')
+        .on('click', card_summary);
+
+      // ランクを表示
+      add_rank($('div.ig_decksection_mid div.common_box3 td a.thickbox span'), $('div[id^="cardWindow_"]'));
+    }
+
+    // すべてのプレゼントを受け取るを非表示にする
+    if (options['present_all_get']) {
+      $('#ig_allbtn').hide();
+    }
+
     if (!$pager.length) {
       return;
     }
@@ -19793,22 +19809,6 @@ function MokoMain($) {
       return;
     }
     $(window).scroll(adding_page);
-
-    if (!!location.pathname.match(/\/user\/present\.php/)) {
-      // 表示範囲のカード集計
-      $('<input />').attr({ type: 'button', id: 'card_summary',  value: 'ページ内のカードを集計' })
-        .css({ 'float': 'right', 'margin-right': '4px' })
-        .insertBefore('#presentAllForm')
-        .on('click', card_summary);
-
-      // ランクを表示
-      add_rank($('div.ig_decksection_mid div.common_box3 td a.thickbox span'), $('div[id^="cardWindow_"]'));
-    }
-
-    // すべてのプレゼントを受け取るを非表示にする
-    if (options['present_all_get']) {
-      $('#ig_allbtn').hide();
-    }
   }
 
 // ^ プレゼント
