@@ -1234,7 +1234,7 @@ function MokoMain($) {
     // 所領リスト
     createBaseList: function() {
       var list = [];
-      $('#sideboxBottom div.my_country li').each(function() {
+      $('#sideboxBottom div.my_country li, #sideboxBottom div.my_capital li').each(function() {
         var $children = $(this).children().eq(0),
           xy = $children.attr('title').split(' ')[1].match(/\(.+?\)/),
           name = $children.text();
@@ -3231,7 +3231,7 @@ function MokoMain($) {
   function warabeSetFlag(name) {
     var f = false;
     var $sideboxBottom = $('#sideboxBottom');
-    var my_home = $sideboxBottom.find('div.my_country li:first').children().eq(0).text();
+    var my_home = $sideboxBottom.find('div.my_capital li:first').children().eq(0).text();
     var other_home;
     $sideboxBottom.find('div.other_country').each(function() {
       if (BATTLE_MODE == '東西戦中') {
@@ -3712,7 +3712,7 @@ function MokoMain($) {
         $foreign_basename = $('#sideboxBottom div.other_country'),
         keyword = $foreign_basename.prev().find('h4').text(),
         select_base = $('#lordSiteArea').text(),
-        my_len = $('#gM01').find('ul li').length,
+        my_len = $('#gM01').find('ul li').length-1,
         base_list = [], //本領・所領
         battle_list = [], //自国 合戦拠点
         place_list = [], //他国 合戦拠点
@@ -3732,7 +3732,6 @@ function MokoMain($) {
         });
       }
     });
-    home_html += base_list.shift().html;
     var foreign_html;
     if (keyword == '他国') {
       foreign_html = '<ul>';
@@ -4357,7 +4356,7 @@ function MokoMain($) {
         var $li = $('div.sideBoxInner.basename.other_country li:eq(0)');
         center = [$li.attr('data-village_x'), $li.attr('data-village_y')];
       } else {
-        var $li = $('div.sideBoxInner.basename.my_country li:eq(0)');
+        var $li = $('div.sideBoxInner.basename.my_capital li:eq(0)');
         center = [$li.attr('data-village_x'), $li.attr('data-village_y')];
       }
       for(var i = 0; i < data.length; i++) {
@@ -15068,7 +15067,8 @@ function MokoMain($) {
     });
     // 存在しない拠点データは削除
     for (var key in facilitys) {
-      if (!$('div.my_country li[data-village_id="' + key + '"]').length) {
+      if (!$('div.my_country li[data-village_id="' + key + '"]').length &&
+          !$('div.my_capital li[data-village_id="' + key + '"]')) {
         delete facilitys[key];
       }
     }
