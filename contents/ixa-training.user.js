@@ -524,7 +524,7 @@
       //. home
       function home() {
         var list = [];
-        $('.sideBoxInner.basename.my_country LI > *:first-child').each(function() {
+        $('.sideBoxInner.basename.my_country LI > *:first-child, .sideBoxInner.basename.my_capital LI > *:first-child').each(function() {
           var name = $(this).text().trim(),
             village = Util.getVillageByName(name);
           if (!village) {
