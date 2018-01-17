@@ -17327,18 +17327,13 @@ function MokoMain($) {
     if (location.pathname != '/alliance/info.php') {
       return;
     }
-    var selector = (login_data.chapter == 14) ? $('img[alt="同盟情報"]').eq(1) : 'div.alli_family';
-    var css = (login_data.chapter == 14) ? {
+    var selector = $('img[alt="同盟情報"]').eq(1);
+    var css = {
         'height': 'auto',
         'width': 'auto',
         'margin': '0 0 0 10px',
         'vertical-align': 'bottom'
-       } : {
-        'cursor': 'pointer',
-        'height': '26px',
-        'width': '184px',
-        'margin-bottom': '5px'
-      };
+       };
     var $tr = $('table.common_table1 tr.fs12');
     $('<button id="show_continuous_defence">連続防衛数を表示</button>')
       .click(showContinuousDefence)
@@ -17349,35 +17344,19 @@ function MokoMain($) {
       nowLoading();
       var def_ar = [];
       $('table.common_table1').find('tr').eq(0).find('th').eq(-2).text('連続防衛');
-      if (login_data.chapter == 14) {
-        var $tr = $('table.common_table1 tr.fs12').not('.sub');
-        $tr.each(function() {
-          var $this = $(this);
-          var url = $this.find('td.profile_name a').attr('href');
-          def_ar.push($.ajax({
-            type: 'get',
-            url: url
-          })
-          .then(function(html) {
-            var def = $(html).find('.common_table1.center tr:eq(1) td:eq(4)').text().trim();
-            $this.find('td').eq(-2).text(def.replace('連続防衛', '').replace('合戦', ''));
-          }, null));
-        });
-      } else {
-        var $tr = $('table.common_table1 tr.fs12');
-        $tr.each(function() {
-          var $this = $(this);
-          var url = $this.find('td').eq(2).find('a').attr('href');
-          def_ar.push($.ajax({
-            type: 'get',
-            url: url
-          })
-          .then(function(html) {
-            var def = $(html).find('.common_table1.center').find('tr').eq(1).find('td').eq(4).text().trim();
-            $this.find('td').eq(-2).text(def.replace('連続防衛', '').replace('合戦', ''));
-          }, null));
-        });
-      }
+      var $tr = $('table.common_table1 tr.fs12').not('.sub');
+      $tr.each(function() {
+        var $this = $(this);
+        var url = $this.find('td.profile_name a').attr('href');
+        def_ar.push($.ajax({
+          type: 'get',
+          url: url
+        })
+        .then(function(html) {
+          var def = $(html).find('.common_table1.center tr:eq(1) td:eq(4)').text().trim();
+          $this.find('td').eq(-2).text(def.replace('連続防衛', '').replace('合戦', ''));
+        }, null));
+      });
       $.when.apply($, def_ar).then(function() { nowLoading(true); });
     }
   }
