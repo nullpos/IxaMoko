@@ -1,23 +1,27 @@
 // ==UserScript==
 // @name         IxaTraining
-// @description  一括兵士訓練ツール
-// @version      10.0.2.2
+// @description  戦国IXA用ツール 一括兵士訓練
+// @version      10.14.2300.0
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
 // @exclude      http://sengokuixa.jp/*
-// @exclude      http://world.sengokuixa.jp/*
+// @exclude      http://h.sengokuixa.jp/*
+// @exclude      http://m.sengokuixa.jp/*
+// @exclude      http://*.world.sengokuixa.jp/world/*
+// @exclude      http://*.sengokuixa.jp/false/*
 // @run-at       document-start
+// @grant        none
 // ==/UserScript==
 
 // https://github.com/metameta/sengokuixa-meta
 // meta【一括兵士訓練】上記を参考にしました
 
-
 (function () {
 
-  // meta
-  function meta($) {
+  // IxaTraining
+  function IxaTraining($) {
+    console.debug('Load... IxaTraining');
     'use strict';
     //■ プロトタイプ {
     var XRWstext = function(xhr) {
@@ -189,11 +193,14 @@
     });
 
     //■ metaStorage {
+    // ixa内ではArrayがJSON.stringify()で正しく文字列化されないのでtoJSON()で文字列化
+    var toJSON = function(o) {var type = typeof(o);if (o === null) {return 'null';}if (type == 'undefined') {return undefined;}if (type == 'number' || type == 'boolean') {return o + '';}if (type == 'string') {return quoteString(o);}if (type == 'object') {if (o.constructor === Date) {var month = o.getUTCMonth() + 1;if (month < 10) {month = '0' + month;}var day = o.getUTCDate();if (day < 10) {day = '0' + day;}var year = o.getUTCFullYear();var hours = o.getUTCHours();if (hours < 10) {hours = '0' + hours;}var minutes = o.getUTCMinutes();if (minutes < 10) {minutes = '0' + minutes;}var seconds = o.getUTCSeconds();if (seconds < 10) {seconds = '0' + seconds;}var milli = o.getUTCMilliseconds();if (milli < 100) {milli = '0' + milli;}if (milli < 10) {milli = '0' + milli;}return '"' + year + '-' + month + '-' + day + 'T' + hours + ':' + minutes + ':' + seconds + '.' + milli + 'Z"';}if (o.constructor === Array) {var ret = [];for (var i = 0, len = o.length; i < len; i++) {ret.push(toJSON(o[i]) || 'null');}return '[' + ret.join(',') + ']';}var pairs = [];for (var k in o) {var name;type = typeof k;if (type == "number") {name = '"' + k + '"';} else if (type == "string") {name = quoteString(k);} else {continue;}if (typeof o[k] == "function") {continue;}var val = toJSON(o[k]);pairs.push(name + ":" + val);}return '{' + pairs.join(', ') + '}';}},quoteString = function(s) {var _escapeable = /["\\\x00-\x1f\x7f-\x9f]/g;var _meta = {'\b': '\\b','\t': '\\t','\n': '\\n','\f': '\\f','\r': '\\r','"': '\\"','\\': '\\\\'};if (s.match(_escapeable)) {return '"' + s.replace(_escapeable, function(a) {var c = _meta[a];if (typeof c === 'string') {return c;}c = a.charCodeAt();return '\\u00' + Math.floor(c / 16).toString(16) + (c % 16).toString(16);}) + '"';}return '"' + s + '"';};
+
     var metaStorage = (function() {
       var storageList = {},
-        storagePrefix = 'IM.',
-        eventListener = {},
-        propNames = 'expires'.split(' ');
+          storagePrefix = document.body.className == 'current_owner_sub' ? 'zs_IM.': 'IM.',
+          eventListener = {},
+          propNames = 'expires'.split(' ');
 
       function metaStorage(name) {
         var storageName = storagePrefix + name,
@@ -210,6 +217,7 @@
         }
         return storage;
       }
+
       $.extend(metaStorage, {
         keys: {},
         registerStorageName: function(storageName) {
@@ -244,7 +252,8 @@
               exportData[value] = stringData;
             }
           });
-          return JSON.stringify(exportData);
+          // return JSON.stringify(exportData);
+          return toJSON(exportData);
         },
         change: function(name, callback) {
           var storageName = storagePrefix + name;
@@ -258,6 +267,7 @@
         this.data = {};
         return this;
       }
+
       $.extend(Storage.prototype, {
         clear: function() {
           this.data = {};
@@ -292,7 +302,7 @@
           delete this.tranData;
         },
         toJSON: function() {
-          return JSON.stringify(this.data);
+          return toJSON(this.data);
         }
       });
 
@@ -338,7 +348,8 @@
       }
 
       function save(storageArea, storageName, data) {
-        var stringData = JSON.stringify(data),
+        // var stringData = JSON.stringify(data),
+        var stringData = toJSON(data),
           storage;
         if (storageArea == 'local') {
           storage = localStorage;
@@ -351,6 +362,7 @@
           storage.setItem(storageName, stringData);
         }
       }
+
       $(window).on('storage', function(event) {
         var storageName = event.originalEvent.key,
           storage;
@@ -363,22 +375,12 @@
         }
         $(eventListener).trigger(storageName, event);
       });
+
       return metaStorage;
     })();
 
-    'ENVIRONMENT SETTINGS VILLAGE FACILITY ALLIANCE COUNTDOWN UNIT_STATUS USER_FALL USER_INFO FAVORITE_UNIT'.split(' ').forEach(function(value) {
+    'ENVIRONMENT VILLAGE FACILITY TRAINING'.split(' ').forEach(function(value) {
       metaStorage.registerStorageName(value);
-    });
-    '1 2 3 4 5 6 7 8 9 10 11 12 20 21'.split(' ').forEach(function(value) {
-      metaStorage.registerStorageName('COORD.' + value);
-    });
-    'UNION_CARD'.split(' ').forEach(function(value) {
-      metaStorage.registerSessionName(value);
-    });
-    metaStorage.change('UNIT_STATUS', function(event, storageEvent) {
-      $('#imi_unitstatus').trigger('update');
-      $('#imi_raid_list').trigger('update');
-      $('#imi_basename').trigger('update');
     });
     // } metaStorage
 
@@ -424,11 +426,8 @@
         document.cookie = world + '_c=0; expires=Fri, 31-Dec-1999 23:59:59 GMT; domain=.sengokuixa.jp; path=/;';
         if (newseason !== season) {
           //期が変わった場合
-          'VILLAGE FACILITY ALLIANCE COUNTDOWN UNIT_STATUS USER_FALL USER_INFO FAVORITE_UNIT'.split(' ').forEach(function(value) {
+          'VILLAGE FACILITY FACILITY TRAINING'.split(' ').forEach(function(value) {
             metaStorage(value).clear();
-          });
-          '1 2 3 4 5 6 7 8 9 10 11 12 20 21'.split(' ').forEach(function(value) {
-            metaStorage('COORD.' + value).clear();
           });
           season = newseason;
         }
@@ -441,8 +440,8 @@
         war = 0;
       }
       if (login && war === 0) {
-        metaStorage('USER_FALL').clear();
-        metaStorage('USER_INFO').clear();
+        // metaStorage('USER_FALL').clear();
+        // metaStorage('USER_INFO').clear();
       }
       return {
         //. loginProcess
@@ -561,25 +560,6 @@
         });
         return list;
       }
-      //. coords
-      function coords(country) {
-        var list = [],
-          map_list = metaStorage('COORD.' + country).data;
-        for (var key in map_list) {
-          var point = key.match(/(-?\d+),(-?\d+)/),
-            x = point[1].toInt(),
-            y = point[2].toInt();
-          list.push({
-            type: 2,
-            id: null,
-            name: map_list[key],
-            x: x,
-            y: y,
-            color: '#ff0'
-          });
-        }
-        return list;
-      }
       //. return
       return {
         all: function(country) {
@@ -600,33 +580,7 @@
 
     //■ Soldier {
     var Soldier = (function() {
-      var data_11s = {
-        // 槍
-        '足軽':     { type: 321, training: [85], order: 1 },
-        '長槍足軽': { type: 322, training: [100], order: 2 },
-        '武士':     { type: 323, training: [115], order: 3 },
-        // 弓
-        '弓足軽':   { type: 325, training: [90], order: 1 },
-        '長弓兵':   { type: 326, training: [105], order: 2 },
-        '弓騎馬':   { type: 327, training: [120], order: 3 },
-        // 馬
-        '騎馬兵':   { type: 329, training: [95], order: 1 },
-        '精鋭騎馬': { type: 330, training: [110], order: 2 },
-        '赤備え':   { type: 331, training: [125], order: 3 },
-        // 器
-        '破城鎚':   { type: 333, training: [163], order: 1 },
-        '攻城櫓':   { type: 334, training: [183], order: 2 },
-        '大筒兵':   { type: 335, training: [203], order: 3 },
-        '鉄砲足軽': { type: 336, training: [173], order: 4 },
-        '騎馬鉄砲': { type: 337, training: [193], order: 5 },
-        '焙烙火矢': { type: 345, training: [183], order: 6 }
-      };
-      var data_12s = {
-        // 器
-        '破城鎚':   { type: 333, training: [126], order: 1 },
-        '攻城櫓':   { type: 334, training: [143], order: 2 }
-      };
-      var data_13s = {
+      var data_14s = {
         // 槍
         '足軽':     { type: 321, training: [82], order: 1 },
         '長槍足軽': { type: 322, training: [97], order: 2 },
@@ -642,20 +596,51 @@
         // 器
         '破城鎚':   { type: 333, training: [95], order: 1 },
         '攻城櫓':   { type: 334, training: [109], order: 2 },
-        '大筒兵':   { type: 335, training: [195], order: 3 },
-        '鉄砲足軽': { type: 336, training: [170], order: 4 },
-        '騎馬鉄砲': { type: 337, training: [190], order: 5 },
-        '焙烙火矢': { type: 345, training: [180], order: 6 },
-        '穴太衆':   { type: 346, training: [200], order: 7 }
+        '穴太衆':   { type: 346, training: [200], order: 3 },
+        '大筒兵':   { type: 335, training: [195], order: 4 },
+        '鉄砲足軽': { type: 336, training: [170], order: 5 },
+        '騎馬鉄砲': { type: 337, training: [190], order: 6 },
+        '焙烙火矢': { type: 345, training: [180], order: 7 }
+      };
+      var data_15s = {
+        // 槍
+        '足軽': { type: 321, training: [82], order: 1 },
+        '長槍足軽': { type: 322, training: [97], order: 2 },
+        '武士': { type: 323, training: [112], order: 3 },
+        // 弓
+        '弓足軽': { type: 325, training: [87], order: 1 },
+        '長弓兵': { type: 326, training: [102], order: 2 },
+        '弓騎馬': { type: 327, training: [117], order: 3 },
+        // 馬
+        '騎馬兵': { type: 329, training: [92], order: 1 },
+        '精鋭騎馬': { type: 330, training: [107], order: 2 },
+        '赤備え': { type: 331, training: [122], order: 3 },
+        // 器
+        '破城鎚': { type: 333, training: [95], order: 1 },
+        '攻城櫓': { type: 334, training: [105], order: 2 },
+        '穴太衆': { type: 346, training: [120], order: 3 },
+        '大筒兵': { type: 335, training: [180], order: 4 },
+        '鉄砲足軽': { type: 336, training: [170], order: 5 },
+        '騎馬鉄砲': { type: 337, training: [190], order: 6 },
+        '焙烙火矢': { type: 345, training: [180], order: 7 }
       };
 
       var data;
-      if (Env.chapter == 11) {
-        data = data_11s;
-      } else if (Env.chapter == 12) {
-        data = $.extend(data_11s, data_12s);
+      if (Env.chapter >= 15) {
+        data = data_15s;
       } else {
-        data = data_13s;
+        data = data_14s;
+      }
+
+      function crArray(arr) {
+        for (var i = 1; i < 15; i++) {
+          arr[i] = 0;
+        }
+        return arr;
+      }
+
+      for (var key in data) {
+        data[key].training = crArray(data[key].training);
       }
 
       function Soldier() {
@@ -665,7 +650,6 @@
       $.extend(Soldier, {
         nameKeys: {},
         typeKeys: {},
-        classKeys: {},
         dataKeys: {},
         //. getByName
         getByName: function(name) {
@@ -688,7 +672,6 @@
         if (value.type) {
           Soldier.nameKeys[key] = value.type;
           Soldier.typeKeys[value.type] = key;
-          Soldier.classKeys[value.class] = key;
           Soldier.dataKeys[key] = value;
         }
       });
@@ -708,8 +691,8 @@
       },
       //. getVillageByName
       getVillageByName: function(name) {
-        var list = metaStorage('VILLAGE').get('list') || [],
-          i, len;
+        var list, i, len;
+        list = metaStorage('VILLAGE').get('list') || [];
         for (i = 0, len = list.length; i < len; i++) {
           if (list[i].name != name) {
             continue;
@@ -728,8 +711,8 @@
       },
       //. getVillageById
       getVillageById: function(id) {
-        var list = metaStorage('VILLAGE').get('list') || [],
-          i, len;
+        var list, i, len;
+        list = metaStorage('VILLAGE').get('list') || [];
         for (i = 0, len = list.length; i < len; i++) {
           if (list[i].id != id) {
             continue;
@@ -747,63 +730,19 @@
         return null;
       },
       //. getVillageList
-      getVillageList: function() {
+      getVillageList: function () {
         var list = [];
-        $.ajax({
-          type: 'get',
-          url: '/user/',
-          async: false,
-          beforeSend: XRWstext
-        })
-        .done(function(html) {
-          var $html = $(html),
-            $table = $html.find('TABLE.common_table1');
-          //本領所領
-          $table.eq(0).find('TR.fs14').each(function() {
-            var $this = $(this),
-              type = $this.find('TD').eq(0).text(),
-              $a = $this.find('A'),
-              name = $a.eq(0).text().trim(),
-              id = $a.eq(0).attr('href').match(/village_id=(\d+)/)[1],
-              point = $a.eq(1).attr('href').match(/x=(-?\d+)&y=(-?\d+)&c=(\d+)/),
-              x = point[1].toInt(),
-              y = point[2].toInt(),
-              country = point[3].toInt(),
-              fall = $this.find('TD').eq(4).find('.red').length;
-            list.push({
-              type: type,
-              id: id,
-              name: name,
-              x: x,
-              y: y,
-              country: country,
-              fall: fall
-            });
+        var $li = Env.chapter >= 15 ? $('#sideboxBottom div.my_capital li, .sideBoxInner.basename.my_country li') : $('#sideboxBottom div.my_country li');
+        $li.each(function(index, el) {
+          list.push({
+            id: $(this).data('village_id'),
+            name: $(this).children().eq(0).text(),
+            x: $(this).data('village_x'),
+            y: $(this).data('village_y'),
+            country: $(this).data('village_c')
           });
-          //出城・陣・領地
-          $table.eq(1).find('TR.fs14').each(function() {
-            var $this = $(this),
-              type = $this.find('TD').eq(0).text(),
-              $a = $this.find('A'),
-              name = $a.eq(0).text().trim(),
-              id = $a.eq(0).attr('href').match(/village_id=(\d+)/)[1],
-              point = $a.eq(1).attr('href').match(/x=(-?\d+)&y=(-?\d+)&c=(\d+)/),
-              x = point[1].toInt(),
-              y = point[2].toInt(),
-              country = point[3].toInt(),
-              fall = $this.find('TD').eq(4).find('.red').length;
-            list.push({
-              type: type,
-              id: id,
-              name: name,
-              x: x,
-              y: y,
-              country: country,
-              fall: fall
-            });
-          });
-          metaStorage('VILLAGE').set('list', list);
         });
+        metaStorage('VILLAGE').set('list', list);
         return list;
       },
       //. getVillageCurrent
@@ -818,42 +757,40 @@
       //. getPoolSoldiers
       getPoolSoldiers: function() {
         var data = {};
-        $.ajax({
+        var html = $.ajax({
           type: 'get',
           url: '/facility/unit_list.php',
           async: false,
           beforeSend: XRWstext
-        })
-        .then(function(html) {
-          var $html = $(html),
-            $table, $cell, text;
-          text = $html.find('.ig_solder_commentarea').text().split('/')[1].trim();
-          data.capacity = text.toInt();
-          data.soldier = $html.find('#all_pool_unit_cnt').text().toInt();
-          data.pool = {};
-          data.training = [];
-          $table = $html.find('.ig_fight_dotbox');
-          $table.first().find('TH').each(function() {
-            var $this = $(this),
-              type = Soldier.getType($this.text()),
-              pool = $this.next().text().toInt();
-            data.pool[type] = pool;
-          });
-          $table.eq(1).find('.table_fightlist2').each(function() {
-            var $tr = $(this).find('TR'),
-              name = $tr.first().find('A').text(),
-              village = Util.getVillageByName(name);
-            $tr.slice(1).each(function() {
-              var $td = $(this).find('TD'),
-                type = Soldier.getType($td.eq(0).find('IMG').attr('alt')),
-                num = $td.eq(1).text().toInt(),
-                finish = $td.eq(3).text().getTime();
-              data.training.push({
-                id: village.id,
-                type: type,
-                num: num,
-                finish: finish
-              });
+        }).responseText;
+        var $html = $(html),
+          $table, $cell, text;
+        text = $html.find('.ig_solder_commentarea').text().split('/')[1].trim();
+        data.capacity = text.toInt();
+        data.soldier = $html.find('#all_pool_unit_cnt').text().toInt();
+        data.pool = {};
+        data.training = [];
+        $table = $html.find('.ig_fight_dotbox');
+        $table.first().find('TH').each(function() {
+          var $this = $(this),
+            type = Soldier.getType($this.text()),
+            pool = $this.next().text().toInt();
+          data.pool[type] = pool;
+        });
+        $table.eq(1).find('.table_fightlist2').each(function() {
+          var $tr = $(this).find('TR'),
+            name = $tr.first().find('A').text(),
+            village = Util.getVillageByName(name);
+          $tr.slice(1).each(function() {
+            var $td = $(this).find('TD'),
+              type = Soldier.getType($td.eq(0).find('IMG').attr('alt')),
+              num = $td.eq(1).text().toInt(),
+              finish = $td.eq(3).text().getTime();
+            data.training.push({
+              id: village.id,
+              type: type,
+              num: num,
+              finish: finish
             });
           });
         });
@@ -876,7 +813,8 @@
       },
       //. getFacility
       getFacility: function(name) {
-        var data = metaStorage('FACILITY').data,
+        var data = localStorage.ixamoko_facilitys ?
+          JSON.parse(localStorage.ixamoko_facilitys) : metaStorage('FACILITY').data,
           list = [];
         (function() {
           var facility_list, village, facility;
@@ -919,16 +857,6 @@
           $('#iron').text().toInt(),
           $('#rice').text().toInt()
         ];
-      },
-      //. getUranai
-      getUranai: function() {
-        var $img = $('.rightF IMG');
-        if ($img.length === 0) {
-          return [1, 1, 1];
-        }
-        return $img.map(function() {
-          return (100 - $(this).attr('alt').match(/\d/)[0].toInt()) / 100;
-        });
       },
       //. checkExchange
       checkExchange: function(resource, requirements, rate) {
@@ -1035,51 +963,50 @@
       getValidSoldiers: function(facility) {
         var url = Util.getVillageChangeUrl(facility.id, '/facility/facility.php?x=' + facility.x + '&y=' + facility.y),
           soldiers = [];
-        $.ajax({
+        var html = $.ajax({
           type: 'get',
           url: url,
           async: false,
           beforeSend: XRWstext
-        })
-        .then(function(html) {
-          var $html = $(html),
-            idx = 0;
-          if ($html.find('DIV[id^="TrainingBlock"]').length) {
-            idx = 1;
+        }).responseText;
+        var $html = $(html),
+          idx = 0;
+        if ($html.find('DIV[id^="TrainingBlock"]').length) {
+          idx = 1;
+        }
+        $html.find('.ig_tilesection_innermid, .ig_tilesection_innermid2').each(function() {
+          var $this = $(this),
+            name, materials, soldata, $div, str;
+          $div = $this.closest('DIV[id^="TrainingBlock"]');
+          str = $div.find('DIV.ig_decksection_top').text();
+          if (str == '高速訓練' || str == '上位訓練') {
+            return;
           }
-          $html.find('.ig_tilesection_innermid, .ig_tilesection_innermid2').each(function() {
-            var $this = $(this),
-              name, materials, soldata, $div, str;
-            $div = $this.closest('DIV[id^="TrainingBlock"]');
-            str = $div.find('DIV.ig_decksection_top').text();
-            if (str == '高速訓練' || str == '上位訓練') {
-              return;
-            }
-            if ($this.find('H3').length === 0) {
-              return;
-            }
-            if ($this.find('H3 A').length > 0) {
-              return;
-            }
-            name = $this.find('H3').text().match(/\[(.*)\]/)[1];
-            materials = [
-              $this.find('.icon_wood').text().match(/(\d+)/)[1].toInt(),
-              $this.find('.icon_cotton').text().match(/(\d+)/)[1].toInt(),
-              $this.find('.icon_iron').text().match(/(\d+)/)[1].toInt(),
-              $this.find('.icon_food').text().match(/(\d+)/)[1].toInt()
-            ];
-            soldata = Soldier.getByName(name);
-            var image = $this.find('.ig_tilesection_iconarea IMG').attr('src');
-            soldiers.push({
-              type: soldata.type,
-              name: name,
-              materials: materials,
-              training: soldata.training,
-              image: image,
-              order: soldata.order
-            });
+          if ($this.find('H3').length === 0) {
+            return;
+          }
+          if ($this.find('H3 A').length > 0) {
+            return;
+          }
+          name = $this.find('H3').text().match(/\[(.*)\]/)[1];
+          materials = [
+            $this.find('.icon_wood').text().match(/(\d+)/)[1].toInt(),
+            $this.find('.icon_cotton').text().match(/(\d+)/)[1].toInt(),
+            $this.find('.icon_iron').text().match(/(\d+)/)[1].toInt(),
+            $this.find('.icon_food').text().match(/(\d+)/)[1].toInt()
+          ];
+          soldata = Soldier.getByName(name);
+          var image = $this.find('.ig_tilesection_iconarea IMG').attr('src');
+          soldiers.push({
+            type: soldata.type,
+            name: name,
+            materials: materials,
+            training: soldata.training,
+            image: image,
+            order: soldata.order
           });
         });
+
         return soldiers.reverse();
       },
       //. getMaxTraining
@@ -1180,7 +1107,6 @@
     //■ Display {
     var Display = (function() {
       var $sysmessage;
-
       function Dialog(options) {
         var $overlay = $('<div id="imi_overlay"><div class="imc_overlay" /><div id="imi_dialog_container" /></div>'),
           $container = $overlay.find('#imi_dialog_container'),
@@ -1499,6 +1425,17 @@
         $html.trigger('metaupdate');
         return dfd;
       },
+      //. getLocaleDate
+      getLocaleDate: function() {
+        return new Date().toLocaleDateString();
+      },
+      //. toTrainingTime
+      toTrainingTime: function() {
+        var obj = metaStorage('TRAINING').get('time');
+        for (var key in obj.value) {
+          Soldier.dataKeys[key].training = obj.value[key];
+        }
+      },
       //. preDialogTraining
       preDialogTraining: function() {
         var ol = Display.dialog();
@@ -1514,17 +1451,28 @@
           Util.wait(1000).then(ol.close);
           return false;
         }
-        return Display.getTrainingTime(0, 0, obj, ol);
+        // 占い結果で毎日訓練時間が変わるので日付が違う場合のみ更新
+        var data = metaStorage('TRAINING').get('time') || { update: null, value: {} };
+        if (data.update != Display.getLocaleDate()) {
+          return Display.getTrainingTime(0, 0, obj, ol, data);
+        } else {
+          Display.toTrainingTime();
+          ol.message('総合情報取得中...');
+          return setTimeout(Display.dialogTraining, 100, ol);
+        }
       },
       //. getTrainingTime
-      getTrainingTime: function(key_idx, arr_idx, obj, ol) {
+      getTrainingTime: function(key_idx, arr_idx, obj, ol, data) {
          if (Object.keys(obj).length == key_idx) {
+          data.update = Display.getLocaleDate();
+          metaStorage('TRAINING').set('time', data);
+          Display.toTrainingTime();
           ol.message('総合情報取得中...');
-          return setTimeout(Display.dialogTraining, 200, ol);
+          return setTimeout(Display.dialogTraining, 100, ol);
         }
         var key =  Object.keys(obj)[key_idx];
         if (arr_idx === 0) {
-          ol.message(key + 'の情報取得中...');
+          ol.message('「' + key + '」の訓練時間を取得中...');
         }
         var facility = obj[key][arr_idx];
         var url = Util.getVillageChangeUrl(facility.id, '/facility/facility.php?x=' + facility.x + '&y=' + facility.y);
@@ -1551,21 +1499,36 @@
             name = $this.find('H3').text().match(/\[(.*)\]/)[1];
             // 訓練時間を取得
             var $tr = $this.find('FORM[name="createUnitForm"]').closest('TR');
-            Soldier.dataKeys[name].training[facility.lv - 1] = $tr.find('TD:eq(0) SPAN').text().toSecond();
+            if (!data.value[name]) {
+              data.value[name] = Soldier.dataKeys[name].training;
+            }
+            data.value[name][facility.lv - 1] = $tr.find('TD:eq(0) SPAN').text().toSecond();
           });
           arr_idx++;
           if (obj[key].length == arr_idx) {
             key_idx++;
             arr_idx = 0;
           }
-          return Display.getTrainingTime(key_idx, arr_idx, obj, ol);
+          return Display.getTrainingTime(key_idx, arr_idx, obj, ol, data);
         });
       },
       //. dialogTraining
       dialogTraining: function(ol) {
-        var current = Util.getVillageCurrent(), // 選択中拠点id
-        data = metaStorage('FACILITY').data,
-        pooldata = Util.getPoolSoldiers(),
+        var current = Util.getVillageCurrent(); // 選択中拠点obj
+        // 所領以外の拠点選択中の場合データが取得できないので改めて取得する
+        if (!current) {
+          var $li = $('#sideboxBottom li.on');
+          current = {
+            id: $li.data('village_id'),
+            name: $li.children('span').text(),
+            x: $li.data('village_x'),
+            y: $li.data('village_y'),
+            country: $li.data('village_c')
+          };
+        }
+        var data = localStorage.ixamoko_facilitys ?
+          JSON.parse(localStorage.ixamoko_facilitys) : metaStorage('FACILITY').data;
+        var pooldata = Util.getPoolSoldiers(),
         facilities = {},
         fcount = 0,
         vcount = 0,
@@ -1623,7 +1586,6 @@
           facilities[key] = facility;
           fcount++;
         });
-
         if (fcount === 0) {
           ol.message('訓練可能な施設は見つかりませんでした。');
           Util.wait(1000).then(ol.close);
@@ -1694,9 +1656,11 @@
         });
 
         $table.append($tr);
-        $table.append('<tr><th>施設</th>' + '<th>Lv</th><th>人数</th><th>時間</th>'.repeat(fcount) + '</tr>');
+        $table.append('<tr><th>施設 [<a href="javascript:void(0);" id="imc-resetData">リセット</a>]</th>' + '<th>Lv</th><th>人数</th><th>時間</th>'.repeat(fcount) + '</tr>');
+
         //各拠点
         $.each(data, function(key, elem) {
+          console.log(key);
           var village = Util.getVillageById(key);
           $tr = $('<tr />');
           $tr.append('<td>' + village.name + '</td>');
@@ -1751,6 +1715,14 @@
         '<div id="imi_training_message"></div>' +
         '</div>' +
         '');
+
+        $html.on('click', '#imc-resetData', function(e) {
+          if (!confirm('データをリセットしてよろしいですか？')) {
+            return;
+          }
+          var storage = metaStorage('TRAINING').remove('time');
+          $('#imi_overlay').remove();
+        });
 
         $html.on('click', '.imc_input_type LI', function() {
           var $this = $(this),
@@ -2009,8 +1981,8 @@
 
         dialog = Display.dialog({
           title: '一括兵士訓練',
-          width: 935,
-          height: 505,
+          width: 930,
+          height: 480,
           top: 50,
           content: $html,
           buttons: {
@@ -2183,7 +2155,7 @@
     exPage.registerAction('village', {
       //. main
       main: function() {
-        this.getFacilityList();
+        localStorage.ixamoko_facilitys ? null : this.getFacilityList();
       },
       //. getFacilityList
       getFacilityList: function() {
@@ -2249,11 +2221,7 @@
 
   // load
   window.addEventListener('DOMContentLoaded', function() {
-
-    if (location.pathname == '/top' || location.pathname == '/banner/' || location.pathname == '/false/login_sessionout.php' || location.pathname == '/user/first_login.php') {
-      return;
-    }
-
+    // console.debug(document.readyState);
     var style = document.createElement('style');
     style.setAttribute('type','text/css');
     style.innerHTML = '' +
@@ -2292,8 +2260,8 @@
     document.head.appendChild(style);
 
     var scriptMeta = document.createElement('script');
-      scriptMeta.setAttribute('type','text/javascript');
-      scriptMeta.textContent = '(' + meta.toString() + ')(j213$);';
+    scriptMeta.setAttribute('type','text/javascript');
+    scriptMeta.textContent = '(' + IxaTraining.toString() + ')(j213$);';
     document.head.appendChild(scriptMeta);
   });
 
