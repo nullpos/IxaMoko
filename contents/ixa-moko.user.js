@@ -5033,7 +5033,6 @@ function MokoMain($) {
       $('ul.pager').css({
         'overflow-x': 'auto',
         'overflow-y': 'hidden',
-        'white-space': 'nowrap',
         'width': '442px',
         'padding': '5px 0 0 0'
       });
