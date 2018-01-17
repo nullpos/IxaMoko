@@ -19653,7 +19653,7 @@ function MokoMain($) {
         }).responseJSON.card_data;
       },
       createKakushiList = function(list) {
-        var nameList = [ '小姓の応援', '小姓の隠し玉', '高橋Ｐ', 'ルルハ', 'すみれ' ];
+        var nameList = [ '小姓の応援', '小姓の隠し玉', '高橋Ｐ', 'ルルハ', 'すみれ', '鋼鉄素来夢王' ];
         return list.filter(function(e) {
           for(var i = 0; i < nameList.length; i++) {
             if(e.name == nameList[i] && e.protect_flg != "1") {
