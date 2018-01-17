@@ -5023,13 +5023,11 @@ function MokoMain($) {
     if (location.pathname == '/card/deck.php') {
       $('#bar_card .pager').css({
         'top': '14px',
-        'width': '400px',
         'height': 'initial'
       });
       $('ul.pager').css({
         'overflow-x': 'auto',
-        'overflow-y': 'hidden',
-        'white-space': 'nowrap'
+        'overflow-y': 'hidden'
       });
     } else {
       $('ul.pager').css({
