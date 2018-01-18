@@ -5034,7 +5034,8 @@ function MokoMain($) {
         'overflow-x': 'auto',
         'overflow-y': 'hidden',
         'width': '442px',
-        'padding': '5px 0 0 0'
+        'padding': '5px 0 0 0',
+        'height': 'initial'
       });
     }
 
