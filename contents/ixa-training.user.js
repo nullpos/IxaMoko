@@ -732,7 +732,7 @@
       //. getVillageList
       getVillageList: function () {
         var list = [];
-        var $li = Env.chapter >= 15 ? $('#sideboxBottom div.my_capital li, .sideBoxInner.basename.my_country li') : $('#sideboxBottom div.my_country li');
+        var $li = $('#sideboxBottom').find('div.my_capital li, div.my_country li');
         $li.each(function(index, el) {
           list.push({
             id: $(this).data('village_id'),
@@ -1660,7 +1660,6 @@
 
         //各拠点
         $.each(data, function(key, elem) {
-          console.log(key);
           var village = Util.getVillageById(key);
           $tr = $('<tr />');
           $tr.append('<td>' + village.name + '</td>');
