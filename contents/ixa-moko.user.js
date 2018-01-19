@@ -5126,6 +5126,9 @@ function MokoMain($) {
             $('div[id^="cardWindow_"]').remove();
             $('#sidebar').before(new_cardWindow);
           }
+          if (location.pathname == '/union/levelup.php') {
+            btnImgeUpdate();
+          }
 
           tb_init('a.thickbox');
           favoriteSort();
