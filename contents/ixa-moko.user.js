@@ -5470,6 +5470,7 @@ function MokoMain($) {
       '<li>部隊コスト：<span id="allcost">' + deck_unit.cost + '</span></li>' +
       '<li>総兵数：<span id="solno">' + deck_unit.sol + '</span></li>' +
       '<li id="total_power" style="min-width: 150px;">攻撃力：' + getUnitAtt() + ' / 防御力：' + getUnitDef() + '</li>' +
+      '<li id="get_busho_data">武将データを取得</li>' +
       '</ul>' +
       '</div>' +
       '<div id="fixmenu_bottom">' +
@@ -5508,6 +5509,33 @@ function MokoMain($) {
 
     $('#now_deck').on('click', function() {
       return scrollView(0);
+    });
+  }
+  // 武将データを取得
+  function getBushoData() {
+    if (location.pathname != '/card/deck.php') {
+      return;
+    }
+    $('#get_busho_data').css('cursor', 'pointer').click(function() {
+      var getCardList = function() {
+        return $.ajax('/card/deck.php', {
+          beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+          },
+          async: false
+        }).responseJSON.card_data;
+      }
+      download(getCardList());
+      function download(obj) {
+        var date = new Date(), m = date.getMonth()+1, d = date.getDate(),
+          m = m < 10 ? '0' + m : m, d = d < 10 ? '0' + d : d,
+          world = location.host.match(/(.+?)\./)[1],
+          filename = 'moko_busho_' + m + '_' + d + '_' + world +'.json',
+          blob = new Blob([toJSON(obj)], {'type': 'text/plain'}),
+          url = URL.createObjectURL(blob),
+          $link = $('<a>').attr({'download': filename, 'href': url, 'target': '_blank'});
+        $link[0].click();
+      }
     });
   }
   // デッキ 討伐ゲージの回復時間表示
@@ -21999,6 +22027,7 @@ function MokoMain($) {
   quickAddCard();               //card/deck
   autoPager();                  //card/deck
   collectiveLevelup();          //card/deck
+  getBushoData();               //card/deck
   statusSetSupport();           //card/status_info
   rankUpSupport();              //card/lead_info
   delListCheck();               //card_delete
