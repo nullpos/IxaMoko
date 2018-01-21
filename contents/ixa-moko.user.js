@@ -5067,7 +5067,10 @@ function MokoMain($) {
             new_deck_file = $html.find('#deck_file'),
             $cardarea = new_deck_file.find('div.ig_deck_smallcardarea');
           $cardarea.each(smallcardarea_check);
-          $deck_file.replaceWith(new_deck_file);
+          $deck_file.empty();
+          new_deck_file.children().each(function() {
+            $deck_file.append($(this));
+          });
           $deck_file = null;
           $('input[name="p"]').val(page);
 
