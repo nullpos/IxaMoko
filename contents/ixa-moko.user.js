@@ -14470,7 +14470,7 @@ function MokoMain($) {
           'background-color': '#333',
           'color': 'white'
         });
-      } else if (!data[i].img_src && data[i].word == '>合流詳細') {
+      } else if (!data[i].img_src && data[i].word.indexOf('合流詳細') != -1) {
         data[i].status = '合流';
         state_flg = true;
         $mt_unit.css(unitStatusColor(data[i].status));
