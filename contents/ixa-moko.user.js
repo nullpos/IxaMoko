@@ -4218,7 +4218,7 @@ function MokoMain($) {
             'Content-type': 'application/x-www-form-urlencoded'
         },
         data: 'payload=' + JSON.stringify({
-          "channel": channel,
+          "channel": '#61saba',
           "username": name,
           "text": text,
           "mrkdwn": true
@@ -13741,7 +13741,8 @@ function MokoMain($) {
           establish_camp: '陣張',
           reclaim_attack: '開拓',
           merge_attack: '合流',
-          merge_attack_ready: '合流'
+          merge_attack_ready: '合流',
+          merge_ride: '合流'
         },
         $mk_sumid_move = target.find('ul.mk_sumid_move'),
         html = '<ul class="mk_sumid_move">',
