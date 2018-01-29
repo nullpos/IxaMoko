@@ -4277,6 +4277,10 @@ function MokoMain($) {
         });
       }
       var alarmArray = filteringNearEnemy(raidNearCreateArray($data));
+      $('#net-content').empty();
+      for(var i = 0; i < alarmArray.length; i++) {
+        showNearEnemy(alarmArray[i]);
+      }
       for(var i = 0; i < alarmArray.length; i++) {
         nearEnemyNotiication(alarmArray[i]);
       }
@@ -4285,15 +4289,31 @@ function MokoMain($) {
       var ret = [];
       $html.find('tr').slice(1).each(function(e) {
         var $td = $(this).find('td');
-        var type   = $td.eq(0).text().trim(),
-          name     = $td.eq(1).text().trim(),
-          alliance = $td.eq(2).text().trim(),
-          place    = $td.eq(3).text().trim().match(/.*?\((-?\d+,-?\d+)\)$/)[1];
+        var type     = $td.eq(0).text().trim(),
+          name       = $td.eq(1).text().trim(),
+          alliance   = $td.eq(2).text().trim(),
+          place_tmp  = $td.eq(3).text().trim().match(/^(.*?).\((-?\d+,-?\d+)\)$/),
+          place      = place_tmp[2],
+          place_name = place_tmp[1],
+          def_str    = $td.eq(4).text().trim(),
+          def_num    = (def_str == "-") ? 0 : def_str.match(/^(\d+?)部隊$/)[1]*1,
+          att_num    = $td.eq(5).text().trim().match(/^(\d+?)攻撃$/)[1]*1,
+          url_name   = $td.eq(1).find('a:eq(0)').attr('href'),
+          url_alli   = $td.eq(2).find('a:eq(0)').attr('href'),
+          url_place  = $td.eq(3).find('a:eq(0)').attr('href'),
+          $tds       = $(this).find('td');
         ret.push({
           type: type,
           name: name,
           alliance: alliance,
-          place: place
+          place: place,
+          place_name: place_name,
+          def_num: def_num,
+          att_num: att_num,
+          url_name: url_name,
+          url_alli: url_alli,
+          url_place: url_place,
+          $tds: $tds
         });
       });
       return ret;
@@ -4375,6 +4395,28 @@ function MokoMain($) {
         notification.close();
       };
     }
+    function showNearEnemy(data) {
+      $('#net-content').append($('<tr></tr>').append(data['$tds']));
+    }
+  }
+
+  function nearEnemyTable() {
+    if(!options['near_alarm']['tf']) return;
+    var css_battle_table = 'width: 650px; border-collapse: collapse; border-spacing: none; padding: 0; line-height: 1.0; margin-bottom: 10px; border-top: 1px solid #76601d; border-bottom: 1px solid #76601d; border-right: 1px solid #76601d;';
+    var html = '' +
+      '<div id="net-wrapper" style="position: fixed; bottom: 8px; left: 8px; background: white; z-index: 100;">' +
+        '<div id="net-header">' +
+          '<p id="net-header-text"><span>近隣敵襲一覧</span></p>' +
+          '<p id="net-header-badge"><span></span></p>' +
+        '</div>' +
+        '<div id="net-table-content" class="clearfix">' +
+          '<table class="net-table" style="' + css_battle_table + '">' +
+            '<tbody id="net-content">' +
+            '</tbody>' +
+          '</table>'
+        '</div>' +
+      '</div>';
+    $('body').append($(html));
   }
 
 
@@ -8221,6 +8263,11 @@ function MokoMain($) {
         var $html = $(html).find('#ig_boxInner');
         $html.find('div[id^="cardWindow_"]').each(function(i) {
           data = get_card_data($(this));
+          if(data.card_no == '1106') {
+            data.cost--;
+          } else if(data.card_no == '1101') {
+            data.cost--;
+          }
           if (i === 0) {
             if (id_name == 'now_category') {
               keys.group = data.grp;
@@ -22126,6 +22173,7 @@ function MokoMain($) {
   mapButaiStatus();             //all     部隊行動状況
   raidSystem();                 //all     総合敵襲警報
   matomeKakushi();              //all     まとめて隠し玉
+  nearEnemyTable();
 
 }
 // ^ Moko.main
@@ -22941,6 +22989,9 @@ window.addEventListener('DOMContentLoaded', function() {
     '#kakushi_inner { margin: 8px 0px 8px 8px; padding-right: 8px; font-size: 12px; height: 85%; overflow: auto; }' +
     '#kakushi_exec { margin: 5px; padding: 5px 10px; border-top: solid 1px black; text-align: right; }' +
     '#kakushi_exec button { cursor: pointer; margin: 0 4px; width: 100px; height: 30px; }' +
+    //近隣敵襲
+    '#net-content td { border-left: 1px solid #76601d; border-bottom: 1px dotted #76601d; padding: 4px 8px; text-align: center; color: #300; line-height: 1.5; vertical-align: middle; }' +
+    '#net-content td a { color: #060!important; }' +
     //整形
     '#ig_deck_cardlistmenu_for_ui_change select { margin-right: 6px; }' +
     'textarea, input, select { font-family: "Hiragino Kaku Gothic Pro w3", Meiryo, "ＭＳ PGothic", sans-serif; font-family: -moz-use-system-font;}' +
