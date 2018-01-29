@@ -4416,7 +4416,11 @@ function MokoMain($) {
           '</table>'
         '</div>' +
       '</div>';
-    $('body').append($(html));
+      var $html = $(html);
+      $html.find('#net-header').click(function() {
+        $('#net-table-content').toggle();
+      });
+    $('body').append($html);
   }
 
 
