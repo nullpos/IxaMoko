@@ -4303,8 +4303,8 @@ function MokoMain($) {
         ret = [],
         center,
         type = 0;
-      if(!!$('div.sideBoxInner.basename.other_country')[0] && BATTLE_MODE != '天下統一戦中') {
-        var $li = $('div.sideBoxInner.basename.other_country li:eq(0)');
+      if(!!$('div.sideBoxInner.basename.my_capital')[0] && BATTLE_MODE != '天下統一戦中') {
+        var $li = $('div.sideBoxInner.basename.my_capital li:eq(0)');
         center = [$li.attr('data-village_x'), $li.attr('data-village_y')];
       } else {
         var $li = $('div.sideBoxInner.basename.my_capital li:eq(0)');
@@ -13740,7 +13740,8 @@ function MokoMain($) {
           reinforcement: '加勢',
           establish_camp: '陣張',
           reclaim_attack: '開拓',
-          merge_attack: '合流'
+          merge_attack: '合流',
+          merge_attack_ready: '合流'
         },
         $mk_sumid_move = target.find('ul.mk_sumid_move'),
         html = '<ul class="mk_sumid_move">',
@@ -13748,7 +13749,7 @@ function MokoMain($) {
 
         for (var i = 0; i < 4; i++) {
           id_name = elem.eq(i).attr('id');
-          if (!id_name || (flag && id_name != 'reinforcement')) {
+          if (!id_name || (flag && id_name != 'reinforcement') || id_name == "establish_alliance_camp") {
             html += '<li class="btn_move_none" type="' + id_name + '">-</li>';
           } else {
             html += '<li class="btn_move_' + id_name + '" type="' + id_name + '">' + move_list[id_name] + '</li>';
@@ -17855,9 +17856,9 @@ function MokoMain($) {
   // 合戦報告書 2ペイン表示
   war2paneLayout = function() {
     var html = '' +
-      '<link rel="stylesheet" type="text/css" href="' + CACHE_PASS + '/css/battle_report_with_decoration_enable.css">' +
-      '<link rel="stylesheet" type="text/css" href="' + CACHE_PASS + '/css/ig_card2.css">' +
-      '<link rel="stylesheet" type="text/css" href="' + CACHE_PASS + '/css/report_rows_separate_by_side_enable.css">';
+      '<link rel="stylesheet" type="text/css" href="' + img_root  + '/css/battle_report_with_decoration_enable.css">' +
+      '<link rel="stylesheet" type="text/css" href="' + img_root  + '/css/ig_card2.css">' +
+      '<link rel="stylesheet" type="text/css" href="' + img_root  + '/css/report_rows_separate_by_side_enable.css">';
     $('head').append(html);
 
     var $div = $('<div id="scroll_panel" />').css({
