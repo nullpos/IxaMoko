@@ -19268,7 +19268,15 @@ function MokoMain($) {
       return;
     }
 
-    var max_num = union_type == 1 ? 12 : 5;
+    var max_num = 12;
+    if(union_type != 1) {
+      if(login_data.chapter >= 15) {
+        max_num = 6;
+      } else {
+        max_num = 5;
+      }
+    }
+    //var max_num = union_type == 1 ? 12 : 5;
 
     $.ajax({
       type: 'post',
