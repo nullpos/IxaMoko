@@ -8267,6 +8267,7 @@ function MokoMain($) {
         var $html = $(html).find('#ig_boxInner');
         $html.find('div[id^="cardWindow_"]').each(function(i) {
           data = get_card_data($(this));
+          //コスト低下武将
           if(data.card_no == '1106') {
             data.cost--;
           } else if(data.card_no == '1101') {
@@ -8433,6 +8434,15 @@ function MokoMain($) {
         var $html = $(html).find('#ig_boxInner'),
         max_page = html_max_page($html),
         $cardWindow = $html.find('div[id^="cardWindow_"]');
+        $cardWindow.each(function(i, e) {
+          var $this = $(e),
+            no = $this.find('span.ig_card_cardno:eq(0)').text();
+          if(no == '1101') {
+            $this.find('span.ig_card_cost').text($this.find('span.ig_card_cost').text()*1 - 2);
+          } else if(no == '1106') {
+            $this.find('span.ig_card_cost').text($this.find('span.ig_card_cost').text()*1 - 1);
+          }
+        });
         $data_box.append($cardWindow);
         page++;
         Info.count(page + '/' + max_page + 'ページ');
