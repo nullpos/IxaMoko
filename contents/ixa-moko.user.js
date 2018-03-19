@@ -18403,13 +18403,15 @@ function MokoMain($) {
     }
 
     var $td = $('td.parameter .damage.player:not(.defeat):eq(0)').parent().parent();
-    var side, other_side, $hpboxes;
+    var side, other_side, attdef, $hpboxes;
     if ($td.hasClass('right')) {
       side = 'right';
       other_side = 'left';
+      attdef = 'defence';
     } else {
       side = 'left';
       other_side = 'right';
+      attdef = 'attack';
     }
 
     expectPower();
@@ -18484,6 +18486,7 @@ function MokoMain($) {
       if (total_gyaku == 0) return;
       $higai.each(function(i) {
         var power = addFigure(parseInt(mytotal * gyaku_higai[i] / total_gyaku));
+        if(power == 0) return true;
         var $div = $tmpldiv.clone().append($tmpl.clone().text('【' + power + '】'));
         if (side == 'right') {
           $div.find('span:eq(0)').css('right', '0px');
