@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      15.2.1.1
+// @version      15.3.0.0
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
