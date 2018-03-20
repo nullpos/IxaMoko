@@ -18429,7 +18429,7 @@ function MokoMain($) {
       $hpboxes.each(function() {
         $(this).find('tr').slice(2).each(function() {
           var text = $(this).find('td:eq(4)').text().trim();
-          if(text.indexOf('負傷') != -1) {
+          if(text.indexOf('負傷') != -1 || $(this).find('td:eq(0)').text().replace(/[\t\s]/g, '').indexOf('HP:0') != -1) {
             return true;
           }
           damage = text.replace(/[\t\s]/g, '').replace(/^.*?:/, '')*-1;
@@ -18450,20 +18450,29 @@ function MokoMain($) {
       //勝利時 残りHP=100-(敗北側総防御力or攻撃力÷勝利側総攻撃力or防御力)×58
       //敗北時 残りHP=(敗北側総攻撃力or防御力÷勝利側総防御力or攻撃力)×42-5
       //  攻撃勝利時: 敗北側総防御力 = damage*勝利側総攻撃力/58
+      //    防御敗北時: damage = 105-(敗北側総防御力/勝利側総攻撃力*42)
       //  防衛敗北時: 勝利側総攻撃力 = 敗北側総防御力*42/(105-damage)
+      //    攻撃勝利時: damage = 敗北側総防御力/勝利側総攻撃力*58
       //  攻撃敗北時: 勝利側総防御力 = 敗北側総攻撃力*42/(105-damage)
+      //    防衛勝利時: damage = 敗北側総攻撃力/勝利側総防御力*58
       //  防衛勝利時: 敗北側総攻撃力 = damage*勝利側総防御力/58
-      var enemy_total;
+      //    攻撃敗北時: damage = 105-(敗北側総攻撃力/勝利側総防御力*42)
+      var enemy_total, enemy_damage;
       if (side == 'left' && battle == 'win') {         // 自:攻撃勝利、敵:防御敗北
         enemy_total = parseInt(min_damage * total / 58);
+        enemy_damage = parseInt(105 - (42 * enemy_total / total));
       } else if(side == 'right' && battle == 'lose') { // 自:防御敗北、敵:攻撃勝利
         enemy_total = parseInt(total * 42 / (105 - min_damage));
+        enemy_damage = parseInt(58 * total / enemy_total);
       } else if(side == 'left' && battle == 'lose') {  // 自:攻撃敗北、敵:防御勝利
         enemy_total = parseInt(total * 42 / (105 - min_damage));
+        enemy_damage = parseInt(58 * total / enemy_total);
       } else if(side == 'right' && battle == 'win') {  // 自:防御勝利、敵:攻撃敗北
         enemy_total = parseInt(min_damage * total / 58);
+        enemy_damage = parseInt(105 - (42 * enemy_total / total));
       }
-      $('td.bbd1.' + other_side + ' span.count:eq(0)').text(addFigure(enemy_total));
+      enemy_damage = (enemy_damage > 100) ? 100 : enemy_damage;
+      $('td.bbd1.' + other_side + ' span.count:eq(0)').text(addFigure(enemy_total) + '\nHP' + -1 * enemy_damage);
     }
 
     function butaiPower() {
