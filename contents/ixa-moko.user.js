@@ -18419,6 +18419,7 @@ function MokoMain($) {
 
     function expectPower() {
       var total = $('td.bbd1.' + side + ' div.power_point_common:eq(0) div.total:eq(0) span.count:eq(0)').text().trim().replace('～', '').replace(/,/g, '')*1;
+      var enemy_higai = $('td.' + other_side + '.total div.damage.total span.count:eq(0)').text().trim().replace(/,/g, '')*1;
       // HP減少から敵の火力を予想
       if ($('div.battle_box_block:eq(0) table.battle_box_info_table:eq(0) th:eq(0)').text().trim()[0] == '【') {
         $hpboxes = $('div.battle_box_block:eq(0) table.battle_box_info_table');
@@ -18457,22 +18458,54 @@ function MokoMain($) {
       //    防衛勝利時: damage = 敗北側総攻撃力/勝利側総防御力*58
       //  防衛勝利時: 敗北側総攻撃力 = damage*勝利側総防御力/58
       //    攻撃敗北時: damage = 105-(敗北側総攻撃力/勝利側総防御力*42)
-      var enemy_total, enemy_damage;
+      //敵兵数予想
+      //勝利時被害兵数 = 総兵士数 * 0.4 * (敵軍火力 / 自軍火力)
+      //敗北時被害兵数 = 総兵士数 * (1-0.6 * (自軍火力 / 敵軍火力))
+      //  敵勝利時総兵士数 = 敵被害兵数 * 2.5 * 敵軍火力 / 自軍火力
+      //  敵敗北時総兵士数 = 敵被害兵数 * 自軍火力 / (自軍火力-0.6 * 敵軍火力)
+      if(enemy_higai == 0) {
+        return;
+      }
+      var enemy_total, enemy_damage, enemy_soldier, enemy_soldier_per; // 残り%
       if (side == 'left' && battle == 'win') {         // 自:攻撃勝利、敵:防御敗北
-        enemy_total = parseInt(min_damage * total / 58);
-        enemy_damage = parseInt(105 - (42 * enemy_total / total));
+        enemy_total       = parseInt(min_damage * total / 58);
+        enemy_damage      = parseInt(105 - (42 * enemy_total / total));
+        enemy_soldier     = parseInt(enemy_higai * total / (total - 0.6 * enemy_total));
+        enemy_soldier_per = parseInt((1 - (enemy_higai / enemy_soldier)) * 100);
+        if(total > enemy_total * 4) {
+          enemy_soldier = enemy_higai;
+          enemy_soldier_per = 0;
+        }
       } else if(side == 'right' && battle == 'lose') { // 自:防御敗北、敵:攻撃勝利
-        enemy_total = parseInt(total * 42 / (105 - min_damage));
-        enemy_damage = parseInt(58 * total / enemy_total);
+        enemy_total       = parseInt(total * 42 / (105 - min_damage));
+        enemy_damage      = parseInt(58 * total / enemy_total);
+        enemy_soldier     = parseInt(enemy_higai * 2.5 * enemy_total / total);
+        enemy_soldier_per = parseInt((1 - (enemy_higai / enemy_soldier)) * 100);
       } else if(side == 'left' && battle == 'lose') {  // 自:攻撃敗北、敵:防御勝利
-        enemy_total = parseInt(total * 42 / (105 - min_damage));
-        enemy_damage = parseInt(58 * total / enemy_total);
+        enemy_total       = parseInt(total * 42 / (105 - min_damage));
+        enemy_damage      = parseInt(58 * total / enemy_total);
+        enemy_soldier     = parseInt(enemy_higai * 2.5 * enemy_total / total);
+        enemy_soldier_per = parseInt((1 - (enemy_higai / enemy_soldier)) * 100);
       } else if(side == 'right' && battle == 'win') {  // 自:防御勝利、敵:攻撃敗北
-        enemy_total = parseInt(min_damage * total / 58);
-        enemy_damage = parseInt(105 - (42 * enemy_total / total));
+        enemy_total       = parseInt(min_damage * total / 58);
+        enemy_damage      = parseInt(105 - (42 * enemy_total / total));
+        enemy_soldier     = parseInt(enemy_higai * total / (total - 0.6 * enemy_total));
+        enemy_soldier_per = parseInt((1 - (enemy_higai / enemy_soldier)) * 100);
+        if(total > enemy_total * 4) {
+          enemy_soldier = enemy_higai;
+          enemy_soldier_per = 0;
+        }
       }
       enemy_damage = (enemy_damage > 100) ? 100 : enemy_damage;
-      $('td.bbd1.' + other_side + ' span.count:eq(0)').text(addFigure(enemy_total) + '\nHP' + -1 * enemy_damage);
+      enemy_damage = (enemy_damage < 0)   ? 0   : enemy_damage;
+      enemy_soldier_per = (enemy_soldier_per > 100) ? 100 : enemy_soldier_per;
+      enemy_soldier_per = (enemy_soldier_per < 0)   ? 0   : enemy_soldier_per;
+      var power_text = addFigure(enemy_total) + '\nHP' + -1 * enemy_damage
+      $('td.bbd1.' + other_side + ' span.count:eq(0)').text(power_text);
+      var $higai = $('td.' + other_side + '.total div.damage.total span.count:eq(0)');
+      var higai_text = $higai.text() + ' / ' + addFigure(enemy_soldier) + ' 残り ' + enemy_soldier_per + '%';
+      $higai.text(higai_text);
+      $higai.attr('style', 'white-space: nowrap;');
     }
 
     function butaiPower() {
@@ -18528,6 +18561,7 @@ function MokoMain($) {
 
       var busho_idx = 0;
       $butai_table.each(function(i, e) {
+        if(!butai_power[i]) return true;
         var $this = $(e);
         var $th = $this.find('thead tr th:eq(0)');
         var text = $th.text();
@@ -18541,7 +18575,7 @@ function MokoMain($) {
         });
       });
       $heishu_higai.each(function(i) {
-        if((typeof heishu_power[i]) == 'undefined' || heishu_power[i] == 0) return true;
+        if(!heishu_power[i]) return true;
         var html = '<span class="count" style="font-size: 10px; top: 2px; color: black;">【' + addFigure(heishu_power[i]) + '】</span>';
         var $div = $('<div class="damage"></div>').append($(html));
         if (side == 'right') {
