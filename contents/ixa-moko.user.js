@@ -18478,25 +18478,72 @@ function MokoMain($) {
     function butaiPower() {
       // 部隊別攻撃力計算
       // 逆比、浮動小数点避けに大きい数字からそれぞれ割る
-      var mytotal = $('td.bbd1.' + side + ' div.power_point_common:eq(0) div.player:eq(0) span.count:eq(0)').text().trim().replace('～', '').replace(/,/g, '')*1;
-      var higai_arr = [];
-      var $higai = $('td.bb1.parameter.' + side + ':eq(0) div:not(.damage)').slice(1);
-      var $tmpl = $('<span class="count" style="font-size: 10px; top: 2px; color: black;"></span>');
-      var $tmpldiv = $('<div class="damage"></div>');
-      $higai.each(function() {
-        higai_arr.push($(this).find('div.player span.count:eq(0)').text().trim().replace(/,/g, '') * 1);
+      // 部隊ごとの被害兵数 = 総被害兵数 * 自軍火力 / 部隊ごとの火力
+      var sugar = 10000000;
+      var busho_power = [], butai_power = [], heishu_power = [], busho_higai_ratio = [];
+      var total_higai_inv_ratio = 0;
+      var total_power = $('td.bbd1.' + side + ' div.power_point_common:eq(0) div.player:eq(0) span.count:eq(0)').text().trim().replace('～', '').replace(/,/g, '')*1;
+      var total_higai = $('td.' + side + '.total div.damage.player span.count:eq(0)').text().trim().replace(/,/g, '')*1;
+      var $heishu_higai = $('td.bb1.parameter.' + side + ':eq(0) div:not(.damage)').slice(1);
+      var $butai_table = $('div.battle_box_block.' + attdef + ' .battle_box_info_table').filter(function(i, e){
+        var head = $(e).find('thead th').text().trim();
+        var ad = (attdef == 'attack') ? '攻撃': '防御';
+        return (head.indexOf('部隊') != 1 && head.indexOf(ad) != -1);
       });
-      var gyaku_higai = higai_arr.map(function(x) {
-        return x == 0 ? 0 : 10000000 / x;
+      $butai_table.each(function(i, e) {
+        var butai_idx = i;
+        var $this = $(e);
+        $this.find('tbody tr').slice(1).each(function(i, e) {
+          var $this = $(e);
+          var type  = 3; // 砲器
+          var heishu = $this.find('td:eq(1)').text().trim();
+          if(heishu == '足軽' || heishu == '長槍足軽' || heishu == '武士' || heishu == '国人衆') {
+            type = 0;
+          } else if(heishu == '弓足軽' || heishu == '長弓兵' || heishu == '弓騎馬' || heishu == '海賊衆') {
+            type = 1;
+          } else if(heishu == '騎馬兵' || heishu == '精鋭騎馬' || heishu == '赤備え' || heishu == '母衣衆') {
+            type = 2;
+          }
+          var higai = $this.find('td:eq(2)').text().trim().replace(/,/g, '') * 1
+                      - $this.find('td:eq(3)').text().trim().replace(/,/g, '') * 1;
+          busho_higai_ratio.push({'butai': butai_idx, 'type': type,
+            'big_ratio': sugar * higai / total_higai, 'inv_ratio': total_higai / higai});
+        });
       });
-      var total_gyaku = gyaku_higai.reduce(function(p, c, i, a) {
-        return p + c;
+      for(var i = 0; i < busho_higai_ratio.length; i++) {
+        total_higai_inv_ratio += busho_higai_ratio[i]['inv_ratio'];
+      }
+      for(var i = 0; i < busho_higai_ratio.length; i++) {
+        if((typeof butai_power[busho_higai_ratio[i]['butai']]) == 'undefined') {
+          butai_power[busho_higai_ratio[i]['butai']] = 0;
+        }
+        if((typeof heishu_power[busho_higai_ratio[i]['type']]) == 'undefined') {
+          heishu_power[busho_higai_ratio[i]['type']] = 0;
+        }
+        var power = parseInt(sugar * total_power / busho_higai_ratio[i]['big_ratio'] / total_higai_inv_ratio);
+        butai_power[busho_higai_ratio[i]['butai']] += power;
+        heishu_power[busho_higai_ratio[i]['type']] += power;
+        busho_power.push(power);
+      }
+
+      var busho_idx = 0;
+      $butai_table.each(function(i, e) {
+        var $this = $(e);
+        var $th = $this.find('thead tr th:eq(0)');
+        var text = $th.text();
+        $th.attr('colspan', 7);
+        $th.text(text + addFigure(butai_power[i]));
+
+        var th_html = '<th>予想火力<th/>';
+        $this.find('tbody tr:eq(0)').append($(th_html));
+        $this.find('tbody tr').slice(1).each(function(i, e) {
+          $(e).append($('<td>' + addFigure(busho_power[busho_idx++]) + '</td>'));
+        });
       });
-      if (total_gyaku == 0) return;
-      $higai.each(function(i) {
-        var power = addFigure(parseInt(mytotal * gyaku_higai[i] / total_gyaku));
-        if(power == 0) return true;
-        var $div = $tmpldiv.clone().append($tmpl.clone().text('【' + power + '】'));
+      $heishu_higai.each(function(i) {
+        if((typeof heishu_power[i]) == 'undefined' || heishu_power[i] == 0) return true;
+        var html = '<span class="count" style="font-size: 10px; top: 2px; color: black;">【' + addFigure(heishu_power[i]) + '】</span>';
+        var $div = $('<div class="damage"></div>').append($(html));
         if (side == 'right') {
           $div.find('span:eq(0)').css('right', '0px');
         }
