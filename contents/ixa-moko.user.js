@@ -5000,7 +5000,7 @@ function MokoMain($) {
       if (i === now_page) {
         html += '<li><span>' + i + '</span></li>';
       } else {
-        html += '<li><a href="javascript:void(0);" class="ixamoko_deckpager" title="' + i + '" >' + i + '</a></li>';
+        html += '<li><a href="javascript:void(0);" class="ixamoko_deckpager" title="' + i + '" onClick="" >' + i + '</a></li>';
       }
     }
     $pager.html(html);
