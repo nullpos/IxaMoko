@@ -4231,7 +4231,9 @@ function MokoMain($) {
         showNearEnemy(alarmArray[i]);
       }
       for(var i = 0; i < alarmArray.length; i++) {
-        nearEnemyNotiication(alarmArray[i]);
+        try {
+          nearEnemyNotification(alarmArray[i]);
+        } catch(e) {}
       }
     });
     function raidNearCreateArray($html) {
@@ -4272,7 +4274,10 @@ function MokoMain($) {
         ret = [],
         center,
         type = 0;
-      if(BATTLE_MODE == '天下統一戦中' || !$('div.sideBoxInner.basename.my_stronghold')[0]) {
+      if(BATTLE_MODE == '天下統一戦中') {
+        var $li = $('div.sideBoxInner.basename.my_country li:eq(0)');
+        center = [$li.attr('data-village_x'), $li.attr('data-village_y')];
+      } else if(!$('div.sideBoxInner.basename.my_stronghold')[0]) {
         var $li = $('div.sideBoxInner.basename.my_capital li:eq(0)');
         center = [$li.attr('data-village_x'), $li.attr('data-village_y')];
       } else {
@@ -4320,7 +4325,7 @@ function MokoMain($) {
       }
       return ret;
     }
-    function nearEnemyNotiication(enemy) {
+    function nearEnemyNotification(enemy) {
       var hostName;
       if (HOST == 'hm' && !MIXI_FLAG) {
         hostName = '(h)' + location.hostname;
