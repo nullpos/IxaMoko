@@ -3379,6 +3379,7 @@ function MokoMain($) {
         '<div>' +
           '<a id="friendly" href="/facility/unit_status.php?dmo=help">友軍</a>' +
           '<a href="/facility/unit_status.php?dmo=recieve_reinforcement">加勢</a>' +
+          '<a href="/facility/unit_status.php?dmo=merge">合流</a>' +
           '<a href="/facility/unit_list.php">待機兵士一覧</a>' +
         '</div>' +
       '</li>' +
