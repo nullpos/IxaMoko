@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      15.3.1.3
+// @version      15.3.1.4
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 15.3.1.3";
+  var VERSION_NAME = "ver 15.3.1.4";
 
 // === Plugin ===
 
@@ -13376,6 +13376,7 @@ function MokoMain($) {
                   houkokusho +
                   '<a id="enemy_around" style="display: none;" href="/war/fight_history.php?type=0&find_name=&find_x=' + data.x + '&find_y=' + data.y + '&find_length=10&btn_exec=true">周辺の敵襲状況を見る</a>' +
                   '<a href="javascript:void(0);" id="change_name" data-code="' + coordinate +'" style="display: none;">ここの名称を変更...</a>' +
+                  '<a href="javascript:void(0)" id="post_map_slack" data-code="' + coordinate +'" data-vil="' + data.village_name + '">この座標をSlackに投稿する</a>' +
                 '</span>' +
               '</li>';
 
@@ -13403,11 +13404,6 @@ function MokoMain($) {
         html += '</span>' +
                 '</li>';
       }
-
-      // post to slack
-      html += '<li class="moko_menu" id="post_slack_menu">' +
-                '<a href="javascript:void(0)" id="post_map_slack" data-code="' + coordinate +'" data-vil="' + data.village_name + '">この座標をSlackに投稿する</a>' +
-                '</li>';
 
       target.after(html);
 
