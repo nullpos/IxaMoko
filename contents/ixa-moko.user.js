@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sengokuixa-moko
 // @description  戦国IXA用ツール
-// @version      15.3.1.5
+// @version      15.3.1.6
 // @namespace    hoge
 // @author       nameless
 // @include      http://*.sengokuixa.jp/*
@@ -20,7 +20,7 @@
 // MokoMain
 function MokoMain($) {
   "use strict";
-  var VERSION_NAME = "ver 15.3.1.5";
+  var VERSION_NAME = "ver 15.3.1.6";
 
 // === Plugin ===
 
@@ -20409,7 +20409,12 @@ function MokoMain($) {
       $('div[id^="cardWindow_"]').each(function(i,e) {
         var $para = $(e).find('div.parameta_area'),
           name = $para.find('span.ig_card_name').text(),
-          rank = ($para.find('span.level_star img').attr('width').slice(0, -1) * 1) / 20;
+          rank;
+          if(!!$para.find('span.level_star')[0]) {
+            rank = ($para.find('span.level_star img').attr('width').slice(0, -1) * 1) / 20;
+          } else {
+            rank = '限界突破';
+          }
         if(!summary[name]) {
           summary[name] = {};
         }
@@ -20458,9 +20463,15 @@ function MokoMain($) {
       $spans.each(function(i,e) {
         var $span = $(e),
           $cwindow = $cwindows.eq(i),
-          rank = ($cwindow.find('div.parameta_area span.level_star img').attr('width').slice(0, -1) * 1) / 20,
-          name = $span.text();
-        $span.text(name + ' ★' + rank);
+          name = $span.text(),
+          rank;
+        if(!!$cwindow.find('div.parameta_area span.level_star')[0]) {
+          rank = ($cwindow.find('div.parameta_area span.level_star img').attr('width').slice(0, -1) * 1) / 20;
+          $span.text(name + ' ★' + rank);
+        } else {
+          rank = '限界突破';
+          $span.text(name + ' ' + rank);
+        }
       });
     };
 
