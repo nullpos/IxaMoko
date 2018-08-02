@@ -37,10 +37,10 @@
             return xhr.setRequestHeader('X-Requested-With', 'statusText');
         };
 
-        try {
-            let tmp = JSON.parse(storage)
+        let tmp = JSON.parse(storage)
+        if(tmp) {
             storage = tmp
-        } catch (error) {
+        } else {
             storage = {
                 'while': 'while_card',
                 'while_num': '10',
