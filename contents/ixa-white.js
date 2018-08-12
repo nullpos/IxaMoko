@@ -49,9 +49,9 @@
                 'keep_skills': '槍隊堅守,槍隊進撃'
             }
         }
-    
+
         // create interface
-        
+
         /// Dog text
         let text = $('<a id="auto_white_dog" href="#" style="color: black;">自動で白くじを引くワン？</a>')
 
@@ -91,7 +91,7 @@
 
         let displayDiv = $('<div></div>')
         let logs = $('<p style="overflow-y: scroll; height: 400px; width: 100%; display: none;"></p>')
-        
+
 
         parentDiv.append(loopDiv).append(afterDiv).append(keepDiv).append(startDiv).append(displayDiv).append(logs)
         let div = $('<div class="ig_tilesection_mid" style="display: none;">&nbsp;</div>').append(
@@ -130,7 +130,7 @@
             let text = keepSkill.find('input:first').val()
             keepSkillList.html(text.split(',').join('</br>'))
         }
-        
+
         function createRadio(id, name, text) {
             let radio = $('<input type="radio" name="' + name + '" id="' + id + '" value="' + id + '"/>')
             let label = $('<label for="' + id + '">' + text + '</label>')
@@ -268,7 +268,7 @@
                 }
             }
         })()
-        
+
         let log = (function() {
             return {
                 shortage: function() {

@@ -1200,7 +1200,8 @@ function MokoMain($) {
   var COUNTRY = (function() {
     var data = {
       14: { 1:"織田家", 2:"斎藤家", 3: "武田家", 4: "長尾家", 5: "三好家", 6: "南部家", 7: "朝倉家", 8: "北条家", 9: "尼子家", 10: "今川家", 11: "大内家", 12: "島津家" },
-      15: { 1:"足利家", 2:"北条家", 3: "尼子家", 4: "安東家", 5: "蒲生家", 6: "本願寺家", 7: "小田家", 8: "村上家", 9: "松永家", 10: "長宗我部家", 11: "相良家", 12: "豊臣家" }
+      15: { 1:"足利家", 2:"北条家", 3: "尼子家", 4: "安東家", 5: "蒲生家", 6: "本願寺家", 7: "小田家", 8: "村上家", 9: "松永家", 10: "長宗我部家", 11: "相良家", 12: "豊臣家" },
+      16: { 1:"織田家", 2:"徳川家", 3: "羽柴家", 4: "上杉家", 5: "柴田家", 6: "北条家", 7: "毛利家", 8: "伊東家", 9: "武田家", 10: "里見家", 11: "最上家", 12: "宇喜多家" }
     }[login_data.chapter];
 
     function COUNTRY() { return $.extend({}, data); }
@@ -1256,7 +1257,15 @@ function MokoMain($) {
         "攻城櫓"　: { number: 334, attack: 18, defense: 15, moving: 17, destroy: 12, tp1: "t4", tp2: "t4", command: "heiki2", skilltype: "器", cost: [17, 10, 12, 14] },
         "大筒兵"　: { number: 335, attack: 24, defense: 21, moving: 17, destroy: 20, tp1: "t3", tp2: "t4", command: "heiki3", skilltype: "器", cost: [40, 45, 50, 25] },
         "穴太衆"　: { number: 346, attack: 21, defense: 21, moving: 17, destroy: 15, tp1: "t4", tp2: "t4", command: "heiki8", skilltype: "器", cost: [27, 17, 21, 20] }
-     }
+      },
+      15: {
+        "武士"　　: { number: 323, attack: 22, defense: 22, moving: 21, destroy:  5, tp1: "t1", tp2: "t3", command: "yari3" , skilltype: "槍", cost: [21, 27,  14, 18] },
+        "赤備え"　: { number: 331, attack: 23, defense: 21, moving: 25, destroy:  3, tp1: "t1", tp2: "t2", command: "kiba3" , skilltype: "馬", cost: [14, 18,  21, 27] },
+        "鉄砲足軽": { number: 336, attack: 26, defense: 28, moving: 19, destroy:  3, tp1: "t1", tp2: "t4", command: "heiki4", skilltype: "砲", cost: [45, 25,  60, 50] },
+        "騎馬鉄砲": { number: 337, attack: 28, defense: 26, moving: 21, destroy:  3, tp1: "t2", tp2: "t4", command: "heiki5", skilltype: "砲", cost: [25, 60,  45, 50] },
+        "焙烙火矢": { number: 345, attack: 27, defense: 27, moving: 19, destroy:  4, tp1: "t3", tp2: "t4", command: "heiki7", skilltype: "砲", cost: [45, 50,  25, 60] },
+        "大筒兵"　: { number: 335, attack: 24, defense: 22, moving: 17, destroy: 20, tp1: "t3", tp2: "t4", command: "heiki3", skilltype: "器", cost: [40, 45, 50, 25] },
+      }
     };
 
     function SOLDIER() { return $.extend({}, data); }
@@ -2347,7 +2356,8 @@ function MokoMain($) {
               case 'chapter_change_mod':
                 var stage = {
                   '14': '覇国黎明～群雄割拠の流星群～',
-                  '15': '戦国異伝～悠久の将、下天を喰らう～'
+                  '15': '戦国異伝～悠久の将、下天を喰らう～',
+                  '16': '天廻争乱～覇者開闢に抗いし戦鬼～'
                 };
                 setting_list += '<li><label>' + this.optionsKeys[key].caption + ':</label>&nbsp;' +
                   '<select class="ixamoko_setting" key="' + key + '">' +

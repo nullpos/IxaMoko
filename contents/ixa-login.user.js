@@ -30,7 +30,7 @@ function MokoLogin($) {
     var season_num = $(this).find('span[class^="flag_"] img').attr('src').match(/flag_\w(\d+).gif/)[1];
     var world = title.replace('ワールド', '');
     var chapter = {
-      1: '13',
+      1: '16',
       2: '14',
       3: '15'
     }[chapter_num];
