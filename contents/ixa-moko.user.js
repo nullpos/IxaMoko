@@ -5276,7 +5276,7 @@ function MokoMain($) {
         pageList = $.grep(pageList, function(el, index) {
           return index === $.inArray(el, pageList);
         });
-        for(var i = 0; i < pageList; i++) {
+        for(var i = 0; i < pageList.length; i++) {
           pageFuncList.push(getPage(pageList[i].slice(-1)));
         }
         $.when.apply($, pageFuncList).then(function($htmls) {
@@ -20219,7 +20219,7 @@ function MokoMain($) {
           i++;
           setTimeout(function() {
             setProcess(obj, i);
-          }, 300);
+          }, 10);
         };
         if (!capacity) {
           return alert('これ以上素材カードにセットすることはできません');
