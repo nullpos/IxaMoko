@@ -270,20 +270,26 @@
         })()
 
         let log = (function() {
+            function add(text) {
+                logs.html(text + '</br>' + logs.html())
+            }
             return {
                 shortage: function() {
-                    logs.html('銅銭が足りないため、終了しました。</br>' + logs.html())
+                    add('銅銭が足りないため、終了しました。')
                 },
                 capOver: function() {
-                    logs.html('カード所持上限に達したため、終了しました。</br>' + logs.html())
+                    add('カード所持上限に達したため、終了しました。')
                 },
                 success: function() {
-                    logs.html('条件を満たしたため、終了しました。</br>' + logs.html())
+                    add('条件を満たしたため、終了しました。')
+                },
+                error: function() {
+                    add('タイムアウトか、くじが正常に引けなかったため、終了しました。')
                 },
                 card: function(data, removed) {
                     let rare = ''
                     if(data['rare'] <= 3) {
-                        rare = '<strong>特</strong>'
+                        rare = '<span style="color: red;">特</span>'
                     } else if(data['rare'] <= 4) {
                         rare = '上'
                     } else if(data['rare'] <= 5) {
@@ -292,11 +298,11 @@
                     let text = ''
 
                     if(removed) {
-                        text = rare + ' No.' + data['no'] + ': ' + data['name'] + '(' + data['skill'] + ') ...破棄</br>'
+                        text = rare + ' No.' + data['no'] + ': ' + data['name'] + '(' + data['skill'] + ') ...破棄'
                     } else {
-                        text = rare + ' No.' + data['no'] + ': <strong>' + data['name'] + '</strong>(' + data['skill'] + ') ...保持</br>'
+                        text = rare + ' No.' + data['no'] + ': <strong>' + data['name'] + '</strong>(' + data['skill'] + ') ...保持'
                     }
-                    logs.html(text + logs.html())
+                    add(text)
                 }
             }
         })()
@@ -346,24 +352,26 @@
         function start() {
             if(!condition.continue()) {
                 log.success()
-                timerId = -1
-                startButton.val('決定')
+                finish()
                 return
             }
             if(state['money'] < WHITE_PRICE) {
                 log.shortage()
-                timerId = -1
-                startButton.val('決定')
+                finish()
                 return
             }
             if(state['card'] + state['bids'] >= state['card_cap']) {
                 log.capOver()
-                timerId = -1
-                startButton.val('決定')
+                finish()
                 return
             }
 
             let result = white()
+            if(!result) {
+                log.error()
+                finish()
+                return
+            }
             state.white(result)
             display.update()
 
@@ -376,6 +384,12 @@
             }
             display.update()
             timerId = setTimeout(start, 500)
+        }
+
+        function finish() {
+            timerId = -1
+            startButton.val('決定')
+            alert('自動くじ引きを終了したワン！')
         }
 
         // ajax
@@ -403,9 +417,12 @@
                 beforeSend: xrwStatusText,
                 async: false
             }).responseText
-            
-            let $card_front = $(html).find('#id_deck_card_front'),
-                card_name = $card_front.find('span.ig_card_name').text(),
+
+            let $card_front = $(html).find('#id_deck_card_front')
+            if(!$card_front[0]) {
+                return false
+            }
+            let card_name = $card_front.find('span.ig_card_name').text(),
                 rare = $card_front.find('span[class^="rarity_"]').attr('class').split('_')[1],
                 card_id = $card_front.find('.commandsol_').attr('id').split('_')[2],
                 card_no = $card_front.find('.ig_card_cardno').text(),
