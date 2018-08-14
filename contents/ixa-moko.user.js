@@ -20225,10 +20225,13 @@ function MokoMain($) {
         var arranged = $table.find('div.busho a').length;
         var $img = $('#ig_deck_smallcardarea_out img[alt="セットする"]:visible');
         var capacity = max_num - arranged;
+        var $max_exp = $('.get_full_exp:first');
+        var $now_exp = $('.composite_box_exp:first');
         var setProcess = function(obj, i) {
           var exe = obj.length > capacity ? capacity : obj.length;
+          var is_over_exp = ($max_exp.text() * 1 != 0) && ($max_exp.text() * 1 <= $now_exp.text().split('～')[0] * 1)
           Info.count((i + 1) + '/' + exe);
-          if (capacity === i || obj.length === i) {
+          if (capacity === i || obj.length === i || is_over_exp) {
             return nowLoading(true);
           }
           obj[i].click();
