@@ -19958,6 +19958,31 @@ function MokoMain($) {
       $('html,body').animate({scrollTop: position, duration: 10});
     } else if(location.pathname == '/union/rankup_result.php') {
       $('p.mb10.mt10:eq(1)').append('<input type="button" value="ランクアップ画面へ" onclick="javascript:(function(){ window.location=\'/union/rankup.php\' })();" />');
+    } else if(location.pathname == '/union/learn_result.php') {
+      if(!$('img[src$="success1.png"]')[0]) {
+        return;
+      }
+      var second = $('.skill2:first');
+      var third = $('.skill3:first');
+      var form = $('#union_data');
+      var button = $('<button style="display: block; margin: 10px auto;"/></button>');
+      if(!!second[0]) {
+        append(second.find('.ig_skill_name').text() + 'を入れ替え', 2);
+      }
+      if(!!third[0]) {
+        append(third.find('.ig_skill_name').text() + 'を入れ替え', 3);
+      } else {
+        append('新規追加', 3);
+      }
+      function append(text, num) {
+        var b = button.clone();
+        b.text(text);
+        b.on('click', function() {
+          $('#union_data input[name="target_sort"]').val(num);
+          $('#union_data').submit();
+        });
+        form.before(b);
+      }
     }
   }
 
