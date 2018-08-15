@@ -19959,30 +19959,95 @@ function MokoMain($) {
     } else if(location.pathname == '/union/rankup_result.php') {
       $('p.mb10.mt10:eq(1)').append('<input type="button" value="ランクアップ画面へ" onclick="javascript:(function(){ window.location=\'/union/rankup.php\' })();" />');
     } else if(location.pathname == '/union/learn_result.php') {
-      if(!$('img[src$="success1.png"]')[0]) {
-        return;
-      }
-      var second = $('.skill2:first');
-      var third = $('.skill3:first');
-      var form = $('#union_data');
-      var button = $('<button style="display: block; margin: 10px auto;"/></button>');
-      if(!!second[0]) {
-        append(second.find('.ig_skill_name').text() + 'を入れ替え', 2);
-      }
-      if(!!third[0]) {
-        append(third.find('.ig_skill_name').text() + 'を入れ替え', 3);
+      if(!!$('img[src$="success1.png"]')[0]) {
+        var second = $('.skill2:first');
+        var third = $('.skill3:first');
+        var form = $('#union_data');
+        var button = $('<button style="display: block; margin: 10px auto;"/></button>');
+        if(!!second[0]) {
+          append(second.find('.ig_skill_name').text() + 'を入れ替え', 2);
+        }
+        if(!!third[0]) {
+          append(third.find('.ig_skill_name').text() + 'を入れ替え', 3);
+        } else {
+          append('新規追加', 3);
+        }
+        function append(text, num) {
+          var b = button.clone();
+          b.text(text);
+          b.on('click', function() {
+            $('#union_data input[name="target_sort"]').val(num);
+            $('#union_data').submit();
+          });
+          form.before(b);
+        }
       } else {
-        append('新規追加', 3);
-      }
-      function append(text, num) {
-        var b = button.clone();
-        b.text(text);
-        b.on('click', function() {
-          $('#union_data input[name="target_sort"]').val(num);
-          $('#union_data').submit();
+        var button = $('<button style="display: block; margin: 10px auto;"/></button>');
+        button.text('同名武将で再合成');
+        var form = $('form[name="union_data"]');
+        form.before(button);
+        button.on('click', function() {
+          var busho_name = $('span.delete_card').text().split('(')[0];
+          var data = {
+            'select_card_group': '',
+            'select_filter_num': '',
+            'show_deck_card_count': '15',
+            'base_cid': form.find('input[name="base_cid"]').val(),
+            'union_type': form.find('input[name="union_type"]').val(),
+            'target_sort': form.find('input[name="target_sort"]').val(),
+            'selected_cid': 0,
+            'deck_mode': '',
+            'btn_change_flg': '',
+            'add_flg': '',
+            'new_cid': '',
+            'remove_cid': '',
+            'p': ''
+          }
+
+          var learn = $.ajax({
+            type: 'post',
+            url: '/union/learn.php',
+            data: {
+              'base_cid': data['base_cid'],
+              'union_type': data['union_type'],
+              'target_sort': data['target_sort'],
+            },
+            beforeSend: xrwStatusText
+          }).responseText;
+          var $learn = $(learn);
+          data['select_card_group'] = $learn.find('input[name="select_card_group"]').val();
+          data['select_filter_num'] = $learn.find('input[name="select_filter_num"]').val();
+
+          var card_data = $.ajax('/card/deck.php', {
+            beforeSend: function(xhr) {
+              xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            },
+            async: false
+          }).responseJSON.card_data;
+          for(var i=0; i < card_data.length; i++) {
+            if(card_data[i]['name'] === busho_name &&
+              card_data[i]['level']*1 < 10 &&
+              card_data[i]['rank'] === '0' &&
+              card_data[i]['protect_flg'] === '0') {
+              data['selected_cid'] = card_data[i]['card_id'];
+              return $.form({
+                type: 'post',
+                url: '/union/learn_confirm.php',
+                data: data,
+                beforeSend: xrwStatusText
+              });
+            }
+          }
+          moko_alert('同名武将が存在しないか、エラーが発生しました。');
         });
-        form.before(b);
       }
+
+      window.card_data = $.ajax('/card/deck.php', {
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        },
+        async: false
+      })
     }
   }
 
