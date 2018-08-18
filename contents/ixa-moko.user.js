@@ -19964,13 +19964,13 @@ function MokoMain($) {
         var third = $('.skill3:first');
         var form = $('#union_data');
         var button = $('<button style="display: block; margin: 10px auto;"/></button>');
-        if(!!second[0]) {
-          append(second.find('.ig_skill_name').text() + 'を入れ替え', 2);
-        }
         if(!!third[0]) {
           append(third.find('.ig_skill_name').text() + 'を入れ替え', 3);
         } else {
           append('新規追加', 3);
+        }
+        if(!!second[0]) {
+          append(second.find('.ig_skill_name').text() + 'を入れ替え', 2);
         }
         function append(text, num) {
           var b = button.clone();
@@ -19979,13 +19979,13 @@ function MokoMain($) {
             $('#union_data input[name="target_sort"]').val(num);
             $('#union_data').submit();
           });
-          form.before(b);
+          form.after(b);
         }
       } else {
         var button = $('<button style="display: block; margin: 10px auto;"/></button>');
         button.text('同名武将で再合成');
         var form = $('form[name="union_data"]');
-        form.before(button);
+        form.after(button);
         button.on('click', function() {
           var busho_name = $('span.delete_card').text().split('(')[0];
           var data = {
@@ -20038,20 +20038,13 @@ function MokoMain($) {
               });
             }
           }
-          moko_alert('同名武将が存在しないか、エラーが発生しました。');
+          moko_alert('同名武将が存在しないか、部隊ページの組が正しく指定されていません。');
         });
       }
-
-      window.card_data = $.ajax('/card/deck.php', {
-        beforeSend: function(xhr) {
-          xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        },
-        async: false
-      })
     }
   }
 
-  // 白くじ12枚引き
+  // 白くじ引き
   function senkujiWhiteLottery() {
     if (location.pathname != '/senkuji/senkuji.php') {
       return;
