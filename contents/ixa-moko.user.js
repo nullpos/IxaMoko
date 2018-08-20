@@ -20465,7 +20465,7 @@ function MokoMain($) {
         $chkbox.prop('checked', true);
       }
     }
-    $('.common_box3').each(function(i, e) {
+    $('.item').each(function(i, e) {
       $(e).on('click', onclick_div_check);
     });
 
@@ -20485,8 +20485,8 @@ function MokoMain($) {
             type: 'checkbox',
             name: 'select_' + $(this).val()
           }).css('margin-right', '0.4em'),
-          target = $(this).parent().css('float', 'left');
-        target.after($label.prepend($checkbox));
+          target = $(this).parent();
+        target.after($label.prepend($checkbox)).after('</br>');
       });
     },
     get_selected = function() {
