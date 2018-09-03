@@ -5239,10 +5239,7 @@ function MokoMain($) {
   function slack_notify(list) {
     var name = 'ixa_bot',
       username = $('#lordName').text().trim(),
-      world = location.host.match(/^y0(\d\d)/);
-    if(world == null) { return; }
-    world = location.host.match(/^y0(\d\d)/)[1];
-    var channel = '#' + world + 'saba',
+      channel = '#61saba',
       host = location.origin;
 
     for(var i = 0; i < list.length; i++) {
@@ -13316,9 +13313,10 @@ function MokoMain($) {
   }
 
   function kagemushaRect() {
-    $('#kagemusha_list').find('tr.tr_gradient').find('a:eq(2)').each(function() {
-      var code = $(this).attr('href').match(/-?\d+/g),
-      param = positionCalcu(MM_SCALE, code, 0);
+    $('ul.add_attribute_stronghold li.orange').each(function() {
+      var $div = $(this).find('div'),
+      x = $div.attr('data-x'), y = $div.attr('data-y'),
+      param = positionCalcu(MM_SCALE, [x, y], 0);
       var ctx = $('#mini_map > canvas')[0].getContext('2d');
       ctx.beginPath();
       ctx.strokeStyle = 'chocolate';
@@ -13806,9 +13804,9 @@ function MokoMain($) {
         var $td = $html.find('tr.ig_rank_you td');
         data.rating = $td.eq(0).text();
         data.palms = $td.eq(3).text();
-        data.att_point = $td.eq(4).text();
-        data.def_point = $td.eq(5).text();
-        data.des_point = $td.eq(6).text();
+        data.att_point = $td.eq(5).text();
+        data.def_point = $td.eq(6).text();
+        data.des_point = $td.eq(7).text();
       }
       return getCrushingDefense(data);
     });
@@ -13819,8 +13817,8 @@ function MokoMain($) {
     $.post(search, function(html) {
       var $html = $(html).find('table.common_table1');
       var $td = $html.find('tr.now td');
-      data.crushing = $td.eq(3).text().trim();
-      data.defense = $td.eq(4).text().trim();
+      data.crushing = $td.eq(10).text().trim();
+      data.defense = $td.eq(11).text().trim();
       setStorage('ixamoko_target_data', data);
       return createInfoPower(data);
     });
@@ -15738,6 +15736,13 @@ function MokoMain($) {
     if (options.map_minimap) {
       kagemushaRect();
     }
+    $('li.new_worldmap_magnifymap_list_ootono_s10:eq(0)').click(function() {
+      $('ul.add_attribute_stronghold li').each((i, e) => {
+        var $div = $(e).find('div');
+        $div.text($div.attr('data-reinforce_units'));
+      });
+    });
+    $('li.new_worldmap_magnifymap_list_ootono_s10:eq(0)').attr('title', 'クリックで加勢数を表示');
   }
   // 所領|領地でも空地戦力表示
   function territoryPower() {
