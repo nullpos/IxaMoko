@@ -1273,7 +1273,7 @@ function MokoMain($) {
         "攻城櫓"　: { number: 334, attack: 18, defense: 15, moving: 17, destroy: 12, tp1: "t4", tp2: "t4", command: "heiki2", skilltype: "器", cost: [17, 10, 12, 14] },
         "大筒兵"　: { number: 335, attack: 24, defense: 21, moving: 17, destroy: 20, tp1: "t3", tp2: "t4", command: "heiki3", skilltype: "器", cost: [40, 45, 50, 25] },
         "穴太衆"　: { number: 346, attack: 21, defense: 21, moving: 17, destroy: 15, tp1: "t4", tp2: "t4", command: "heiki8", skilltype: "器", cost: [27, 17, 21, 20] }
-		},
+    },
 
       16: {
         "足軽"　　: { number: 321, attack: 12, defense: 12, moving: 17, destroy:  4, tp1: "t1", tp2: "t1", command: "yari1" , skilltype: "槍", cost: [ 8, 10,   5,  6] },
@@ -2163,6 +2163,8 @@ function MokoMain($) {
       all_platoon_remove: {tag: 'deck', caption: '「全小隊長を外す」を表示する(全部隊)'},
       platoon_leader_remove: {tag: 'deck', caption: '「小隊長を外す」を表示する(部隊内)'},
       deck_scroll: {tag: 'deck', caption: 'スクロールボタンを表示する'},
+      assault_deck_cost: {tag: 'deck', caption: '強襲デッキコスト'},
+      assault_deck_cost_mod: {tag: 'deck', caption: '強襲デッキコスト指定'},
       troops_strength_display: {tag: 'deck', caption: '部隊戦力を表示する'},
       favorite_sort: {tag: 'deck', caption: 'お気に入りソート登録を使用する'},
       width_display: {tag: 'deck', caption: '待機武将一覧をワイド表示にする'},
@@ -2534,6 +2536,29 @@ function MokoMain($) {
                 list = {
                   0: '通常モード',
                   1: '秘境モード'
+                };
+                setting_list += this.createList(key, '', list, mod);
+                break;
+              case 'assault_deck_cost'://変更(強襲コスト)
+                mod = options.assault_deck_cost_mod;
+                list = {
+                  120: '12.0',
+                  125: '12.5',
+                  130: '13.0',
+                  135: '13.5',
+                  140: '14.0',
+                  145: '14.5',
+                  150: '15.0',
+                  155: '15.5',
+                  160: '16.0',
+                  165: '16.5',
+                  170: '17.0',
+                  175: '17.5',
+                  180: '18.0',
+                  185: '18.5',
+                  190: '19.0',
+                  195: '19.5',
+                  200: '20.0',
                 };
                 setting_list += this.createList(key, '', list, mod);
                 break;
@@ -5878,7 +5903,7 @@ function MokoMain($) {
 
     if (select_assign_no == 7) {
       source = html.find('#deck_info_tbl td').eq(2).text().match(/(\d+\.?\d?)\/(\d+\.?\d?)/);
-      max = 12;   // 強襲部隊コスト上限
+      max = options.assault_deck_cost_mod/10;
       numstr = '0/' + max;
       str = source ? source[0] : numstr;
       now = source ? parseFloat(source[1]) : 0;
@@ -7157,11 +7182,11 @@ function MokoMain($) {
 
       if (c1.length) {
         for (var i = 0, len = clist.length; i < len; i++) {
-        	var clist0 = clist[i][0].slice(0,-2) + ' <span class="skill_' + clist[i][0].slice(-1) + '">' + clist[i][0].slice(-2).replace('.', '') + '</span>';
-        	var clist1 = clist[i][1].slice(0,-2) + ' <span class="skill_' + clist[i][1].slice(-1) + '">' + clist[i][1].slice(-2).replace('.', '') + '</span>';
-        	var clist2 = clist[i][2].slice(0,-2) + ' <span class="skill_' + clist[i][2].slice(-1) + '">' + clist[i][2].slice(-2).replace('.', '') + '</span>';
-        	var clist3 = clist[i][3].slice(0,-2) + ' <span class="skill_' + clist[i][3].slice(-1) + '">' + clist[i][3].slice(-2).replace('.', '') + '</span>';
-          var clist4 = clist[i][4].slice(0,-2) + ' <span class="skill_' + clist[i][4].slice(-1) + '">' + clist[i][4].slice(-2).replace('.', '') + '</span>';
+          var clist0 = clist[i][0].slice(0,-2).replace(/\.$/g,'') + ' <span class="skill_' + clist[i][0].slice(-1) + '">' + clist[i][0].slice(-2).replace('.', '') + '</span>';
+          var clist1 = clist[i][1].slice(0,-2).replace(/\.$/g,'') + ' <span class="skill_' + clist[i][1].slice(-1) + '">' + clist[i][1].slice(-2).replace('.', '') + '</span>';
+          var clist2 = clist[i][2].slice(0,-2).replace(/\.$/g,'') + ' <span class="skill_' + clist[i][2].slice(-1) + '">' + clist[i][2].slice(-2).replace('.', '') + '</span>';
+          var clist3 = clist[i][3].slice(0,-2).replace(/\.$/g,'') + ' <span class="skill_' + clist[i][3].slice(-1) + '">' + clist[i][3].slice(-2).replace('.', '') + '</span>';
+          var clist4 = clist[i][4].slice(0,-2).replace(/\.$/g,'') + ' <span class="skill_' + clist[i][4].slice(-1) + '">' + clist[i][4].slice(-2).replace('.', '') + '</span>';
           html += '<tr><td>' + clist0 + '</td><td>' + clist1 + '</td><td>' + clist2 + '</td>' +
             '<td>' + clist3 + '</td><td>' + clist4 + '</td></tr>';
         }
@@ -14310,7 +14335,7 @@ function MokoMain($) {
     write_potential = function(data) {
       $moko_material.html(POTENTIAL[data.value] || '');
       $moko_material.find('dd:contains("◎")').css('color', 'orange');
-      if (data.dist > 10) {
+      if (data.dist > 20) {
         $moko_material.find('dl').append('<dd id="decline">※攻撃力減少有</dd>');
       }
     },
@@ -18987,7 +19012,7 @@ function MokoMain($) {
         var img = [];
         array = (function() {
           var a = [];
-          $(html).find('table.battle_box_info_table tr').each(function(idx) {
+          $(html).find('table.battle_box_info_table:eq(0) tr').each(function(idx) {
             if ($(this).find('th.attack').length) {
               return;
             }
@@ -20481,17 +20506,18 @@ function MokoMain($) {
     create_checkbox = function(html) {
       var $input = get_target($(html));
       $input.each(function() {
-        var $label = $('<label>選択</label>').css({
-            'margin': '0px 10px',
+        var $label = $('<label><br>選択</label>').css({
+            'margin': '0 4px',
             'line-height': '1.7em',
-            'color': 'black'
+            'color': 'black',
+            'font-size': '11px',
           }),
           $checkbox = $('<input />').attr({
             type: 'checkbox',
             name: 'select_' + $(this).val()
-          }).css('margin-right', '0.4em'),
-          target = $(this).parent();
-        target.after($label.prepend($checkbox)).after('</br>');
+          }),
+          target = $(this).parent().css('float', 'left');
+        target.after($label.prepend($checkbox));
       });
     },
     get_selected = function() {
@@ -20499,7 +20525,8 @@ function MokoMain($) {
         id, name;
       $('input[name^="select_"]').each(function() {
         id = $(this).attr('name').match(/\d+/g)[0];
-        name = $(this).closest('tbody').find('p.para:eq(0) span').text();
+        name = $(this).parents('div.item_wrap_out3').find('p.title').text();
+
         if ($(this).prop('checked')) {
           array.push({
             id: id,
@@ -20619,14 +20646,25 @@ function MokoMain($) {
 
     if ($input.length) {
       $('<input />').attr({ type: 'button', id: 'select_receive',  value: '選択項目を受け取る' })
-      .css({ 'float': 'right', 'margin-right': '205px' })
-      .insertBefore('#presentAllForm')
+      .css({
+          'float': 'left',
+          'margin-left': '190px',
+          'width': '160px',
+          'height': '26px',
+          'border': '.5px #fff solid',
+          'font-family': '"ＭＳ Ｐ明朝","細明朝体","ヒラギノ明朝 Pro W3"',
+          'font-size': '15px',
+          'font-weight': 'bold',
+          'color': '#f5f5f5',
+          'background-color': '#9A2B25',
+          'border-radius': '4px',
+          'box-shadow': '0 0 1px #000',
+          'text-shadow': '0 0 2px #000',
+          })
+
+      .insertBefore('#inpage')
+
       .click(start_receive);
-      $('div.present_caution').css({
-        'position': 'absolute',
-        'right': '165px',
-        'margin': '32px 0 0 0'
-      });
       create_checkbox($html);
     }
 
@@ -20643,7 +20681,7 @@ function MokoMain($) {
 
     // すべてのプレゼントを受け取るを非表示にする
     if (options['present_all_get']) {
-      $('#ig_allbtn').hide();
+      $('#pid').hide();
     }
 
     if (!$pager.length) {
@@ -20677,15 +20715,17 @@ function MokoMain($) {
           beforeSend: xrwStatusText
         })
         .then(function(html) {
-          var $common_box3 = $(html).find('div.common_box3'),
+          var $common_box3 = $(html).find('div.item'),
             $cardWindow = $(html).find('div[id^="cardWindow_"]');
-          add_rank($common_box3.find('td a.thickbox span'), $cardWindow);
-          $common_box3.on('click', onclick_div_check);
+          var $modal = $(html).find('div[id^="modal"]:has(div.modal_window)');
+
           if (location.pathname == '/user/present.php') {
             create_checkbox($common_box3);
           }
-          $('div.ig_decksection_mid').append($common_box3);
+          $('div.present_box_item_wrap').append($common_box3);
           $('#sidebar').before($cardWindow);
+
+          $('#sidebar').before($modal);
           tb_init('a.thickbox');
           add_next_page.flag = false;
           add_page++;
