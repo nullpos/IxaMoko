@@ -20736,7 +20736,7 @@ function MokoMain($) {
         }
         $.ajax({
           type: 'post',
-          url: location.pathname,
+          url: location.pathname + location.search,
           data: data,
           beforeSend: xrwStatusText
         })
