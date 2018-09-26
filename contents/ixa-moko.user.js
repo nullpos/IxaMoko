@@ -5018,6 +5018,7 @@ function MokoMain($) {
   }
   // 拠点移動のURLの取得・移動
   function moveExecution(f) {
+    /*
     var $on = $('#sideboxBottom li.on');
     var $div = $on.closest('div');
     var getDestination = function (el, idx) {
@@ -5044,6 +5045,31 @@ function MokoMain($) {
     if ($('#repair_central_form').length) {
       obj.prev = obj.prev.replace('map', 'village');
       obj.next = obj.next.replace('map', 'village');
+    }
+
+    var url = 0 > f && obj.prev ? obj.prev : 0 < f && obj.next ? obj.next : null;
+    url ? location.href = url : void 0;
+    */
+
+    var $parent = $('#sideboxBottom div.sideBoxInner.basename').not('.strategic_base').not('.alliance_territory');
+    var $all = $parent.find('li.nolist').not('.head');
+    var obj = {};
+    for(var i=0; i < $all.length; i++) {
+      if($all[i].hasClassName('on')) {
+        var prev, next;
+        if(i === 0) {
+          prev = $all.length - 1;
+          next = i + 1;
+        } else if(i === $all.length-1) {
+          prev = i - 1;
+          next = 0;
+        } else {
+          prev = i - 1;
+          next = i + 1;
+        }
+        obj.prev = $($all[prev]).children('a').attr('href');
+        obj.next = $($all[next]).children('a').attr('href');
+      }
     }
 
     var url = 0 > f && obj.prev ? obj.prev : 0 < f && obj.next ? obj.next : null;
